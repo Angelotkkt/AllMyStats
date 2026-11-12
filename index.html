@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AllMyStats : toutes tes stats de jeux au même endroit</title>
+<meta name="description" content="AllMyStats (AMS) est une appli Windows gratuite qui suit toute seule tes stats sur Genshin Impact, Valorant, Call of Duty, Blox Fruits et Pokémon GO.">
+<link rel="icon" href="icone.png">
+<style>
+  :root {
+    --nuit: #141832; --encre: #1C2146; --encre-2: #242A57; --trait: #2E3570;
+    --brume: #9AA3C7; --craie: #EEF0FA; --corail: #FF6B5E; --or: #FFC44D; --turquoise: #33D1C1; --vert: #33D19A;
+    --f-chiffres: "Bahnschrift SemiCondensed", "Bahnschrift", "Arial Narrow", "Roboto Condensed", sans-serif;
+    --f-texte: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; overflow-x: hidden; background: var(--nuit); color: var(--craie); font: 17px/1.6 var(--f-texte); }
+  a { color: var(--turquoise); }
+  :focus-visible { outline: 3px solid var(--or); outline-offset: 3px; border-radius: 6px; }
+  svg.emoji { display: block; width: 100%; height: 100%; }
+  .page { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- en-tête */
+  header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .marque { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+  .marque .logo { width: 40px; height: 40px; }
+  .marque b { font: 700 24px/1 var(--f-chiffres);
+    background: linear-gradient(90deg, var(--corail), var(--or) 50%, var(--turquoise)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  header nav { display: flex; gap: 22px; font-size: 15px; }
+  header nav a { color: var(--brume); text-decoration: none; }
+  header nav a:hover { color: var(--craie); }
+
+  /* ---------- héros : le texte, et une vraie carte de joueur */
+  .heros { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; padding: 48px 0 84px; }
+  h1 { font: 700 clamp(44px, 6vw, 76px)/.98 var(--f-chiffres); letter-spacing: -1px; margin: 0 0 22px; }
+  .heros p.intro { color: var(--brume); font-size: 19px; max-width: 34em; margin: 0 0 32px; }
+  .telecharger { display: inline-flex; align-items: center; gap: 12px; padding: 16px 26px; border-radius: 14px;
+    background: var(--corail); color: #1A0F14; font: 700 19px/1 var(--f-texte); text-decoration: none;
+    box-shadow: 0 5px 0 #A63A30; transition: transform .12s, box-shadow .12s; }
+  .telecharger:hover { transform: translateY(2px); box-shadow: 0 3px 0 #A63A30; }
+  .telecharger:active { transform: translateY(5px); box-shadow: none; }
+  .telecharger .ico { width: 26px; height: 26px; }
+  .telecharger[aria-disabled="true"] { background: var(--encre-2); color: var(--brume); box-shadow: none; pointer-events: none; }
+  .meta { color: var(--brume); font-size: 14px; margin-top: 16px; }
+
+  .carte { position: relative; border-radius: 28px; padding: 30px; overflow: hidden;
+    background: radial-gradient(120% 140% at 0% 0%, rgba(255,70,85,.34), transparent 60%), linear-gradient(135deg, #2A1E45, var(--encre) 65%);
+    border: 1.5px solid rgba(255,70,85,.45); transform: rotate(1.6deg); box-shadow: 0 30px 70px rgba(5,7,20,.6); }
+  .carte .filigrane { position: absolute; right: -40px; top: -40px; width: 230px; height: 230px; opacity: .14; }
+  .carte .haut { display: flex; gap: 18px; align-items: center; position: relative; }
+  .carte .emblem { width: 74px; height: 74px; flex: none; }
+  .carte .jeu { color: #FF9AA2; font-weight: 600; font-size: 14px; }
+  .carte .pseudo { font: 700 32px/1.05 var(--f-chiffres); }
+  .carte .rang { display: inline-flex; align-items: center; gap: 7px; margin-top: 6px; padding: 3px 12px 3px 5px; border-radius: 999px;
+    font: 700 15px/1.3 var(--f-chiffres); background: rgba(255,70,85,.2); border: 1.5px solid rgba(255,70,85,.6); }
+  .carte .rang .ico { width: 20px; height: 20px; }
+  .carte .vedette { position: relative; text-align: right; margin: 6px 0 18px; }
+  .carte .vedette .chiffre { font: 700 96px/.9 var(--f-chiffres); letter-spacing: -2px; text-shadow: 0 4px 0 #7A1F2A; }
+  .carte .vedette .libelle { color: var(--brume); font-size: 14px; }
+  .carte .tuiles { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .tuile { background: rgba(20,24,50,.75); border: 1.5px solid var(--trait); border-radius: 16px; padding: 22px 12px 12px; position: relative; }
+  .tuile .sticker { position: absolute; top: -14px; left: 10px; width: 34px; height: 34px; border-radius: 50%; padding: 4px;
+    background: var(--encre-2); border: 2px solid var(--craie); }
+  .tuile .nom { color: var(--brume); font-size: 12.5px; }
+  .tuile .val { font: 700 26px/1.1 var(--f-chiffres); }
+  .tuile .delta { color: var(--vert); font-size: 12px; }
+
+  /* ---------- sections */
+  section { padding: 72px 0; border-top: 1px dashed var(--trait); }
+  h2 { font: 700 clamp(32px, 4vw, 46px)/1.05 var(--f-chiffres); margin: 0 0 12px; }
+  .chapeau { color: var(--brume); max-width: 40em; margin: 0 0 40px; }
+
+  /* La planche de stickers : un sticker par jeu */
+  .planche { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 26px; }
+  .sticker-jeu { --c: var(--brume); background: var(--encre); border-radius: 22px; padding: 26px 20px 22px; position: relative;
+    border: 2px solid color-mix(in srgb, var(--c) 55%, var(--trait)); }
+  .sticker-jeu:nth-child(odd) { transform: rotate(-1.4deg); }
+  .sticker-jeu:nth-child(even) { transform: rotate(1.1deg); }
+  .sticker-jeu .rond { width: 82px; height: 82px; border-radius: 50%; padding: 9px; margin: -54px 0 14px;
+    background: color-mix(in srgb, var(--c) 22%, var(--encre-2)); border: 4px solid var(--craie); box-shadow: 0 6px 0 rgba(0,0,0,.35); }
+  .sticker-jeu h3 { font: 700 23px/1.1 var(--f-chiffres); margin: 0 0 8px; }
+  .sticker-jeu p { margin: 0; color: var(--brume); font-size: 15px; line-height: 1.5; }
+  .sticker-jeu .comment { display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--c); }
+  .planche { padding-top: 34px; }
+
+  /* Étapes */
+  .etapes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; counter-reset: e; }
+  .etapes li { counter-increment: e; position: relative; padding-top: 70px; }
+  .etapes li::before { content: counter(e); position: absolute; top: 0; left: 0; font: 700 64px/1 var(--f-chiffres); color: var(--or); }
+  .etapes h3 { font: 700 22px/1.2 var(--f-chiffres); margin: 0 0 8px; }
+  .etapes p { margin: 0; color: var(--brume); font-size: 15.5px; }
+
+  /* Points forts */
+  .forts { display: grid; grid-template-columns: 1fr 1fr; gap: 30px 48px; }
+  .fort { display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: start; }
+  .fort .ico { width: 52px; height: 52px; }
+  .fort h3 { font: 700 21px/1.2 var(--f-chiffres); margin: 4px 0 6px; }
+  .fort p { margin: 0; color: var(--brume); font-size: 15.5px; }
+
+  /* Questions */
+  .questions { max-width: 780px; }
+  details { border-bottom: 1px solid var(--trait); padding: 18px 0; }
+  summary { cursor: pointer; font-weight: 600; font-size: 18px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--or); font: 700 24px/1 var(--f-chiffres); }
+  details[open] summary::after { content: "–"; }
+  details p, details ol { color: var(--brume); margin: 12px 0 0; font-size: 15.5px; }
+  details ol { padding-left: 22px; }
+
+  /* Bas de page */
+  .final { text-align: center; padding: 84px 0; border-top: 1px dashed var(--trait); }
+  .final h2 { margin-bottom: 26px; }
+  footer { color: var(--brume); font-size: 13px; padding: 28px 0 48px; border-top: 1px solid var(--trait); line-height: 1.6; }
+
+  @media (max-width: 900px) {
+    .heros { grid-template-columns: 1fr; gap: 48px; padding-top: 24px; }
+    .etapes, .forts { grid-template-columns: 1fr; }
+    header nav { display: none; }
+  }
+  @media (max-width: 480px) {
+    .page { padding: 0 18px; }
+    .carte .tuiles { grid-template-columns: 1fr 1fr; }
+    .carte .vedette .chiffre { font-size: 72px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .telecharger { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <a class="marque" href="#"><span class="logo" data-ico="ams"></span><b>AllMyStats</b></a>
+    <nav aria-label="Sections">
+      <a href="#jeux">Les jeux</a><a href="#installer">Installer</a><a href="#questions">Questions</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="heros">
+      <div>
+        <h1>Toutes tes stats de jeux, au même endroit.</h1>
+        <p class="intro">AllMyStats suit tout seul ta progression sur Genshin Impact, Valorant, Call of Duty, Blox Fruits et
+          Pokémon GO. Tu te connectes une fois, il s'occupe du reste, et il se met à jour tout seul.</p>
+        <a class="telecharger" id="telecharger" href="#installer">
+          <span class="ico" data-ico="telecharger"></span><span id="texte-telecharger">Télécharger pour Windows</span></a>
+        <div class="meta" id="meta">Gratuit · Windows 10 et 11</div>
+      </div>
+
+      <div class="carte" aria-label="Exemple de carte de joueur dans AllMyStats">
+        <span class="filigrane" data-ico="jeu_valorant"></span>
+        <div class="haut">
+          <span class="emblem" data-ico="jeu_valorant"></span>
+          <div>
+            <div class="jeu">Valorant</div>
+            <div class="pseudo">Angelo#EUW</div>
+            <div class="rang"><span class="ico" data-ico="valo_rang"></span>Diamant 1 · 37 RR</div>
+          </div>
+        </div>
+        <div class="vedette"><div class="chiffre">1,53</div><div class="libelle">Ratio K/D</div></div>
+        <div class="tuiles">
+          <div class="tuile"><span class="sticker" data-ico="valo_tete"></span><div class="nom">Headshots</div><div class="val">26,7 %</div><div class="delta">+1,2 cette semaine</div></div>
+          <div class="tuile"><span class="sticker" data-ico="valo_acs"></span><div class="nom">ACS</div><div class="val">217</div><div class="delta">+9 cette semaine</div></div>
+          <div class="tuile"><span class="sticker" data-ico="valo_victoire"></span><div class="nom">Victoires</div><div class="val">58 %</div><div class="delta">+4 cette semaine</div></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="jeux">
+      <h2>Les jeux suivis</h2>
+      <p class="chapeau">Chaque jeu a sa page, ses stickers et ses courbes de progression. Tu masques ceux auxquels tu ne joues pas.</p>
+      <div class="planche">
+        <article class="sticker-jeu" style="--c:#FF6B7A">
+          <div class="rond" data-ico="jeu_valorant"></div>
+          <h3>Valorant</h3>
+          <p>Rang et RR, K/D, ACS, headshots, victoires, tes agents et tes cartes, partie après partie.</p>
+          <span class="comment">Automatique · compte Riot</span>
+        </article>
+        <article class="sticker-jeu" style="--c:#C9CED8">
+          <div class="rond" data-ico="famille_call_of_duty"></div>
+          <h3>Call of Duty</h3>
+          <p>BO6, BO7, Cold War, MW4, Warzone, MW3 et MW2 : ton Combat Record et ton temps de jeu.</p>
+          <span class="comment">Lecture d'écran · compte Activision</span>
+        </article>
+        <article class="sticker-jeu" style="--c:#8FB7FF">
+          <div class="rond" data-ico="jeu_genshin"></div>
+          <h3>Genshin Impact</h3>
+          <p>Rang d'aventure, persos, abysses, vœux et primogemmes, notes en temps réel.</p>
+          <span class="comment">Automatique · compte HoYoLAB</span>
+        </article>
+        <article class="sticker-jeu" style="--c:#F0904A">
+          <div class="rond" data-ico="jeu_bloxfruits"></div>
+          <h3>Blox Fruits</h3>
+          <p>Niveau, Beli et fragments lus pendant que tu joues, badges, game pass et amis en ligne.</p>
+          <span class="comment">Lecture d'écran · compte Roblox</span>
+        </article>
+        <article class="sticker-jeu" style="--c:#3FB6E8">
+          <div class="rond" data-ico="jeu_pokemongo"></div>
+          <h3>Pokémon GO</h3>
+          <p>Niveau, PX, distance, Pokémon attrapés et PokéStops, lus sur tes captures du profil.</p>
+          <span class="comment">Captures d'écran</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="installer">
+      <h2>Installer en une minute</h2>
+      <p class="chapeau">Pas d'installation compliquée : un seul fichier, et AllMyStats se met à jour tout seul ensuite.</p>
+      <ol class="etapes">
+        <li><h3>Télécharge AllMyStats.exe</h3>
+          <p>Lance-le. Si Windows affiche « Windows a protégé votre ordinateur », clique sur
+            <b>Informations complémentaires</b> puis <b>Exécuter quand même</b>.</p></li>
+        <li><h3>Connecte tes comptes</h3>
+          <p>Sur la page de chaque jeu, « Se connecter » ouvre la vraie page de connexion du jeu.
+            Ton mot de passe ne passe jamais par AllMyStats.</p></li>
+        <li><h3>Joue</h3>
+          <p>Active « Toujours actif » dans les Paramètres : tes stats, ton temps de jeu et les mises à jour
+            arrivent tout seuls.</p></li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Fait pour ne plus y penser</h2>
+      <p class="chapeau">Pas de cookies à chercher, pas de fichier à retélécharger.</p>
+      <div class="forts">
+        <div class="fort"><span class="ico" data-ico="actualiser"></span><div>
+          <h3>Tout automatique</h3><p>Une petite vérification par minute, une actualisation complète toutes les 30 minutes,
+            même fenêtre fermée.</p></div></div>
+        <div class="fort"><span class="ico" data-ico="maj"></span><div>
+          <h3>Mises à jour toutes seules</h3><p>Les nouveautés arrivent par Internet et s'installent quand l'appli est
+            fermée. Si une version plante, AllMyStats revient à la précédente.</p></div></div>
+        <div class="fort"><span class="ico" data-ico="cle"></span><div>
+          <h3>Tes comptes restent à toi</h3><p>Les connexions restent dans leur fenêtre, comme dans un navigateur.
+            Les captures d'écran sont lues puis effacées tout de suite.</p></div></div>
+        <div class="fort"><span class="ico" data-ico="graphique"></span><div>
+          <h3>Ta progression en courbes</h3><p>Chaque stat garde son historique : tu vois ce qui a bougé depuis la
+            dernière fois, et depuis le début.</p></div></div>
+      </div>
+    </section>
+
+    <section id="questions">
+      <h2>Questions</h2>
+      <div class="questions">
+        <details><summary>C'est gratuit ?</summary>
+          <p>Oui, entièrement. Pas de compte AllMyStats, pas de pub.</p></details>
+        <details><summary>Pourquoi Windows dit que l'appli n'est pas reconnue ?</summary>
+          <p>AllMyStats n'a pas de signature numérique payante, donc Windows SmartScreen ne la connaît pas encore.
+            Clique sur <b>Informations complémentaires</b> puis <b>Exécuter quand même</b>. Télécharge-la
+            uniquement depuis cette page.</p></details>
+        <details><summary>Où sont gardées mes stats ?</summary>
+          <p>Sur ton PC uniquement, dans le dossier AllMyStats de %APPDATA%. Rien n'est envoyé ailleurs.</p></details>
+        <details><summary>Pourquoi une clé HenrikDev pour Valorant ?</summary>
+          <p>Riot ne donne pas d'accès direct aux stats Valorant pour ce genre d'appli. HenrikDev est l'API utilisée par
+            les trackers : la clé est gratuite (api.henrikdev.xyz, Dashboard, API Keys) et se colle une seule fois dans
+            les Réglages de Valorant.</p></details>
+        <details><summary>Comment mettre à jour ?</summary>
+          <p>Tu n'as rien à faire : AllMyStats vérifie toutes les 6 heures. Pour l'avoir tout de suite :
+            Paramètres, Mises à jour, Vérifier maintenant.</p></details>
+      </div>
+    </section>
+
+    <div class="final">
+      <h2>Prêt à voir tes stats ?</h2>
+      <a class="telecharger" id="telecharger-2" href="#installer">
+        <span class="ico" data-ico="telecharger"></span><span>Télécharger pour Windows</span></a>
+    </div>
+  </main>
+
+  <footer>
+    AllMyStats (AMS) est un projet perso, gratuit, sans lien avec HoYoverse, Riot Games, Activision, Roblox,
+    Niantic ou Scopely. Les noms des jeux appartiennent à leurs éditeurs.
+    · <a href="https://github.com/Angelotkkt/AllMyStats">Code et mises à jour sur GitHub</a>
+  </footer>
+</div>
+
+<script src="icones.js"></script>
+<script>
+  // Les emojis maison de l'appli
+  document.querySelectorAll("[data-ico]").forEach((el) => { el.innerHTML = ICONES[el.dataset.ico] || ""; });
+
+  // Le bouton pointe vers la dernière version publiée (fichier AllMyStats.exe d'une « Release » GitHub)
+  const DEPOT = "Angelotkkt/AllMyStats";
+  const boutons = [document.getElementById("telecharger"), document.getElementById("telecharger-2")];
+  fetch(`https://api.github.com/repos/${DEPOT}/releases/latest`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((rel) => {
+      const exe = rel?.assets?.find((a) => /\.exe$/i.test(a.name));
+      if (!exe) throw new Error("pas encore de fichier");
+      boutons.forEach((b) => { b.href = exe.browser_download_url; });
+      const mo = (exe.size / 1048576).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+      document.getElementById("meta").textContent =
+        `Version ${rel.tag_name.replace(/^v/, "")} · ${mo} Mo · Gratuit · Windows 10 et 11`;
+    })
+    .catch(() => {
+      boutons.forEach((b) => { b.setAttribute("aria-disabled", "true"); b.removeAttribute("href"); });
+      document.getElementById("texte-telecharger").textContent = "Bientôt disponible";
+      document.getElementById("meta").textContent = "Le téléchargement arrive très bientôt.";
+    });
+  fetch("maj.json").then((r) => r.json()).then((m) => {
+    const meta = document.getElementById("meta");
+    if (!/Version/.test(meta.textContent) && !/bientôt/.test(meta.textContent)) meta.textContent = `Version ${m.version} · ` + meta.textContent;
+  }).catch(() => {});
+</script>
+</body>
+</html>
