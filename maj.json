@@ -1,6 +1,8 @@
 {
-  "version": "2.6.2",
+  "version": "2.6.3",
   "nouveautes": [
+    "Connexion à Internet plus solide : un proxy Windows qui ne marche plus est contourné",
+    "Les erreurs de connexion affichent leur vraie raison",
     "Valorant : connexion au client Riot plus solide (proxy, sécurité) et message d'erreur précis",
     "Réparé : l'erreur « Failed to import encodings module » au redémarrage après une mise à jour",
     "Nouveau jeu : Valorant, tout automatique comme un tracker (rang, RR, K/D, ACS, headshots, parties, agents, cartes)",
@@ -23,5 +25,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "697d1e617557c82337ca98231bb5e12bd11e4509c693ec30c95e8315b77d276c"
+  "sha256": "16d2ff007ce28cce2d765616ab6f15a6c9d03220549223167f3b9c04eddbf9ba"
 }
