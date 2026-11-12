@@ -1,6 +1,7 @@
 {
-  "version": "2.4.1",
+  "version": "2.4.2",
   "nouveautes": [
+    "Les nouvelles versions sont trouvées tout de suite après leur publication",
     "La barre de gauche affiche le pseudo de chaque compte connecté, même quand tu es sur un autre jeu",
     "Mises à jour automatiques par Internet : plus besoin de télécharger de fichier",
     "Nouveau bouton « Tester la lecture d'écran » : AllMyStats te dit exactement ce qui bloque",
@@ -15,5 +16,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "c33a1452c83506d0e0dbb261659a05d8433579d6fbb173f3b0d8571b23c32765"
+  "sha256": "f85adfd384ca592a995e3822afebdcdea2f7e23af3c7903a1bbfed181cdf3a54"
 }
