@@ -1,6 +1,7 @@
 {
-  "version": "2.12.1",
+  "version": "2.13.0",
   "nouveautes": [
+    "Blox Fruits : ton Build (points du menu Stats) et ton Inventaire comme en jeu, avec les images du wiki",
     "Cases plus propres : plus de « Première valeur », le rang Valorant sans les RR en double",
     "Valorant : nom et logo de ton rang, images des agents et des cartes dans tes parties et tes listes",
     "Valorant : HenrikDev interrogé avec ton identifiant de compte (marche avec les pseudos à caractères spéciaux)",
@@ -44,5 +45,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "7dcbc7357c05b83042c2850dde3f00c68b9cba04c80e9289781208502fa801ad"
+  "sha256": "ce701914727a807b5ceb3daa6adee75790096661c2330995f3226b052b03b2f9"
 }

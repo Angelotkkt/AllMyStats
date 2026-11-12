@@ -545,3 +545,22 @@ emoji("carte_teyvat", `${deg("gct", "#F4E2B0", "#D9B66A")}
   <path d="M22 6.5a4 4 0 0 0-4 4c0 3 4 6.5 4 6.5s4-3.5 4-6.5a4 4 0 0 0-4-4z" fill="#FF6B5E" stroke="#7A1F18" stroke-width="1"/>
   <circle cx="22" cy="10.5" r="1.5" fill="#FFF3E8"/>`);
 ICONES.famille_genshin_impact = ICONES.jeu_genshin;
+
+// ---------- Blox Fruits : build et inventaire (dessins originaux) ----------
+emoji("bf_build", `<rect x="4" y="18" width="5" height="10" rx="1.5" fill="#f0904a"/><rect x="11.5" y="12" width="5" height="16" rx="1.5" fill="#FFC44D"/>
+  <rect x="19" y="6" width="5" height="22" rx="1.5" fill="#33D1C1"/><path d="M26 6l2-2M26 10h3" stroke="#EEF0FA" stroke-width="1.6" stroke-linecap="round"/>`);
+emoji("bf_inventaire", `${deg("gbi", "#C98B4A", "#8A5622")}
+  <path d="M6 11c0-3 2-5 5-5h10c3 0 5 2 5 5v15H6z" fill="url(#gbi)" stroke="#4A2C10" stroke-width="1.4" stroke-linejoin="round"/>
+  <path d="M6 14h20" stroke="#4A2C10" stroke-width="1.4"/><rect x="13" y="12" width="6" height="5" rx="1.2" fill="#FFC44D" stroke="#4A2C10" stroke-width="1.1"/>
+  <path d="M12 6V4.5a4 4 0 0 1 8 0V6" stroke="#4A2C10" stroke-width="1.6" fill="none"/>`);
+emoji("bf_melee", `<path d="M9 14V9a2 2 0 0 1 4 0v4-6a2 2 0 0 1 4 0v6-5a2 2 0 0 1 4 0v6-3a2 2 0 0 1 4 0v8c0 5-3 8-8 8h-1c-4 0-7-3-8-6l-2-5a2 2 0 0 1 3.5-2z"
+  fill="#F3C9A0" stroke="#7A4A22" stroke-width="1.3" stroke-linejoin="round"/>`);
+emoji("bf_defense", `${deg("gbd", "#9AD0FF", "#3C7DD9")}<path d="M16 3l11 4v8c0 7-5 12-11 14-6-2-11-7-11-14V7z" fill="url(#gbd)" stroke="#173A6E" stroke-width="1.4" stroke-linejoin="round"/>
+  <path d="M16 8v16M9 14h14" stroke="#EEF7FF" stroke-width="2" opacity=".8"/>`);
+emoji("bf_epee", `<path d="M26 4l-3 1-13 13 4 4 13-13z" fill="#DDE3EE" stroke="#5A6378" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M8 18l6 6M11 21l-5 5" stroke="#7A4A22" stroke-width="2.6" stroke-linecap="round"/><circle cx="5.5" cy="26.5" r="1.8" fill="#FFC44D"/>`);
+emoji("bf_arme", `<path d="M4 12h20l3-2v6h-6l-2 3h-4l-1 4H9l1-6H4z" fill="#8C95A8" stroke="#3A4152" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M14 16h4" stroke="#3A4152" stroke-width="1.2"/><circle cx="27.5" cy="11" r="1.2" fill="#FFC44D"/>`);
+emoji("bf_fruit", `${rad("gbf", "#C79BFF", "#6A2FC9")}<circle cx="16" cy="18" r="10.5" fill="url(#gbf)" stroke="#3A1477" stroke-width="1.3"/>
+  <path d="M11 15c2-3 4 1 6-2s4 0 5 2M10 20c2-2 4 1 6-1s4 1 6 0" stroke="#EADBFF" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <path d="M16 7.5c0-2 1-3.5 3-4.5" stroke="#5B3A12" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M17.5 5.5c2.5-1.5 5-.5 6 1-2 1.5-4.5 1-6-1z" fill="#3FC46B"/>`);
