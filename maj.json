@@ -1,6 +1,7 @@
 {
-  "version": "2.12.0",
+  "version": "2.12.1",
   "nouveautes": [
+    "Cases plus propres : plus de « Première valeur », le rang Valorant sans les RR en double",
     "Valorant : nom et logo de ton rang, images des agents et des cartes dans tes parties et tes listes",
     "Valorant : HenrikDev interrogé avec ton identifiant de compte (marche avec les pseudos à caractères spéciaux)",
     "Valorant : connexion Riot réparée (ton Riot ID est lu directement, une erreur de stats n'annule plus la connexion)",
@@ -43,5 +44,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "88296a10c1a65e55944a8bf41e36d93165000b6dca8fa0f1c7860d138f798091"
+  "sha256": "7dcbc7357c05b83042c2850dde3f00c68b9cba04c80e9289781208502fa801ad"
 }
