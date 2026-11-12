@@ -1,6 +1,7 @@
 {
-  "version": "2.10.3",
+  "version": "2.10.4",
   "nouveautes": [
+    "Interactive Map : la découpe de la carte est remise aussitôt quand Edge l'efface (fini la barre en haut)",
     "Interactive Map : placement de la carte mesuré par Windows (zone de la page), sans barre en haut",
     "Interactive Map : la carte laissée par l'ancienne version est fermée et remplacée par la bonne",
     "Interactive Map : la carte connectée est placée au pixel près (plus de barre noire en haut)",
@@ -38,5 +39,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "c0c88efb8007d80c1cd0607fdf6ff48539acd9983427e77b5d4490a566ae4b3b"
+  "sha256": "b47a2cdb8c2a3bf2a879c6ebe10c984984e886f84edb69fa93f6b138826be0b6"
 }
