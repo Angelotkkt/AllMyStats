@@ -1,6 +1,7 @@
 {
-  "version": "2.6.0",
+  "version": "2.6.1",
   "nouveautes": [
+    "Réparé : l'erreur « Failed to import encodings module » au redémarrage après une mise à jour",
     "Nouveau jeu : Valorant, tout automatique comme un tracker (rang, RR, K/D, ACS, headshots, parties, agents, cartes)",
     "Paramètres > Jeux affichés : masque les jeux auxquels tu ne joues pas",
     "Nouveau jeu : Pokémon GO (niveau, PX, distance, Pokémon attrapés, PokéStops)",
@@ -21,5 +22,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "843c8463f59776a924f814ce25581c044a5a9b247d001abd58d61ee0f4ce3000"
+  "sha256": "fa098cc6f7f67b01be12c87ee8de655bcece7366b093fcfef904ac0a7183562e"
 }
