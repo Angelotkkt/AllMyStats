@@ -1,6 +1,7 @@
 {
-  "version": "2.13.1",
+  "version": "2.13.2",
   "nouveautes": [
+    "Blox Fruits : la lecture d'écran prend la fenêtre de Roblox, quel que soit son titre ou le lanceur (Bloxstrap…)",
     "Interactive Map : la carte se place correctement sur les écrans zoomés (125 %, 150 %…)",
     "Blox Fruits : ton Build (points du menu Stats) et ton Inventaire comme en jeu, avec les images du wiki",
     "Cases plus propres : plus de « Première valeur », le rang Valorant sans les RR en double",
@@ -46,5 +47,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "ab3c5a22a6e6a675ef53445d6cb5395f8fdc1412ab9c2ef2bb7cfd1c743342b7"
+  "sha256": "1ad337d4ee2d6ffa367ee6d61c36b6f215bb2226f39c5e3a6dee9f206670e784"
 }
