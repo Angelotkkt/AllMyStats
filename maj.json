@@ -1,0 +1,18 @@
+{
+  "version": "2.4.0",
+  "nouveautes": [
+    "Mises à jour automatiques par Internet : plus besoin de télécharger de fichier",
+    "Nouveau bouton « Tester la lecture d'écran » : AllMyStats te dit exactement ce qui bloque",
+    "Lecture d'écran plus solide : images trop grandes, langue de Windows, capture noire repérée",
+    "Blox Fruits est lu même quand les journaux de Roblox sont introuvables",
+    "Call of Duty reconnu même si son programme a un nom inconnu",
+    "Connexion Activision plus solide (plus d'erreur inattendue)",
+    "Connexion Activision réparée : la fenêtre ouvre callofduty.com, clique sur CONNEXION",
+    "Nouvelle catégorie Call of Duty : BO6, BO7, Cold War, MW4, Warzone, Warzone MW4, MW3 et MW2",
+    "Ton Combat Record est lu tout seul à l'écran et rangé dans le bon jeu",
+    "Connexion Activision pour les stats officielles de Cold War et MW2",
+    "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
+  ],
+  "fichier": "AllMyStats.zip",
+  "sha256": "41eb662e21cf80fda0145863076caca02d72b419296ec60cb35243a71f6b0113"
+}
