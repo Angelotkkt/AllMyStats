@@ -1,6 +1,7 @@
 {
-  "version": "2.6.1",
+  "version": "2.6.2",
   "nouveautes": [
+    "Valorant : connexion au client Riot plus solide (proxy, sécurité) et message d'erreur précis",
     "Réparé : l'erreur « Failed to import encodings module » au redémarrage après une mise à jour",
     "Nouveau jeu : Valorant, tout automatique comme un tracker (rang, RR, K/D, ACS, headshots, parties, agents, cartes)",
     "Paramètres > Jeux affichés : masque les jeux auxquels tu ne joues pas",
@@ -22,5 +23,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "fa098cc6f7f67b01be12c87ee8de655bcece7366b093fcfef904ac0a7183562e"
+  "sha256": "697d1e617557c82337ca98231bb5e12bd11e4509c693ec30c95e8315b77d276c"
 }
