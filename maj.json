@@ -1,6 +1,9 @@
 {
-  "version": "2.4.2",
+  "version": "2.5.0",
   "nouveautes": [
+    "Nouveau jeu : Pokémon GO (niveau, PX, distance, Pokémon attrapés, PokéStops)",
+    "Pokémon GO : tes captures du profil sont lues toutes seules dès qu'elles arrivent sur ton PC (OneDrive)",
+    "Glisse des captures d'écran dans AllMyStats pour les faire lire",
     "Les nouvelles versions sont trouvées tout de suite après leur publication",
     "La barre de gauche affiche le pseudo de chaque compte connecté, même quand tu es sur un autre jeu",
     "Mises à jour automatiques par Internet : plus besoin de télécharger de fichier",
@@ -16,5 +19,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "f85adfd384ca592a995e3822afebdcdea2f7e23af3c7903a1bbfed181cdf3a54"
+  "sha256": "ffb20e438aea0980bdd88bdef4cdcdf6a320f6e0614069db58ebf6397f8cadd3"
 }
