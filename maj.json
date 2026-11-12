@@ -1,6 +1,7 @@
 {
-  "version": "2.10.5",
+  "version": "2.11.0",
   "nouveautes": [
+    "Valorant : connexion Riot réparée (ton Riot ID est lu directement, une erreur de stats n'annule plus la connexion)",
     "Interactive Map : la carte reste dans son cadre et ne cache plus les boutons au-dessus",
     "Interactive Map : la découpe de la carte est remise aussitôt quand Edge l'efface (fini la barre en haut)",
     "Interactive Map : placement de la carte mesuré par Windows (zone de la page), sans barre en haut",
@@ -40,5 +41,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "49f493f3f9489179a68a9cbde5a634183f92d7009b871115b12e259b6ed0d5ca"
+  "sha256": "dcab9cacb46577d82efa3022ac080f830c1f9a7e3f003d5d1b508ced635767cc"
 }
