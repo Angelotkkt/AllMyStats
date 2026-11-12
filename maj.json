@@ -1,6 +1,7 @@
 {
-  "version": "2.11.1",
+  "version": "2.12.0",
   "nouveautes": [
+    "Valorant : nom et logo de ton rang, images des agents et des cartes dans tes parties et tes listes",
     "Valorant : HenrikDev interrogé avec ton identifiant de compte (marche avec les pseudos à caractères spéciaux)",
     "Valorant : connexion Riot réparée (ton Riot ID est lu directement, une erreur de stats n'annule plus la connexion)",
     "Interactive Map : la carte reste dans son cadre et ne cache plus les boutons au-dessus",
@@ -42,5 +43,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "c0921cc30b93b655f6cab02a6d7f76c3ca9676c978b2c87559278de6e820b728"
+  "sha256": "88296a10c1a65e55944a8bf41e36d93165000b6dca8fa0f1c7860d138f798091"
 }
