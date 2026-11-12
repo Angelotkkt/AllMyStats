@@ -1,6 +1,7 @@
 {
-  "version": "2.13.3",
+  "version": "2.13.4",
   "nouveautes": [
+    "Blox Fruits : le test met lui-même Roblox au premier plan, et montre ce que disent les journaux de Roblox",
     "Lecture d'écran réparée (erreur « OpenAsync ») et Blox Fruits mieux détecté dans les journaux de Roblox",
     "Blox Fruits : la lecture d'écran prend la fenêtre de Roblox, quel que soit son titre ou le lanceur (Bloxstrap…)",
     "Interactive Map : la carte se place correctement sur les écrans zoomés (125 %, 150 %…)",
@@ -48,5 +49,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "ba320d37279a952e0584d98802656c24ba8a64250fed34a859cd23001d7bacde"
+  "sha256": "c2e788877a112272af83b2d46c8c1047c219e1c2f7af0d1045edee958523e2bc"
 }
