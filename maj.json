@@ -1,6 +1,9 @@
 {
-  "version": "2.8.0",
+  "version": "2.9.0",
   "nouveautes": [
+    "Genshin : ton pseudo s'affiche à la place de l'UID",
+    "Genshin : les nouveaux persos ont leur nom et leur portrait, les armes de tes vœux ont leur image",
+    "Genshin : nouvelle sous-catégorie Interactive Map (la carte officielle de Teyvat, toujours à jour)",
     "Valorant passe par HenrikDev (comme les trackers) : rang, RR et parties même jeu fermé",
     "Valorant : nouvelle fenêtre « Se connecter avec Riot », puis tout est automatique même jeu fermé",
     "Valorant : la bonne région et la bonne version du jeu sont trouvées toutes seules",
@@ -28,5 +31,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "0cb618fa60a5316aae111603e4e48fd68c49f6be4bd75d9db0d34be1e7186d56"
+  "sha256": "c1689547e2f10c0f4064d5f204a8fe81b3fc7b5eeb71d6182e01280ae0178346"
 }

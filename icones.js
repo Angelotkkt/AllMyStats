@@ -538,3 +538,10 @@ emoji("valo_client", `<rect x="3" y="5" width="26" height="18" rx="3" fill="#1C2
 emoji("telecharger", `<path d="M16 3.5v15" stroke="#EEF0FA" stroke-width="3.6" stroke-linecap="round"/>
   <path d="M9 12.5l7 7 7-7" stroke="#EEF0FA" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M4.5 21v4.5a2 2 0 0 0 2 2h19a2 2 0 0 0 2-2V21" stroke="${AMS_OR}" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
+emoji("carte_teyvat", `${deg("gct", "#F4E2B0", "#D9B66A")}
+  <path d="M3 7l8-3 10 3 8-3v21l-8 3-10-3-8 3z" fill="url(#gct)" stroke="#6E4E14" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M11 4v21M21 7v21" stroke="#B8924A" stroke-width="1"/>
+  <path d="M6 18c3-1 4 2 7 1s3-5 6-5 4 2 6 1" stroke="#3F7FD9" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <path d="M22 6.5a4 4 0 0 0-4 4c0 3 4 6.5 4 6.5s4-3.5 4-6.5a4 4 0 0 0-4-4z" fill="#FF6B5E" stroke="#7A1F18" stroke-width="1"/>
+  <circle cx="22" cy="10.5" r="1.5" fill="#FFF3E8"/>`);
+ICONES.famille_genshin_impact = ICONES.jeu_genshin;
