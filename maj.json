@@ -1,6 +1,7 @@
 {
-  "version": "2.13.2",
+  "version": "2.13.3",
   "nouveautes": [
+    "Lecture d'écran réparée (erreur « OpenAsync ») et Blox Fruits mieux détecté dans les journaux de Roblox",
     "Blox Fruits : la lecture d'écran prend la fenêtre de Roblox, quel que soit son titre ou le lanceur (Bloxstrap…)",
     "Interactive Map : la carte se place correctement sur les écrans zoomés (125 %, 150 %…)",
     "Blox Fruits : ton Build (points du menu Stats) et ton Inventaire comme en jeu, avec les images du wiki",
@@ -47,5 +48,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "1ad337d4ee2d6ffa367ee6d61c36b6f215bb2226f39c5e3a6dee9f206670e784"
+  "sha256": "ba320d37279a952e0584d98802656c24ba8a64250fed34a859cd23001d7bacde"
 }
