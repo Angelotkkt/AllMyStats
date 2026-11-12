@@ -1,6 +1,7 @@
 {
-  "version": "2.10.1",
+  "version": "2.10.2",
   "nouveautes": [
+    "Interactive Map : la carte laissée par l'ancienne version est fermée et remplacée par la bonne",
     "Interactive Map : la carte connectée est placée au pixel près (plus de barre noire en haut)",
     "Interactive Map : la carte officielle s'affiche dans AllMyStats avec ton compte HoYoLAB, comme sur le site (essai)",
     "Interactive Map : bouton « Carte avec mon compte » pour cocher tes trouvailles (connexion HoYoLAB)",
@@ -36,5 +37,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "485bf11d1ae82a2d86b10da3fb366f938e6c69054906157f8be1b25de305a816"
+  "sha256": "b699bfa3555dc2c38e815050f32d5a69a8d04f2875e8b8c36d3e0fe97a396aec"
 }
