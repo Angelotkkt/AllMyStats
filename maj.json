@@ -1,6 +1,7 @@
 {
-  "version": "2.6.4",
+  "version": "2.7.0",
   "nouveautes": [
+    "Valorant : nouvelle fenêtre « Se connecter avec Riot », puis tout est automatique même jeu fermé",
     "Valorant : la bonne région et la bonne version du jeu sont trouvées toutes seules",
     "Connexion à Internet plus solide : un proxy Windows qui ne marche plus est contourné",
     "Les erreurs de connexion affichent leur vraie raison",
@@ -26,5 +27,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "2bd44bcb586dedcbcc6ae1d955627758f8783221ef330e9fd86b310da03396f8"
+  "sha256": "c6576f376570bdb9cb6ec6c3788448655edfefef25b3eaf70995e82ab4fa648e"
 }
