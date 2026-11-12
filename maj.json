@@ -1,6 +1,7 @@
 {
-  "version": "2.11.0",
+  "version": "2.11.1",
   "nouveautes": [
+    "Valorant : HenrikDev interrogé avec ton identifiant de compte (marche avec les pseudos à caractères spéciaux)",
     "Valorant : connexion Riot réparée (ton Riot ID est lu directement, une erreur de stats n'annule plus la connexion)",
     "Interactive Map : la carte reste dans son cadre et ne cache plus les boutons au-dessus",
     "Interactive Map : la découpe de la carte est remise aussitôt quand Edge l'efface (fini la barre en haut)",
@@ -41,5 +42,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "dcab9cacb46577d82efa3022ac080f830c1f9a7e3f003d5d1b508ced635767cc"
+  "sha256": "c0921cc30b93b655f6cab02a6d7f76c3ca9676c978b2c87559278de6e820b728"
 }
