@@ -1,6 +1,7 @@
 {
-  "version": "2.6.3",
+  "version": "2.6.4",
   "nouveautes": [
+    "Valorant : la bonne région et la bonne version du jeu sont trouvées toutes seules",
     "Connexion à Internet plus solide : un proxy Windows qui ne marche plus est contourné",
     "Les erreurs de connexion affichent leur vraie raison",
     "Valorant : connexion au client Riot plus solide (proxy, sécurité) et message d'erreur précis",
@@ -25,5 +26,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "16d2ff007ce28cce2d765616ab6f15a6c9d03220549223167f3b9c04eddbf9ba"
+  "sha256": "2bd44bcb586dedcbcc6ae1d955627758f8783221ef330e9fd86b310da03396f8"
 }
