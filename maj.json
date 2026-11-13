@@ -1,6 +1,7 @@
 {
-  "version": "2.20.2",
+  "version": "2.21.0",
   "nouveautes": [
+    "Nouvelle ouverture : le logo explose en objets de tous les jeux (désactivable dans Paramètres > Sons)",
     "iPhone : correction de l'écran blanc au démarrage, et message clair en cas de problème",
     "Version iPhone (gratuite, à installer avec Sideloadly) : reliée une fois au PC, puis autonome",
     "Appli Android autonome : relie-la une fois avec le QR code, elle marche ensuite sans le PC",
@@ -66,5 +67,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "7cfbce7f754bd0e87e6f6137368c754fb95e43199baadf5096323c182f14cc18"
+  "sha256": "948574f1d9f7b436038453b6c017f0b193383dc8dc512eac3776123986cc1a4d"
 }

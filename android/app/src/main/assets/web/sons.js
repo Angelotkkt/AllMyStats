@@ -67,6 +67,11 @@ const SONS = (() => {
     ouvrir: (a, s) => souffle(a, s, { duree: 0.13, vol: 0.35, de: 400, a_: 2600 }),
     fermer: (a, s) => souffle(a, s, { duree: 0.11, vol: 0.3, de: 2400, a_: 450 }),
     bascule: (a, s) => note(a, s, { type: "square", f1: 660, f2: 990, duree: 0.05, vol: 0.08 }),
+    explosion: (a, s) => {
+      souffle(a, s, { duree: .55, vol: .9, de: 1800, a_: 120 });
+      note(a, s, { type: "sine", f1: 140, f2: 38, duree: .6, vol: .7 });
+      [1568, 2093, 2637].forEach((f, i) => note(a, s, { type: "triangle", f1: f, duree: .5, vol: .12, debut: .08 + i * .07 }));
+    },
     maj: (a, s) => [784, 988, 1175].forEach((f, i) =>
       note(a, s, { type: "sine", f1: f, duree: 0.3, vol: 0.25, debut: i * 0.09 })),
   };

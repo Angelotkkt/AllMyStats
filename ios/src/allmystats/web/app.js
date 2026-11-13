@@ -1378,6 +1378,10 @@ function ouvrirParametres() {
       <input type="range" id="p-volume" min="0" max="1" step="0.05" value="${SONS.reglages.volume}" aria-label="Volume des sons">
       ${ICONES.son}</div>
     <label class="interrupteur">
+      <input type="checkbox" id="p-intro" ${INTRO.reglages.active ? "checked" : ""}>
+      <span>Animation d'ouverture (le logo qui explose)</span>
+    </label>
+    <label class="interrupteur">
       <input type="checkbox" id="p-ambiance" ${AMBIANCE.reglages.active ? "checked" : ""}>
       <span>Ambiance sonore (une musique douce quand AllMyStats est au premier plan)</span>
     </label>
@@ -1432,6 +1436,10 @@ function ouvrirParametres() {
     SONS.reglages.actifs = e.target.checked;
     $(".volume-sons").hidden = !e.target.checked;
     if (e.target.checked) SONS.jouer("succes");
+  });
+  $("#p-intro").addEventListener("change", (e) => {
+    INTRO.reglages.active = e.target.checked;
+    if (e.target.checked) { $("#fenetre-parametres").close(); setTimeout(INTRO.jouer, 150); }
   });
   $("#p-ambiance").addEventListener("change", (e) => {
     AMBIANCE.activer(e.target.checked);

@@ -641,3 +641,26 @@ emoji("telephone", `${deg("gtel", "#5EE0D2", "#2A8FB8")}
   <rect x="11.5" y="6.5" width="9" height="16" rx="1.5" fill="url(#gtel)"/>
   <path d="M13.5 18l2-3 2 2 2-4" fill="none" stroke="#1C2146" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
   <circle cx="16" cy="26" r="1.3" fill="#9AA3C7"/>`);
+
+// ---------- Objets de l'animation d'ouverture (dessins maison, pas les modèles des jeux) ----------
+emoji("pioche", `${deg("gpi", "#C9B6FF", "#6E5BE8")}
+  <path d="M8 27L22 9" stroke="#8A5A2B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M12 4.5c5-1.8 11-.6 15 3.6l-4.2 1.4c-2.6-2.2-6-3.1-9.4-2.6z" fill="url(#gpi)" stroke="#2B2560" stroke-width="1.2" stroke-linejoin="round"/>
+  <circle cx="21.2" cy="9.6" r="1.6" fill="#FFE07A"/>`);
+emoji("fusil", `${deg("gfu", "#F4F6FB", "#8F96B8")}
+  <path d="M2 14h18l3-2h7v4h-6l-2 1.5H16l-1.5 6h-4l1-6H8l-1 3H4l.5-3.5H2z" fill="url(#gfu)" stroke="#2A2F48" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M6 14v-2.5h6V14" fill="#FF4655" stroke="#2A2F48" stroke-width="1"/>
+  <path d="M23 12V9.5h2V12" fill="#2A2F48"/>`);
+emoji("couteau", `${deg("gco", "#E8F0FF", "#7D8BB3")}
+  <path d="M7 24c6-1 13-6 17-15 1.5-3.2 1-5 1-5s-3 2.5-5.5 6.5C16 16 11 19 7 20z" fill="url(#gco)" stroke="#2A2F48" stroke-width="1.1" stroke-linejoin="round"/>
+  <circle cx="6.5" cy="25.5" r="3.4" fill="none" stroke="#E8A33A" stroke-width="2.2"/>
+  <path d="M7 20l2 4" stroke="#E8A33A" stroke-width="2.4" stroke-linecap="round"/>`);
+emoji("jeton_or", `${rad("gjo", "#FFF0A8", "#D18F1B")}
+  <circle cx="16" cy="16" r="13" fill="url(#gjo)" stroke="#7A4E0A" stroke-width="1.4"/>
+  <circle cx="16" cy="16" r="9.5" fill="none" stroke="#9A6512" stroke-width="1" opacity=".7"/>
+  <path d="M16 9.5l2 4.2 4.6.6-3.3 3.2.8 4.6-4.1-2.2-4.1 2.2.8-4.6-3.3-3.2 4.6-.6z" fill="#FFF6CF" stroke="#9A6512" stroke-width=".8"/>`);
+emoji("relique", `${deg("gre", "#FFD9D3", "#C2202C")}
+  <path d="M16 2l3.5 7-3.5 15-3.5-15z" fill="url(#gre)" stroke="#4A0D12" stroke-width="1.1" stroke-linejoin="round"/>
+  <path d="M9 22h14" stroke="#E9C046" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M16 23v6" stroke="#3A2A2A" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="16" cy="12" r="1.8" fill="#7FF2FF" stroke="#173D72" stroke-width=".7"/>`);

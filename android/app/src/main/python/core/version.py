@@ -1,12 +1,13 @@
 """Version de AllMyStats. À augmenter à chaque nouvelle version."""
 
-VERSION = "2.20.2"
+VERSION = "2.21.0"
 
 # Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
 # on peut aussi le donner dans Paramètres > Mises à jour.
 DEPOT_MAJ = "Angelotkkt/AllMyStats"
 
 NOUVEAUTES = [
+    "Nouvelle ouverture : le logo explose en objets de tous les jeux (désactivable dans Paramètres > Sons)",
     "iPhone : correction de l'écran blanc au démarrage, et message clair en cas de problème",
     "Version iPhone (gratuite, à installer avec Sideloadly) : reliée une fois au PC, puis autonome",
     "Appli Android autonome : relie-la une fois avec le QR code, elle marche ensuite sans le PC",
