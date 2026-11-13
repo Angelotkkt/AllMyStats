@@ -583,15 +583,7 @@ emoji("equipe", `${[[6, "#ef7a35"], [12.7, "#4cc2f1"], [19.3, "#a5c83b"], [26, "
     `<circle cx="${x}" cy="12" r="3.6" fill="${c}"/><path d="M${x - 4.6} 25c.4-5 2.2-7.6 4.6-7.6s4.2 2.6 4.6 7.6z" fill="${c}"/>`).join("")}
   <path d="M2 27.5h28" stroke="#9AA3C7" stroke-width="1.4" stroke-linecap="round"/>`);
 
-// ---------- Spotify (dessin maison : casque + note, pas le logo) ----------
-emoji("jeu_spotify", `${deg("gsp", "#3BE08A", "#128A4B")}
-  <rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="url(#gsp)"/>
-  <path d="M8 19v-3a8 8 0 0 1 16 0v3" fill="none" stroke="#0B2A1A" stroke-width="2.2" stroke-linecap="round"/>
-  <rect x="6.2" y="17.5" width="4.4" height="7.5" rx="2" fill="#0B2A1A"/>
-  <rect x="21.4" y="17.5" width="4.4" height="7.5" rx="2" fill="#0B2A1A"/>
-  <path d="M17.5 10.5v8.3" stroke="#F2FFF6" stroke-width="1.7" stroke-linecap="round"/>
-  <path d="M17.5 10.5l3.4 1.2" stroke="#F2FFF6" stroke-width="1.7" stroke-linecap="round"/>
-  <ellipse cx="15.6" cy="19.2" rx="2.3" ry="1.8" fill="#F2FFF6"/>`);
+// ---------- Sons et ambiance ----------
 emoji("musique", `<path d="M12 24V8l14-3v15" fill="none" stroke="#3BE08A" stroke-width="2.2" stroke-linejoin="round"/>
   <ellipse cx="8.5" cy="24" rx="4" ry="3.2" fill="#3BE08A"/><ellipse cx="22.5" cy="20" rx="4" ry="3.2" fill="#3BE08A"/>`);
 emoji("son", `<path d="M5 12.5h5l7-6v19l-7-6H5z" fill="#FFC44D" stroke="#7A5418" stroke-width="1.2" stroke-linejoin="round"/>
