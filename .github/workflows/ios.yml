@@ -38,7 +38,8 @@ jobs:
             PROJET=$(ls -d build/allmystats/ios/xcode/*.xcodeproj | head -1)
             xcodebuild -project "$PROJET" -scheme AllMyStats -configuration Release -sdk iphoneos \
               -destination "generic/platform=iOS" -derivedDataPath build/dd \
-              CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+              CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+              EXPANDED_CODE_SIGN_IDENTITY="-" EXPANDED_CODE_SIGN_IDENTITY_NAME="-" build
             APP=$(ls -d build/dd/Build/Products/Release-iphoneos/*.app | head -1)
             rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
             zip -qry ../AllMyStats.ipa Payload
