@@ -51,7 +51,7 @@ android {
 // Le moteur d'AllMyStats (le même code Python que sur le PC) tourne dans l'appli
 chaquopy {
     defaultConfig {
-        version "3.12"
+        version "3.11"
         extractPackages "core", "jeux"
         pyc {
             src false
