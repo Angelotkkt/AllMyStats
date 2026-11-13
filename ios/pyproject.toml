@@ -25,6 +25,11 @@ requires = ["toga-iOS~=0.5.0", "std-nslog~=1.0.3"]
 
 [tool.briefcase.app.allmystats.iOS.info]
 NSLocalNetworkUsageDescription = "AllMyStats se relie une fois à AllMyStats sur ton PC, par ton Wi-Fi, pour copier tes comptes et tes stats."
+# Le dossier de l'appli visible dans Fichiers > Sur mon iPhone > AllMyStats (journal en cas de problème)
+UIFileSharingEnabled = true
+LSSupportsOpeningDocumentsInPlace = true
 
 [tool.briefcase.app.allmystats.iOS.info.NSAppTransportSecurity]
+# L'interface est servie par le moteur d'AllMyStats DANS le téléphone, en http://127.0.0.1 : iOS doit l'accepter
+NSAllowsArbitraryLoads = true
 NSAllowsLocalNetworking = true

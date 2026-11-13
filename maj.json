@@ -1,6 +1,7 @@
 {
-  "version": "2.20.1",
+  "version": "2.20.2",
   "nouveautes": [
+    "iPhone : correction de l'écran blanc au démarrage, et message clair en cas de problème",
     "Version iPhone (gratuite, à installer avec Sideloadly) : reliée une fois au PC, puis autonome",
     "Appli Android autonome : relie-la une fois avec le QR code, elle marche ensuite sans le PC",
     "AllMyStats sur ton téléphone : appli Android reliée à ton PC par le Wi-Fi (Paramètres > Téléphone)",
@@ -65,5 +66,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "bc380451ecabee5847d6de85eef314060a7a2088f6a4ed6378c6ad74144996fc"
+  "sha256": "7cfbce7f754bd0e87e6f6137368c754fb95e43199baadf5096323c182f14cc18"
 }
