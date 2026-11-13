@@ -1051,3 +1051,23 @@ iconePixel("jeu_cod_mw2", "px_mw2", "#66C4D6", "#14505E", [[
   ".....kkkkkk.....",
   "................",
 ], { k: "#0E1A1E", m: "#C8D0D6", g: "#3E5A2E", G: "#7E9A5A" }]);
+
+// Honkai: Star Rail : une locomotive vue de face, sur ses rails, sous les étoiles (pas le logo)
+iconePixel("jeu_starrail", "px_hsr", "#6E63D8", "#1A1640", [[
+  "..y.........y...",
+  ".....kk..kk.....",
+  "....kyyk.kyyk...",
+  "..kkkkkkkkkkkk..",
+  "..kbbbbbbbbbbk..",
+  ".kbwwkbbbbkwwbk.",
+  ".kbwwkbbbbkwwbk.",
+  ".kbbbbbbbbbbbbk.",
+  ".kggggkkkkggggk.",
+  ".kgggkyyyykgggk.",
+  ".kgggkyWWykgggk.",
+  ".kggggkkkkggggk.",
+  ".kkkkkkkkkkkkkk.",
+  ".krrk.kkkk.krrk.",
+  "..kk........kk..",
+  "ssssssssssssssss",
+], { k: "#141230", y: "#FFE07A", b: "#3D4FB8", w: "#BFE8FF", g: "#E8B04B", W: "#FFFFFF", r: "#C9CED8", s: "#8A90A8" }]);

@@ -1,6 +1,7 @@
 {
-  "version": "2.28.1",
+  "version": "2.29.0",
   "nouveautes": [
+    "Nouveau jeu : Honkai: Star Rail (niveau de Pionnier, succès, Univers simulé, Mémoire du Chaos, vitrine, temps de jeu)",
     "Interactive Map : la carte HoYoLAB s'affiche directement dans la page d'AllMyStats (plus de fenêtre à part)",
     "Nouvelles icônes des jeux en pixel art, et la carte HoYoLAB dans sa propre fenêtre AllMyStats (connexion gardée)",
     "Correction : le redémarrage après l'installation de la nouvelle application (erreur « Failed to load Python DLL »)",
@@ -79,5 +80,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "ac8e98753c5c56862b51bcd3edcd573b5d584c31bb77b5cb458f4f4ad04e6df0"
+  "sha256": "2721a4bdbe4e7d9f37f4e955c372b345fff83be0206e97f4821872474d0478e1"
 }
