@@ -239,7 +239,7 @@ def est_cache(jeu):
     return jeu.id in caches or bool(jeu.famille and f"famille:{jeu.famille}" in caches)
 
 
-AMIS = amis.Amis(CONFIG, JEUX, BDD, est_cache, VERSION, mobile=chemins.MOBILE)
+AMIS = amis.Amis(CONFIG, JEUX, BDD, est_cache, VERSION, DOSSIER_DONNEES, mobile=chemins.MOBILE)
 PUBLIER_AMIS_TOUTES = 600
 
 

@@ -1,6 +1,7 @@
 {
-  "version": "2.24.0",
+  "version": "2.24.1",
   "nouveautes": [
+    "Amis : nouveau serveur (ntfy.sh) pour corriger l'erreur 403 à la création du profil",
     "Amis : partage tes stats avec un code ami et compare-toi à tes amis dans un classement par jeu",
     "Builds & Teams : choisis 4 persos et AMS build chacun (arme, artefacts, stats) avec alternatives et ajustements d'équipe",
     "Builds & Teams : « Compléter une équipe », choisis jusqu'à 3 persos et AMS propose les meilleurs coéquipiers",
@@ -70,5 +71,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "1bc79ac385027767f13a3ce848d767e4dee25368d23ce8398f34e4aaf623fba8"
+  "sha256": "1878e4710fb54e59f100210ee9c204172e1605ef837bdad5ae0ff579af6b83b4"
 }

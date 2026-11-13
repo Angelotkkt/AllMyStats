@@ -957,7 +957,8 @@ function dessinerPageAmis() {
   const amisOk = d.amis.filter((a) => !a.erreur && !a.ferme);
   const listeAmis = d.amis.map((a) => `
     <li class="${a.erreur || a.ferme ? "souci" : ""}">${pastille(a)}<div><b>${esc(a.pseudo)}</b>
-      <small>${a.erreur ? esc(a.erreur) : a.ferme ? "N'est plus en partage" : a.maj ? `Stats du ${esc(dateLongue(a.maj))}` : ""}</small></div>
+      <small ${a.avertissement ? `title="${esc(a.avertissement)}"` : ""}>${a.erreur ? esc(a.erreur) : a.ferme ? "N'est plus en partage"
+        : a.maj ? `Stats du ${esc(dateLongue(a.maj))}${a.avertissement ? " (dernières connues)" : ""}` : ""}</small></div>
       <button class="am-retirer" data-retirer="${esc(a.id)}" title="Retirer ${esc(a.pseudo)}" aria-label="Retirer ${esc(a.pseudo)}">×</button></li>`).join("");
   $("#amis-sous").textContent = d.amis.length ? `${d.amis.length} ami${d.amis.length > 1 ? "s" : ""}` : "Classement entre amis";
 
