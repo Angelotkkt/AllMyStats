@@ -811,3 +811,15 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 520px) { .telephone-bloc { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
 .note-pc { display: inline-flex; align-items: center; gap: 8px; color: var(--brume); font-size: 13.5px; }
 .note-pc svg.emoji { width: 20px; height: 20px; }
+
+/* ---------------------------------------------------------------- liaison du téléphone (iPhone) */
+.liaison { max-width: 560px; margin: 0 auto; }
+.liaison-tete { display: flex; gap: 14px; align-items: flex-start; margin: 10px 0 18px; }
+.liaison-tete svg.emoji { width: 56px; height: 56px; flex-shrink: 0; }
+.liaison-tete h2 { margin: 0 0 6px; font: 700 24px/1.15 var(--f-chiffres); }
+.liaison-etapes { margin: 0 0 16px; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; color: #c8cdea; }
+.liaison-form { display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: var(--r-tuile);
+  background: var(--encre); border: 1.5px solid var(--trait); margin-bottom: 14px; }
+.liaison-form input { font: 600 18px/1 var(--f-texte); min-height: 48px; }
+.liaison-form #liaison-code { letter-spacing: 3px; text-transform: uppercase; }
+.liaison-form button { justify-content: center; min-height: 50px; margin-top: 8px; }

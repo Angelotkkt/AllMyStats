@@ -12,6 +12,7 @@ import hmac
 import io
 import json
 import os
+import re
 import secrets
 import sqlite3
 import tempfile
@@ -20,7 +21,11 @@ import threading
 import time
 import zipfile
 from http.server import ThreadingHTTPServer
+import urllib.error
+import urllib.request
 from urllib.parse import parse_qs, urlparse
+
+from jeux.base import ErreurJeu
 
 PORTS = range(8790, 8795)
 ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"   # sans 0/O, 1/I/L : faciles à recopier
@@ -108,6 +113,51 @@ def exporter(dossier_donnees, fichier_bdd, fichier_config, jeux):
                 z.write(chemin, nom)
         z.writestr("synchro.json", json.dumps({"quand": time.time(), "pc": socket.gethostname()}))
     return tampon.getvalue()
+
+
+class ErreurLiaison(ErreurJeu):
+    """Message clair affiché tel quel dans l'appli."""
+
+
+def importer_depuis_pc(hote, code, dossier):
+    """Côté téléphone : télécharge le paquet du PC (une fois) et le range dans le dossier de données."""
+    hote = re.sub(r"^https?://", "", hote.strip()).split("/")[0]
+    if not hote:
+        raise ErreurLiaison("Tape l'adresse affichée sur ton PC (ex : 192.168.1.20:8790).")
+    if ":" not in hote:
+        hote += ":8790"
+    code = code.strip().upper().replace("-", "").replace(" ", "")
+    req = urllib.request.Request(f"http://{hote}/api/telephone/export", headers={"X-AMS-Code": code})
+    ouvreur = urllib.request.build_opener(urllib.request.ProxyHandler({}))   # réseau local : jamais de proxy
+    try:
+        with ouvreur.open(req, timeout=60) as r:
+            contenu = r.read()
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            raise ErreurLiaison("Code incorrect. Regarde le code dans AllMyStats sur ton PC : Paramètres > Téléphone.")
+        if e.code == 429:
+            raise ErreurLiaison("Trop d'essais : attends 10 minutes puis réessaie.")
+        raise ErreurLiaison(f"Ton PC a répondu une erreur ({e.code}). Mets AllMyStats à jour sur le PC.")
+    except OSError:
+        raise ErreurLiaison(f"Ton PC ne répond pas à l'adresse {hote}. Vérifie qu'il est allumé, qu'AllMyStats est "
+                            "lancé avec « Relier mon téléphone » coché, et que le téléphone est sur le même Wi-Fi.")
+    racine = os.path.realpath(dossier)
+    n = 0
+    with zipfile.ZipFile(io.BytesIO(contenu)) as z:
+        for info in z.infolist():
+            if info.is_dir():
+                continue
+            cible = os.path.realpath(os.path.join(dossier, info.filename))
+            if not cible.startswith(racine + os.sep):
+                continue   # sécurité : rien hors du dossier
+            tmp = cible + ".nouveau"
+            with z.open(info) as src, open(tmp, "wb") as dst:
+                dst.write(src.read())
+            os.replace(tmp, cible)
+            n += 1
+    if not n:
+        raise ErreurLiaison("Rien reçu du PC. Mets AllMyStats à jour sur le PC puis réessaie.")
+    return n
 
 
 BLOQUES = {("api", "maj", "fichier"), ("api", "maj", "installer"), ("api", "appli", "quitter"),

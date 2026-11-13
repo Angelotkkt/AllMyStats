@@ -450,7 +450,9 @@ class Gestionnaire(BaseHTTPRequestHandler):
                                   "compte": j.nom_du_compte(reglages) if connecte or not j.connexion_nom else ""})
                 return self._json(liste)
             if m == ["api", "appli"]:
-                return self._json({**etat_appli(), "distant": getattr(self, "distant", False), "android": chemins.ANDROID})
+                return self._json({**etat_appli(), "distant": getattr(self, "distant", False), "android": chemins.ANDROID,
+                                   "mobile": chemins.MOBILE, "ios": chemins.IOS,
+                                   "lie": os.path.exists(os.path.join(DOSSIER_DONNEES, "synchro.json"))})
             if m == ["api", "appli", "telephone"]:
                 if getattr(self, "distant", False):
                     return self._erreur("Ça se règle sur le PC.", 403)
@@ -558,6 +560,12 @@ class Gestionnaire(BaseHTTPRequestHandler):
             if m == ["api", "appli", "telephone"]:
                 return self._json(regler_telephone(corps.get("actif") if "actif" in corps else None,
                                                    bool(corps.get("nouveau_code"))))
+            if m == ["api", "mobile", "relier"]:   # téléphone : copie une fois les comptes et les stats du PC
+                if not chemins.MOBILE:
+                    return self._erreur("Seulement dans l'appli du téléphone.", 403)
+                nb = telephone.importer_depuis_pc(str(corps.get("hote") or ""), str(corps.get("code") or ""),
+                                                  DOSSIER_DONNEES)
+                return self._json({"ok": True, "fichiers": nb})
             if m == ["api", "appli", "arriere-plan"]:
                 regler_arriere_plan(bool(corps.get("actif")))
                 return self._json(etat_appli())
@@ -765,7 +773,7 @@ def demarrer(port=8765, ouvrir_navigateur=True, mode_appli=False, arriere_plan=F
         return
 
     reseau.preparer()
-    if not chemins.ANDROID:   # sur le téléphone, c'est l'APK qui se met à jour
+    if not chemins.MOBILE:   # sur le téléphone, c'est l'appli (APK / iPhone) qui se met à jour
         _installer_au_demarrage()
         threading.Thread(target=_boucle_maj, daemon=True, name="mises-a-jour").start()
 
@@ -790,7 +798,7 @@ def demarrer(port=8765, ouvrir_navigateur=True, mode_appli=False, arriere_plan=F
     print("  Pour arrêter : ferme cette fenêtre (ou Ctrl+C)")
     print("=" * 52)
     MODE["serveur"] = serveur
-    if chemins.ANDROID:   # l'appli Android lit le port ici pour afficher l'interface
+    if chemins.MOBILE:   # l'appli du téléphone lit le port ici pour afficher l'interface
         with open(os.path.join(DOSSIER_DONNEES, "port.txt"), "w") as f:
             f.write(str(port))
     elif reglages_appli().get("telephone") == "oui":

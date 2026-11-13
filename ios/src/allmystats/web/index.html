@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141832">
+<title>AllMyStats</title>
+<link rel="icon" href="icone.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="barre-mobile">
+  <button class="bouton-menu" id="btn-menu" aria-label="Ouvrir la liste des jeux" aria-expanded="false" aria-controls="etagere"></button>
+  <span class="titre-mobile" id="titre-mobile">AllMyStats</span>
+  <span class="logo-mobile" id="logo-mobile"></span>
+</header>
+<div class="voile" id="voile" hidden></div>
+<aside class="etagere" id="etagere">
+  <div class="marque">
+    <span class="marque-logo" id="logo"></span>
+    <div>
+      <div class="marque-nom">AllMyStats</div>
+      <div class="marque-sous">tes jeux, tes stats</div>
+    </div>
+  </div>
+  <nav id="liste-jeux" aria-label="Jeux"></nav>
+  <div class="pied-etagere">
+    <button class="cartouche cartouche-reglages" id="btn-parametres">
+      <span class="cartouche-emblem" id="ic-parametres"></span>
+      <span class="cartouche-texte"><b>Paramètres</b><small id="version"></small></span>
+    </button>
+    <button class="bouton-ambiance" id="btn-ambiance" aria-pressed="true" title="Couper l'ambiance sonore"></button>
+  </div>
+</aside>
+
+<main>
+  <div class="bandeau-maj" id="bandeau-maj" hidden></div>
+  <div id="contenu"><div class="vide">Chargement…</div></div>
+</main>
+
+<dialog id="fenetre-reglages">
+  <form method="dialog" id="form-reglages">
+    <h2 class="titre-fenetre" id="titre-reglages">Réglages</h2>
+    <div id="champs-reglages"></div>
+    <div class="boutons">
+      <button value="annuler" class="secondaire">Annuler</button>
+      <button value="ok" class="principal" id="btn-enregistrer">Enregistrer</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="fenetre-parametres">
+  <form method="dialog">
+    <h2 class="titre-fenetre" id="titre-parametres">Paramètres d'AllMyStats</h2>
+    <div id="contenu-parametres"></div>
+    <div class="boutons"><button value="ok" class="principal">Fermer</button></div>
+  </form>
+</dialog>
+
+<dialog id="fenetre-test" aria-labelledby="titre-test">
+  <div id="contenu-test"></div>
+</dialog>
+
+<dialog id="fenetre-attente">
+  <div class="attente"><div class="rond"></div><p id="texte-attente"></p></div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="icones.js"></script>
+<script src="qr.js"></script>
+<script src="sons.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

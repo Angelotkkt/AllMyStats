@@ -1,0 +1,30 @@
+# AllMyStats pour iPhone : le même moteur que sur le PC (core + jeux) et la même interface (web),
+# dans une appli iOS fabriquée par BeeWare Briefcase. Fabriquée par GitHub (.github/workflows/ios.yml).
+[build-system]
+requires = ["briefcase"]
+
+[tool.briefcase]
+project_name = "AllMyStats"
+bundle = "io.github.angelotkkt"
+version = "2.19.0"
+url = "https://angelotkkt.github.io/AllMyStats/"
+license.file = "LICENSE"
+author = "AllMyStats"
+author_email = "allmystats@users.noreply.github.com"
+
+[tool.briefcase.app.allmystats]
+formal_name = "AllMyStats"
+description = "Toutes tes stats de jeux au même endroit"
+long_description = "AllMyStats sur iPhone : relié une fois à AllMyStats sur ton PC, il récupère ensuite tes stats tout seul."
+icon = "src/allmystats/resources/icone"
+sources = ["src/allmystats", "src/core", "src/jeux"]
+requires = []
+
+[tool.briefcase.app.allmystats.iOS]
+requires = ["toga-iOS~=0.5.0", "std-nslog~=1.0.3"]
+
+[tool.briefcase.app.allmystats.iOS.info]
+NSLocalNetworkUsageDescription = "AllMyStats se relie une fois à AllMyStats sur ton PC, par ton Wi-Fi, pour copier tes comptes et tes stats."
+
+[tool.briefcase.app.allmystats.iOS.info.NSAppTransportSecurity]
+NSAllowsLocalNetworking = true

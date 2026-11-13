@@ -1,6 +1,7 @@
 {
-  "version": "2.19.0",
+  "version": "2.20.0",
   "nouveautes": [
+    "Version iPhone (gratuite, à installer avec Sideloadly) : reliée une fois au PC, puis autonome",
     "Appli Android autonome : relie-la une fois avec le QR code, elle marche ensuite sans le PC",
     "AllMyStats sur ton téléphone : appli Android reliée à ton PC par le Wi-Fi (Paramètres > Téléphone)",
     "L'interface s'adapte aux petits écrans (menu des jeux en tiroir)",
@@ -64,5 +65,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "6cda4d0aeb18dbbe786866b5019f5564ca94e0bc29631bea5e8c88bac1a79c3c"
+  "sha256": "a1761929259a897aeddf3c4c52584df96e1535f81acb5d1106434ae311e940fa"
 }

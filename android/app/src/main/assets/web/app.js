@@ -12,9 +12,16 @@ const etat = {
 const $ = (sel) => document.querySelector(sel);
 // Ouvert depuis le téléphone (appli Android reliée au PC) : on cache ce qui ne marche que sur le PC
 const DISTANT = !["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
-// L'appli Android autonome (AllMyStats tourne sur le téléphone, sans le PC)
+// Les applis du téléphone (AllMyStats tourne dans le téléphone, sans le PC) : Android et iPhone
 const ANDROID = /AllMyStatsAndroid/.test(navigator.userAgent) && !DISTANT;
-const HORS_PC = DISTANT || ANDROID;
+const IOS = !DISTANT && (/AllMyStatsIOS/.test(navigator.userAgent) || (() => {
+  try {
+    if (new URLSearchParams(location.search).get("app") === "ios") localStorage.setItem("ams_app", "ios");
+    return localStorage.getItem("ams_app") === "ios";
+  } catch (e) { return new URLSearchParams(location.search).get("app") === "ios"; }
+})());
+const APPLI_MOBILE = ANDROID || IOS;
+const HORS_PC = DISTANT || APPLI_MOBILE;
 if (HORS_PC) document.documentElement.classList.add("distant");
 const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const emblemeJeu = (j) => icone(j.icone || "jeu_" + j.id, ICONES.jeu);
@@ -68,8 +75,9 @@ async function demarrer() {
     return;
   }
   afficherListeJeux();
-  chargerAppli();
+  await chargerAppli();
   setInterval(chargerAppli, 60 * 1000);
+  if (IOS && !etat.appli?.lie) return afficherLiaison();   // première ouverture sur iPhone : on relie au PC
   let memo = null;
   try { memo = localStorage.getItem("jeuActif"); } catch (e) {}
   ouvrirPremierJeuVisible(memo);
@@ -1318,7 +1326,7 @@ function ouvrirParametres() {
       et AllMyStats arrête de les surveiller. Leurs stats sont gardées si tu les réaffiches.</p>
     <div class="jeux-affiches">${blocsVisibilite()}</div>
 
-    ${ANDROID ? `<h3 class="section-reglages">${ICONES.telephone}Synchronisation avec le PC</h3>
+    ${APPLI_MOBILE ? `<h3 class="section-reglages">${ICONES.telephone}Synchronisation avec le PC</h3>
       <p class="gris petit">Ton téléphone a récupéré tes comptes et tes stats du PC, puis il se débrouille tout seul.
         Pour reprendre les nouveautés du PC (nouvelle clé, import Call of Duty, connexion…), scanne de nouveau son QR code.</p>
       <button type="button" class="secondaire" id="p-resynchro">${ICONES.actualiser}Synchroniser avec mon PC</button>`
@@ -1380,7 +1388,11 @@ function ouvrirParametres() {
     ${HORS_PC ? "" : `<h3 class="section-reglages">${ICONES.quitter}Quitter</h3>
     <button type="button" class="secondaire" id="p-quitter">${ICONES.quitter}Arrêter complètement AllMyStats</button>`}`;
   if (!HORS_PC) chargerTelephone();
-  $("#p-resynchro")?.addEventListener("click", () => window.Android?.synchroniser());
+  $("#p-resynchro")?.addEventListener("click", () => {
+    if (window.Android) return window.Android.synchroniser();
+    $("#fenetre-parametres").close();
+    afficherLiaison(true);
+  });
   $("#p-delier")?.addEventListener("click", () => window.Android?.oublierPc());
   const fen = $("#fenetre-parametres");
   if (!fen.open) fen.showModal();
@@ -1506,4 +1518,51 @@ async function chargerTelephone(action) {
       <a href="https://angelotkkt.github.io/AllMyStats/#telephone" target="_blank" rel="noopener">angelotkkt.github.io/AllMyStats</a></p>`;
   $("#p-telephone").addEventListener("change", (e) => chargerTelephone({ actif: e.target.checked }));
   $("#p-nouveau-code")?.addEventListener("click", () => chargerTelephone({ nouveau_code: true }));
+}
+
+// ---------- iPhone : relier l'appli au PC (une fois), sans quitter l'interface ----------
+function afficherLiaison(resynchro = false) {
+  cacherCarteCollee();
+  $("#titre-mobile").textContent = "Relier au PC";
+  $("#contenu").innerHTML = `
+    <section class="liaison">
+      ${resynchro ? `<button class="discret" id="liaison-retour">${ICONES.retour}Revenir à mes stats</button>` : ""}
+      <div class="liaison-tete">${ICONES.ams}<div><h2>${resynchro ? "Synchroniser avec ton PC" : "Relie ton iPhone une fois"}</h2>
+        <p class="gris">${resynchro
+          ? "Reprends les nouveautés du PC (nouvelle clé, import Call of Duty…). Les stats du PC remplacent celles du téléphone."
+          : "Ton iPhone copie tes comptes, tes clés et tes stats depuis AllMyStats sur ton PC. Ensuite il marche <b>tout seul, sans le PC</b>."}</p></div></div>
+      <ol class="liaison-etapes">
+        <li>Sur ton PC : AllMyStats &gt; <b>Paramètres</b> &gt; <b>Téléphone</b>, coche « Relier mon téléphone ».</li>
+        <li>Mets l'iPhone sur le <b>même Wi-Fi</b> que le PC (juste le temps de la liaison). Si l'iPhone demande
+          l'accès au réseau local, accepte.</li>
+        <li>Tape l'adresse et le code affichés sous le QR code du PC :</li>
+      </ol>
+      <form id="form-liaison" class="liaison-form">
+        <label>Adresse du PC<input id="liaison-hote" inputmode="decimal" autocomplete="off" placeholder="192.168.1.20:8790"
+          value="${esc((() => { try { return localStorage.getItem("ams_pc") || ""; } catch (e) { return ""; } })())}"></label>
+        <label>Code<input id="liaison-code" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder="ABCD-2345"></label>
+        <button class="principal" type="submit" id="liaison-ok">${ICONES.telephone}Relier</button>
+      </form>
+      <p class="gris petit">Les connexions HoYoLAB, Riot, Roblox et Activision restent sur ton PC : le téléphone utilise
+        tes clés d'API et les infos publiques de tes comptes.</p>
+    </section>`;
+  $("#liaison-retour")?.addEventListener("click", () => choisirJeu(etat.jeuActif || etat.jeux[0]?.id));
+  $("#form-liaison").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const hote = $("#liaison-hote").value.trim(), code = $("#liaison-code").value.trim();
+    if (!hote || !code) return toast("Tape l'adresse et le code affichés sur ton PC.", "erreur");
+    const bouton = $("#liaison-ok");
+    bouton.disabled = true;
+    bouton.innerHTML = `${ICONES.actualiser}Copie de tes comptes et de tes stats…`;
+    try {
+      await api("/api/mobile/relier", { method: "POST", body: { hote, code } });
+      try { localStorage.setItem("ams_pc", hote); } catch (err) {}
+      toast("Relié ! Ton téléphone marche maintenant sans le PC.", "ok");
+      setTimeout(() => location.reload(), 800);
+    } catch (err) {
+      toast(err.message, "erreur");
+      bouton.disabled = false;
+      bouton.innerHTML = `${ICONES.telephone}Relier`;
+    }
+  });
 }

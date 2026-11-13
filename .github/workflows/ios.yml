@@ -1,0 +1,64 @@
+name: Appli iPhone
+
+# Fabrique AllMyStats.ipa (non signé, à installer avec Sideloadly ou AltStore et ton identifiant Apple gratuit)
+# et le met dans la publication « ios ».
+on:
+  push:
+    branches: [main]
+    paths: ["ios/**", ".github/workflows/ios.yml", "maj.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Version et outils
+        shell: bash
+        run: |
+          VERSION=$(python3 -c 'import json;print(json.load(open("maj.json"))["version"])')
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          sed -i '' "s/^version = .*/version = \"$VERSION\"/" ios/pyproject.toml
+          python -m pip install --upgrade pip briefcase
+
+      - name: Fabrication
+        shell: bash
+        working-directory: ios
+        run: |
+          {
+            briefcase create iOS --no-input
+            PROJET=$(ls -d build/allmystats/ios/xcode/*.xcodeproj | head -1)
+            xcodebuild -project "$PROJET" -scheme AllMyStats -configuration Release -sdk iphoneos \
+              -destination "generic/platform=iOS" -derivedDataPath build/dd \
+              CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+            APP=$(ls -d build/dd/Build/Products/Release-iphoneos/*.app | head -1)
+            rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
+            zip -qry ../AllMyStats.ipa Payload
+          } 2>&1 | tee ../journal-ios.txt
+
+      - name: Publication
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES="AllMyStats ${APP_VERSION} pour iPhone (non signé : à installer avec Sideloadly ou AltStore)."
+          gh release view ios >/dev/null 2>&1 || gh release create ios --title "AllMyStats pour iPhone" --notes "$NOTES" --latest=false
+          gh release edit ios --notes "$NOTES" --latest=false
+          gh release upload ios AllMyStats.ipa journal-ios.txt --clobber
+
+      - name: Journal en cas d'échec
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view ios-journal >/dev/null 2>&1 || gh release create ios-journal --title "Journal de fabrication iPhone" --notes "Dernier échec" --latest=false --prerelease
+          gh release upload ios-journal journal-ios.txt --clobber || true

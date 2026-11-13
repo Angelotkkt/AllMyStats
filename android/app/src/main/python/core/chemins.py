@@ -9,8 +9,13 @@ FIGE = getattr(sys, "frozen", False)  # True quand on tourne depuis AllMyStats.e
 # Le code (core, jeux, web) : là où se trouve ce fichier
 RESSOURCES = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEB = os.environ.get("AMS_WEB") or os.path.join(RESSOURCES, "web")
-# Sur le téléphone (appli Android autonome) : pas de mises à jour du PC, pas de Windows
+# Sur le téléphone (appli Android ou iPhone autonome) : pas de mises à jour du PC, pas de Windows
 ANDROID = os.environ.get("AMS_ANDROID") == "1"
+IOS = os.environ.get("AMS_IOS") == "1"
+MOBILE = ANDROID or IOS
+if MOBILE and os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "cacert.pem")):
+    # Certificats HTTPS (liste de Mozilla, via certifi) : le Python des téléphones n'en a pas toujours
+    os.environ.setdefault("SSL_CERT_FILE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "cacert.pem"))
 
 # Tes données : %APPDATA%\AllMyStats avec le .exe, dossier data/ avec la version .py
 DONNEES = os.environ.get("MESSTATS_DONNEES") or (
