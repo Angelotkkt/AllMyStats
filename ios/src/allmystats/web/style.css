@@ -928,6 +928,18 @@ button.bt-membre:hover .bt-vig { outline: 2px solid var(--el); }
   color: var(--brume); background: none; border: 1px solid var(--trait); cursor: pointer; }
 .am-retirer:hover { color: #12152B; background: var(--corail); border-color: var(--corail); }
 .am-vide { margin: 0; }
+.am-demandes { margin-bottom: 16px; border-color: color-mix(in srgb, var(--or) 60%, var(--trait));
+  background: linear-gradient(100deg, color-mix(in srgb, var(--or) 14%, var(--encre)), var(--encre) 60%); }
+.am-demandes .am-liste li { gap: 10px; }
+.am-demandes .am-note { margin: 10px 0 0; }
+.am-nb { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 99px;
+  background: var(--or); color: #12152B; font: 700 13px/1 var(--f-chiffres); }
+.am-envoyees { margin-bottom: 14px; }
+.am-envoyees b { font: 600 13.5px/1.2 var(--f-chiffres); letter-spacing: .3px; color: #c8cdea; overflow-wrap: anywhere; }
+.am-sablier { color: var(--craie); font-size: 16px; }
+.am-sous-titre { margin: 4px 0 8px; color: var(--brume); font: 600 13px/1.2 var(--f-texte); }
+.cartouche-amis.a-demandes small { color: var(--or); font-weight: 700; }
+.cartouche-amis.a-demandes .cartouche-emblem { box-shadow: 0 0 0 2px var(--or); }
 .rouge { color: var(--corail); }
 
 .am-jeux-choix { margin-bottom: 16px; }

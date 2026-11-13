@@ -1,6 +1,7 @@
 {
-  "version": "2.25.1",
+  "version": "2.26.0",
   "nouveautes": [
+    "Amis : demandes d'amis à accepter, amitié des deux côtés, stats chiffrées visibles seulement par tes amis (nouveau code ami)",
     "Discord : le statut montre seulement le logo et la description (plus de bouton ni de page regardée)",
     "Photo de profil dans Amis, photo du compte sur Genshin, CS2 (Steam) et Valorant (carte de joueur), et statut Discord avec logo et description",
     "Correction : erreur de certificat (« certificate has expired ») sur certains PC, pour les amis et les autres connexions",
@@ -74,5 +75,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "7455599233db052716a08e79df22b04d242f2b43215abeb22b5d86ad0044f0d4"
+  "sha256": "2a412469571c105851782283aace823a22807f9d9197fd0b6d20e0a0dbf09920"
 }

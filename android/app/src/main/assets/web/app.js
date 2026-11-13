@@ -974,8 +974,8 @@ function blocMoiAmis(moi) {
         <div>${moi.jeux_disponibles.map((j) => `<label class="interrupteur"><input type="checkbox" data-jeu-partage="${esc(j.id)}"
           ${!partages || partages.includes(j.id) ? "checked" : ""}><span>${icone(j.icone || "jeu_" + j.id, ICONES.jeu)}${esc(j.nom)}</span></label>`).join("")}</div>
       </details>
-      <p class="am-prive">${ICONES.astuce}<span>Seuls ton pseudo et la dernière valeur de tes stats sont partagés : jamais tes connexions,
-        tes UID ou ton historique. Tout le monde qui a ton code ami peut les voir.</span></p>
+      <p class="am-prive">${ICONES.astuce}<span>Seuls ton pseudo, ta photo et la dernière valeur de tes stats sont partagés, chiffrés :
+        seuls tes amis acceptés peuvent les lire. Jamais tes connexions, tes UID ou ton historique.</span></p>
       <div class="am-boutons"><button class="principal" id="am-valider">${bouton}</button>
         ${titre ? `<button class="discret" id="am-annuler">Annuler</button>` : ""}</div>
     </div>`;
@@ -983,8 +983,8 @@ function blocMoiAmis(moi) {
     <p class="gris">Ton profil d'amis se règle et se publie depuis AllMyStats sur ton PC. Ici, tu peux ajouter des amis et voir le classement.</p></section>`;
   if (!moi.actif || amis.edition) return `<section class="bt-bloc am-moi">
     <h3>${ICONES.amis}${moi.actif ? "Modifier ton profil" : "Partage tes stats avec tes amis"}</h3>
-    ${moi.actif ? "" : `<p class="am-intro">Choisis un pseudo : AllMyStats te donne un code ami. Envoie-le à tes amis qui ont AllMyStats,
-      ils l'ajoutent, et vous êtes dans le même classement.</p>`}
+    ${moi.actif ? "" : `<p class="am-intro">Choisis un pseudo : AllMyStats te donne un code ami. Échange vos codes avec tes amis qui ont
+      AllMyStats, envoyez-vous une demande, et une fois acceptée vous êtes dans le même classement.</p>`}
     ${formulaire(moi.actif, moi.actif ? "Enregistrer" : "Partager mes stats")}
   </section>`;
   return `<section class="bt-bloc am-moi">
@@ -992,12 +992,22 @@ function blocMoiAmis(moi) {
       <small>${moi.mobile ? "Publié depuis ton PC" : moi.erreur ? `<span class="rouge">${esc(moi.erreur)}</span>` : moi.publie_le ? `Profil publié ${depuis(moi.publie_le)}` : "Pas encore publié"}</small></div></div>
     <div class="am-code"><span>Ton code ami</span><b id="am-mon-code">${esc(moi.code || "…")}</b>
       <button class="secondaire" id="am-copier" ${moi.code ? "" : "disabled"}>Copier</button></div>
-    <p class="am-note">Envoie ce code à tes amis. Tes stats sont republiées toutes seules quand elles changent.</p>
+    <p class="am-note">Donne ce code à tes amis : ils t'envoient une demande, tu l'acceptes, et vous voyez vos stats des deux côtés.
+      Seuls tes amis acceptés peuvent les lire.</p>
     ${moi.mobile ? "" : `<div class="am-boutons">
       <button class="secondaire" id="am-publier">Publier maintenant</button>
       <button class="discret" id="am-modifier">Modifier le profil</button>
       <button class="discret" id="am-arreter">Arrêter de partager</button></div>`}
   </section>`;
+}
+
+// La barre de gauche : nombre d'amis, ou les demandes reçues en évidence
+function majBadgeAmis(demandes, nbAmis) {
+  const sous = $("#amis-sous");
+  if (!sous) return;
+  sous.textContent = demandes ? `${demandes} demande${demandes > 1 ? "s" : ""} d'ami${demandes > 1 ? "s" : ""}`
+    : nbAmis ? `${nbAmis} ami${nbAmis > 1 ? "s" : ""}` : "Classement entre amis";
+  $("#btn-amis").classList.toggle("a-demandes", demandes > 0);
 }
 
 function dessinerPageAmis() {
@@ -1009,8 +1019,17 @@ function dessinerPageAmis() {
     <li class="${a.erreur || a.ferme ? "souci" : ""}">${pastille(a)}<div><b>${esc(a.pseudo)}</b>
       <small ${a.avertissement ? `title="${esc(a.avertissement)}"` : ""}>${a.erreur ? esc(a.erreur) : a.ferme ? "N'est plus en partage"
         : a.maj ? `Stats du ${esc(dateLongue(a.maj))}${a.avertissement ? " (dernières connues)" : ""}` : ""}</small></div>
-      <button class="am-retirer" data-retirer="${esc(a.id)}" title="Retirer ${esc(a.pseudo)}" aria-label="Retirer ${esc(a.pseudo)}">×</button></li>`).join("");
-  $("#amis-sous").textContent = d.amis.length ? `${d.amis.length} ami${d.amis.length > 1 ? "s" : ""}` : "Classement entre amis";
+      ${moi.mobile ? "" : `<button class="am-retirer" data-retirer="${esc(a.id)}" title="Retirer ${esc(a.pseudo)}" aria-label="Retirer ${esc(a.pseudo)}">×</button>`}</li>`).join("");
+  const recues = (d.recues || []).map((a) => `
+    <li>${pastille(a)}<div><b>${esc(a.pseudo)}</b><small>veut être ton ami${a.le ? ` · ${esc(depuis(a.le))}` : ""}</small></div>
+      ${moi.mobile ? "" : `<button class="principal" data-accepter="${esc(a.id)}">Accepter</button>
+      <button class="discret" data-refuser="${esc(a.id)}">Refuser</button>`}</li>`).join("");
+  const envoyees = (d.envoyees || []).map((a) => `
+    <li class="am-attente"><span class="am-pastille am-sablier" style="--c:#3a4383">…</span><div><b>${esc(a.code)}</b>
+      <small>En attente de sa réponse${a.le ? ` · demande ${esc(depuis(a.le))}` : ""}</small></div>
+      ${moi.mobile ? "" : `<button class="discret" data-annuler="${esc(a.id)}">Annuler</button>`}</li>`).join("");
+  majBadgeAmis(d.recues?.length || 0, d.amis.length);
+  (d.notifs || []).forEach((n, i) => setTimeout(() => toast(n, "info"), 400 + i * 2200));
 
   // Les jeux du classement : ceux où au moins un ami a des stats
   const joueurs = [moiProfil, ...amisOk];
@@ -1025,15 +1044,24 @@ function dessinerPageAmis() {
         <p>Compare tes stats avec tes amis qui ont AllMyStats, jeu par jeu.</p>
         <button class="discret" id="am-rafraichir">${ICONES.actualiser || ""}Rafraîchir</button>
       </header>
+      ${recues ? `<section class="bt-bloc am-demandes">
+        <h3>${ICONES.amis}Demandes d'amis <span class="am-nb">${d.recues.length}</span></h3>
+        <ul class="am-liste">${recues}</ul>
+        <p class="am-note">En acceptant, vous devenez amis des deux côtés : chacun voit les stats de l'autre.</p>
+      </section>` : ""}
       <div class="am-haut">
         ${blocMoiAmis(moi)}
         <section class="bt-bloc am-ajout">
           <h3>${ICONES.ajouter || ICONES.amis}Ajouter un ami</h3>
-          <form id="am-form-ajout" class="am-ajout-ligne">
-            <input id="am-code-ami" placeholder="Colle son code ami (AMS-…)" autocomplete="off" spellcheck="false">
-            <button class="principal">Ajouter</button>
-          </form>
-          ${listeAmis ? `<ul class="am-liste">${listeAmis}</ul>` : `<p class="gris am-vide">Pas encore d'ami. Demande-leur leur code ami, dans la page Amis de leur AllMyStats.</p>`}
+          ${moi.mobile ? `<p class="gris am-vide">Les demandes d'amis s'envoient et s'acceptent depuis AllMyStats sur ton PC.</p>`
+          : !moi.actif ? `<p class="gris am-vide">Choisis d'abord ton pseudo à gauche : il te faut un profil pour envoyer des demandes.</p>`
+          : `<form id="am-form-ajout" class="am-ajout-ligne">
+              <input id="am-code-ami" placeholder="Colle son code ami (AMS-…)" autocomplete="off" spellcheck="false">
+              <button class="principal">Envoyer la demande</button>
+            </form>`}
+          ${envoyees ? `<ul class="am-liste am-envoyees">${envoyees}</ul>` : ""}
+          ${listeAmis ? `<h4 class="am-sous-titre">Tes amis</h4><ul class="am-liste">${listeAmis}</ul>`
+            : `<p class="gris am-vide">Pas encore d'ami. Envoie une demande avec son code ami : il l'accepte dans la page Amis de son AllMyStats.</p>`}
         </section>
       </div>
       <section class="am-classement">
@@ -1049,7 +1077,8 @@ function dessinerPageAmis() {
 
   // Événements
   $("#am-rafraichir").onclick = () => { son("clic"); afficherPageAmis(true); };
-  $("#am-form-ajout").onsubmit = async (e) => {
+  const formAjout = $("#am-form-ajout");
+  if (formAjout) formAjout.onsubmit = async (e) => {
     e.preventDefault();
     const code = $("#am-code-ami").value.trim();
     if (!code) return toast("Colle d'abord le code ami (il commence par AMS-).", "info");
@@ -1057,8 +1086,12 @@ function dessinerPageAmis() {
   };
   document.querySelectorAll("[data-retirer]").forEach((b) => b.onclick = () => {
     const a = d.amis.find((x) => x.id === b.dataset.retirer);
-    if (confirm(`Retirer ${a?.pseudo || "cet ami"} de tes amis ?`)) actionAmis("retirer", { id: b.dataset.retirer });
+    if (confirm(`Retirer ${a?.pseudo || "cet ami"} ? Vous ne serez plus amis des deux côtés, et il ne verra plus tes stats.`))
+      actionAmis("retirer", { id: b.dataset.retirer });
   });
+  document.querySelectorAll("[data-accepter]").forEach((b) => b.onclick = () => { son("succes"); actionAmis("accepter", { id: b.dataset.accepter }, b); });
+  document.querySelectorAll("[data-refuser]").forEach((b) => b.onclick = () => actionAmis("refuser", { id: b.dataset.refuser }, b));
+  document.querySelectorAll("[data-annuler]").forEach((b) => b.onclick = () => actionAmis("annuler", { id: b.dataset.annuler }, b));
   document.querySelectorAll("[data-jeu-classement]").forEach((b) => b.onclick = () => {
     amis.jeu = b.dataset.jeuClassement; son("onglet"); dessinerPageAmis();
   });
@@ -1070,7 +1103,7 @@ function dessinerPageAmis() {
   $("#am-publier")?.addEventListener("click", (e) => actionAmis("publier", {}, e.currentTarget));
   $("#am-modifier")?.addEventListener("click", () => { amis.edition = true; dessinerPageAmis(); });
   $("#am-arreter")?.addEventListener("click", (e) => {
-    if (confirm("Arrêter de partager ? Ton profil en ligne sera vidé et tes amis ne verront plus tes stats.")) actionAmis("arreter", {}, e.currentTarget);
+    if (confirm("Arrêter de partager ? Tes amis seront retirés des deux côtés, et tu auras un nouveau code si tu reviens.")) actionAmis("arreter", {}, e.currentTarget);
   });
   let couleur = moi.couleur, photo = moi.photo || "";
   const apercu = () => { const a = $("#am-apercu"); if (a) a.innerHTML = pastille({ pseudo: $("#am-pseudo")?.value || moi.pseudo, couleur, photo }); };
@@ -1787,6 +1820,15 @@ async function chargerAppli() {
     etat.appli = await api("/api/appli");
   } catch (e) { return; }
   $("#version").textContent = "version " + etat.appli.version;
+  if (typeof etat.appli.demandes_amis === "number") {
+    const avant = etat.demandesAmis ?? etat.appli.demandes_amis;
+    etat.demandesAmis = etat.appli.demandes_amis;
+    majBadgeAmis(etat.appli.demandes_amis, amis.data?.amis?.length || 0);
+    if (etat.appli.demandes_amis > avant) {
+      toast("Nouvelle demande d'ami : va voir dans Amis !", "info");
+      if (etat.jeuActif === "_amis" && !amis.edition) afficherPageAmis();
+    }
+  }
   const b = $("#bandeau-maj");
   const maj = etat.appli.maj;
   if (maj && b.hidden && etat.appliVue) son("maj");   // une nouvelle version vient d'arriver

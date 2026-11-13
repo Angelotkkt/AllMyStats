@@ -1,16 +1,19 @@
-"""Système d'amis d'AllMyStats : chacun publie un petit « profil » (ses stats, rien d'autre) et le partage avec
-un code ami. Les amis ajoutent ce code et voient ses stats, comparées dans un classement.
+"""Système d'amis d'AllMyStats : demandes d'amis à accepter, amitié des deux côtés, classement entre amis.
 
-Il n'y a pas de serveur AllMyStats : les profils passent par ntfy.sh, un service gratuit et sans compte fait
-pour que des programmes s'envoient des messages. Chaque profil est publié dans un « sujet » ntfy au nom tiré au
-hasard (impossible à deviner) : ce nom est le code ami. ntfy garde les messages 12 heures, donc AMS republie
-toutes les 6 heures quand le PC est allumé, et garde chez toi les dernières stats connues de chaque ami.
+Il n'y a pas de serveur AllMyStats : tout passe par ntfy.sh, un service gratuit et sans compte fait pour que des
+programmes s'envoient des messages. Chaque joueur a deux « sujets » ntfy :
+  - allmystats-<code>        : sa clé publique, et son profil (ses stats) CHIFFRÉ ;
+  - allmystats-<code>-boite  : sa boîte de réception (demandes, réponses), chaque message chiffré pour lui.
 
-Ce qui part sur Internet : le pseudo choisi dans AMS et la dernière valeur des stats des jeux partagés,
-compressées. Jamais de connexion, de cookie, de clé, d'UID, d'adresse ou d'historique.
+Demande : A envoie à B (dans la boîte de B) sa clé de profil, chiffrée pour B seul. Si B accepte, B garde A dans
+ses amis et lui renvoie sa propre clé de profil : chacun peut alors lire les stats de l'autre, et personne
+d'autre (le code ami seul ne suffit plus). Retirer un ami prévient l'autre côté et change la clé de profil.
+Le chiffrement est décrit dans core/amis_crypto.py ; le code ami est l'empreinte de la clé publique.
 
-Limites, dites à l'utilisateur dans l'appli : n'importe qui qui a ton code peut voir ces stats (c'est le but),
-et pourrait techniquement publier dans ton sujet ; AMS republie de toute façon dès que tes stats changent."""
+ntfy garde les messages 12 heures : AMS republie le profil toutes les 6 heures quand le PC est allumé, renvoie
+les demandes et réponses pendant 7 jours, et garde chez toi les dernières stats connues de chaque ami.
+Ce qui part sur Internet : ton pseudo, ta couleur, ta photo et la dernière valeur des stats partagées, chiffrés.
+Jamais de connexion, de cookie, de clé d'API, d'UID ou d'historique."""
 
 import base64
 import hashlib
@@ -27,24 +30,25 @@ import zlib
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
-# Adresse du service. Peut être changée (tests, serveur ntfy perso) sans toucher au code.
+from core import amis_crypto as crypto
+
 RELAIS = os.environ.get("AMS_RELAIS_AMIS", "https://ntfy.sh").rstrip("/")
 UA = "AllMyStats/2 (amis ; https://github.com/Angelotkkt/AllMyStats)"
 PREFIXE = "AMS-"
 SUJET = "allmystats-{id}"
-ENTETE_MESSAGE = "AMS1:"
+BOITE = "allmystats-{id}-boite"
 TAILLE_MAX = 3900               # ntfy refuse les messages de plus de 4096 octets
 CLE_CONFIG = "_amis"
 REPUBLIER_APRES = 6 * 3600      # ntfy oublie les messages au bout de 12 h
-CACHE_AMIS = 120                # secondes avant de relire le profil d'un ami
+RELANCES_PENDANT = 7 * 86400    # demandes et réponses renvoyées pendant 7 jours
+LIRE_BOITE_APRES = 60
+BLOQUE_APRES_REFUS = 24 * 3600  # après un refus, la même personne peut redemander le lendemain
+CACHE_AMIS = 120
 MAX_AMIS = 50
-# Photo de profil : une petite image (envoyée dans son propre message) ou l'adresse d'une photo de compte de jeu
 PHOTO_MAX = 2800
 HOTES_PHOTO = ("enka.network", "avatars.steamstatic.com", "avatars.akamai.steamstatic.com", "steamcdn-a.akamaihd.net",
                "media.valorant-api.com")
-# Stats qui n'ont pas de sens à comparer (elles parlent des autres, pas de toi)
 STATS_EXCLUES = {"amis_en_jeu", "joueurs_en_ligne"}
-# Stats où moins, c'est mieux
 MOINS_C_EST_MIEUX = {"morts", "defaites"}
 
 
@@ -58,19 +62,13 @@ def code_depuis_id(id_profil):
     return PREFIXE + id_profil if id_profil else ""
 
 
-def nouvel_id():
-    return secrets.token_hex(12)
-
-
 def id_depuis_code(code):
     """« AMS-abc123… » ou juste l'id -> l'id, ou None si ça ne ressemble à rien."""
     texte = (code or "").strip().rstrip("/").rsplit("/", 1)[-1]
     if texte.upper().startswith(PREFIXE):
         texte = texte[len(PREFIXE):]
-    if texte.lower().startswith("allmystats-"):
-        texte = texte[len("allmystats-"):]
     texte = texte.strip().lower()
-    return texte if re.fullmatch(r"[a-z0-9]{16,40}", texte) else None
+    return texte if re.fullmatch(r"[0-9a-f]{24}", texte) else None
 
 
 # ------------------------------------------------------------------ échanges avec ntfy
@@ -79,7 +77,7 @@ def _requete(methode, url, corps=None, timeout=15):
     req = urllib.request.Request(url, data=corps, method=methode, headers={"User-Agent": UA})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
-            return r.status, r.read(400_000).decode("utf-8", errors="replace")
+            return r.status, r.read(600_000).decode("utf-8", errors="replace")
     except urllib.error.HTTPError as e:
         if e.code == 429:
             raise ErreurAmis("Le serveur des amis demande d'attendre un peu (trop de demandes) : réessaie dans quelques minutes.")
@@ -92,30 +90,84 @@ def _requete(methode, url, corps=None, timeout=15):
         raise ErreurAmis(f"Impossible de joindre le serveur des amis ({raison}). Vérifie ta connexion.")
 
 
-def emballer(compact):
-    """Profil compact -> texte court (compressé) qui tient dans un message ntfy."""
-    brut = json.dumps(compact, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-    return ENTETE_MESSAGE + base64.b64encode(zlib.compress(brut, 9)).decode("ascii")
-
-
-def deballer(texte):
-    if not isinstance(texte, str) or not texte.startswith(ENTETE_MESSAGE) or len(texte) > 6000:
-        return None
-    try:
-        brut = zlib.decompressobj().decompress(base64.b64decode(texte[len(ENTETE_MESSAGE):], validate=True), 200_000)
-        data = json.loads(brut.decode("utf-8"))
-    except (ValueError, zlib.error, UnicodeDecodeError):
-        return None
-    return data if isinstance(data, dict) else None
-
-
-def envoyer(id_profil, compact):
-    texte = emballer(compact)
+def _poster(sujet, texte):
     if len(texte) > TAILLE_MAX:
         raise ErreurAmis("Trop de stats à partager d'un coup : décoche quelques jeux dans « Jeux partagés ».")
-    code, _ = _requete("POST", f"{RELAIS}/{SUJET.format(id=id_profil)}", texte.encode("ascii"))
+    code, _ = _requete("POST", f"{RELAIS}/{sujet}", texte.encode("ascii"))
     if code not in (200, 201):
-        raise ErreurAmis(f"Le serveur des amis a refusé la publication (erreur {code}).")
+        raise ErreurAmis(f"Le serveur des amis a refusé l'envoi (erreur {code}).")
+
+
+def _lire_sujet(sujet):
+    """Les messages gardés par ntfy (12 dernières heures) : [(id, heure, texte)], du plus ancien au plus récent."""
+    code, texte = _requete("GET", f"{RELAIS}/{sujet}/json?poll=1&since=all")
+    if code != 200:
+        raise ErreurAmis(f"Le serveur des amis a répondu une erreur {code}.")
+    res = []
+    for ligne in texte.splitlines():
+        try:
+            m = json.loads(ligne)
+        except ValueError:
+            continue
+        if isinstance(m, dict) and m.get("event") == "message" and isinstance(m.get("message"), str):
+            res.append((str(m.get("id") or ""), m.get("time") or 0, m["message"]))
+    res.sort(key=lambda x: x[1])
+    return res
+
+
+def _b64(octets):
+    return base64.b64encode(octets).decode("ascii")
+
+
+def _de_b64(texte):
+    try:
+        return base64.b64decode(texte, validate=True)
+    except (ValueError, TypeError):
+        return None
+
+
+def _sceller(cle, objet):
+    """Objet -> texte chiffré (compressé avant)."""
+    return _b64(crypto.chiffrer(cle, zlib.compress(json.dumps(objet, separators=(",", ":"), ensure_ascii=False).encode("utf-8"), 9)))
+
+
+def _ouvrir(cle, texte):
+    paquet = _de_b64(texte)
+    donnees = crypto.dechiffrer(cle, paquet) if paquet else None
+    if donnees is None:
+        return None
+    try:
+        objet = json.loads(zlib.decompressobj().decompress(donnees, 300_000).decode("utf-8"))
+    except (ValueError, zlib.error, UnicodeDecodeError):
+        return None
+    return objet if isinstance(objet, dict) else None
+
+
+def lire_cle_publique(id_profil):
+    """La clé publique annoncée par ce code (vérifiée : son empreinte doit être le code)."""
+    for _, _, texte in reversed(_lire_sujet(SUJET.format(id=id_profil))):
+        if texte.startswith("AMS2K:"):
+            y = crypto.depuis_hex(texte[6:])
+            if y and crypto.empreinte(y) == id_profil:
+                return y
+    return None
+
+
+def lire_profil(id_profil, cle):
+    """Le dernier profil chiffré de cet ami que sa clé ouvre (avec sa photo), ou None."""
+    profil, photos = None, {}
+    for _, _, texte in _lire_sujet(SUJET.format(id=id_profil)):
+        if texte.startswith("AMS2P:"):
+            p = _ouvrir(cle, texte[6:])
+            if p and p.get("v") == 1:
+                profil = p
+        elif texte.startswith("AMS2F:"):
+            f = _ouvrir(cle, texte[6:])
+            if f and isinstance(f.get("h"), str) and photo_valide(f.get("a")):
+                photos[f["h"]] = f["a"]
+    if profil and profil.get("ah") and not profil.get("a"):
+        profil["a"] = photos.get(profil["ah"], "")
+    return profil
 
 
 def photo_valide(v):
@@ -133,36 +185,6 @@ def photo_valide(v):
 
 def _empreinte_photo(photo):
     return hashlib.sha256(photo.encode("utf-8")).hexdigest()[:12] if photo else ""
-
-
-def recevoir(id_profil):
-    """Le dernier profil publié dans le sujet de cet ami (dans les 12 dernières heures), ou None.
-    Si sa photo est une image envoyée à part, elle est ajoutée au profil (champ « a »)."""
-    code, texte = _requete("GET", f"{RELAIS}/{SUJET.format(id=id_profil)}/json?poll=1&since=all")
-    if code != 200:
-        raise ErreurAmis(f"Le serveur des amis a répondu une erreur {code}.")
-    meilleur, photos = None, {}
-    for ligne in texte.splitlines():
-        try:
-            m = json.loads(ligne)
-        except ValueError:
-            continue
-        if not isinstance(m, dict) or m.get("event") != "message":
-            continue
-        data = deballer(m.get("message"))
-        if not data:
-            continue
-        if data.get("type") == "photo":
-            if isinstance(data.get("h"), str) and photo_valide(data.get("a")):
-                photos[data["h"]] = data["a"]
-        elif meilleur is None or (m.get("time") or 0) >= meilleur[0]:
-            meilleur = (m.get("time") or 0, data)
-    if not meilleur:
-        return None
-    profil = meilleur[1]
-    if profil.get("ah") and not profil.get("a"):
-        profil["a"] = photos.get(profil["ah"], "")
-    return profil
 
 
 # ------------------------------------------------------------------ le contenu d'un profil
@@ -248,19 +270,26 @@ class Amis:
         self.version, self.mobile = version, mobile
         self.fichier_cache = os.path.join(dossier, "amis_cache.json")
         self._verrou = threading.RLock()
-        self._lus = {}            # id -> heure de la dernière lecture en ligne
+        self._lus = {}
+        self._boite_lue = 0
+
+    # ----- réglages (config.json ne garde que des textes : tout tient dans un seul champ JSON)
 
     def reglages(self):
-        # config.json ne garde que des textes : tout le système d'amis tient dans un seul champ JSON
         try:
             r = json.loads((self.config.reglages(CLE_CONFIG) or {}).get("donnees") or "{}")
         except ValueError:
             r = {}
-        r = {"actif": False, "pseudo": "", "couleur": "#FFC44D", "id": "", "amis": [], "jeux_partages": None,
-             **(r if isinstance(r, dict) else {})}
-        r["amis"] = [a for a in r["amis"] if isinstance(a, dict) and id_depuis_code(a.get("id"))]
-        if r.get("id") and not id_depuis_code(r["id"]):
-            r["id"] = ""     # ancien format
+        r = r if isinstance(r, dict) else {}
+        if r.get("version") != 2:   # ancien système (codes publics) : on garde le profil, pas les amis
+            r = {k: v for k, v in r.items() if k in ("actif", "pseudo", "couleur", "photo", "jeux_partages")}
+            r["version"] = 2
+        base = {"version": 2, "actif": False, "pseudo": "", "couleur": "#FFC44D", "photo": "", "jeux_partages": None,
+                "id": "", "prive": "", "k": "", "amis": [], "envoyees": [], "recues": [], "refuses": {},
+                "vus": [], "notifs": []}
+        r = {**base, **r}
+        for liste in ("amis", "envoyees", "recues"):
+            r[liste] = [a for a in r[liste] if isinstance(a, dict) and id_depuis_code(a.get("id"))]
         return r
 
     def _enregistrer(self, **valeurs):
@@ -270,7 +299,23 @@ class Amis:
             self.config.enregistrer(CLE_CONFIG, {"donnees": json.dumps(r, ensure_ascii=False)})
             return r
 
+    def _identite(self):
+        """(clé privée, clé publique, code, clé de profil). Créées la première fois."""
+        with self._verrou:
+            r = self.reglages()
+            try:
+                prive = int(r["prive"], 16) if r.get("prive") else None
+            except ValueError:
+                prive = None
+            if not prive or not r.get("k"):
+                prive, publique = crypto.nouvelle_paire()
+                r = self._enregistrer(prive=format(prive, "x"), id=crypto.empreinte(publique),
+                                      k=secrets.token_hex(32), publie_le=0, cle_annoncee_le=0)
+            publique = pow(crypto.G, prive, crypto.P)
+            return prive, publique, r["id"], bytes.fromhex(r["k"])
+
     # ----- les dernières stats connues de chaque ami, gardées sur le PC
+
     def _cache(self):
         try:
             with open(self.fichier_cache, "r", encoding="utf-8") as f:
@@ -279,17 +324,27 @@ class Amis:
         except (OSError, ValueError):
             return {}
 
+    def _ecrire_cache(self, data):
+        try:
+            with open(self.fichier_cache, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False)
+        except OSError:
+            pass
+
     def _garder(self, id_profil, compact):
         with self._verrou:
             data = self._cache()
             data[id_profil] = {"compact": compact, "lu_le": int(time.time())}
             gardes = {a["id"] for a in self.reglages()["amis"]} | {id_profil}
-            data = {k: v for k, v in data.items() if k in gardes}
-            try:
-                with open(self.fichier_cache, "w", encoding="utf-8") as f:
-                    json.dump(data, f, ensure_ascii=False)
-            except OSError:
-                pass
+            self._ecrire_cache({k: v for k, v in data.items() if k in gardes})
+
+    def _oublier_cache(self, id_profil):
+        with self._verrou:
+            data = self._cache()
+            if data.pop(id_profil, None) is not None:
+                self._ecrire_cache(data)
+
+    # ----- mon profil
 
     def _compact(self):
         return construire_compact(self.reglages(), self.jeux, self.bdd.derniere_valeur, self.est_cache)
@@ -306,11 +361,9 @@ class Amis:
             except Exception:
                 continue
             photo = photo_valide((details or {}).get("avatar") if isinstance(details, dict) else "")
-            if photo.startswith("https://") and photo not in [r["photo"] for r in res]:
+            if photo.startswith("https://") and photo not in [x["photo"] for x in res]:
                 res.append({"jeu": j.nom, "photo": photo})
         return res
-
-    # ----- réglages
 
     def regler(self, actif=None, pseudo=None, couleur=None, jeux_partages=None, tous_les_jeux=False, photo=None):
         changes = {}
@@ -335,134 +388,347 @@ class Amis:
             changes["actif"] = bool(actif)
         self._enregistrer(**changes)
         if self.reglages()["actif"] and not self.mobile:
-            return self.publier(forcer=True)
+            self._identite()
+            message = self.publier(forcer=True)
+            if changes.get("pseudo") or "couleur" in changes or "photo" in changes:
+                self._relancer_amis()   # le nouveau pseudo arrive aussi dans les demandes en cours
+            return message
         return None
 
-    # ----- publication
-
     def publier(self, forcer=False):
-        """Publie mon profil s'il a changé (ou s'il n'a pas été republié depuis 6 h). Renvoie un message."""
+        """Publie ma clé publique et mon profil chiffré s'il a changé (ou toutes les 6 h). Renvoie un message."""
         if self.mobile:
             raise ErreurAmis("Ton profil est publié depuis ton PC.")
         with self._verrou:
             r = self.reglages()
             if not r["actif"]:
                 return None
+            _, publique, id_moi, cle = self._identite()
+            r = self.reglages()
             compact = self._compact()
-            empreinte = _empreinte(compact)
-            if (not forcer and r.get("id") and r.get("empreinte") == empreinte
-                    and time.time() - (r.get("publie_le") or 0) < REPUBLIER_APRES):
+            empreinte = _empreinte({**compact, "_k": r["k"]})
+            vieux = time.time() - (r.get("publie_le") or 0) >= REPUBLIER_APRES
+            if not forcer and r.get("empreinte") == empreinte and not vieux:
                 return None
-            id_profil = r.get("id") or nouvel_id()
+            sujet = SUJET.format(id=id_moi)
             try:
+                if forcer or vieux or time.time() - (r.get("cle_annoncee_le") or 0) >= REPUBLIER_APRES:
+                    _poster(sujet, "AMS2K:" + crypto.en_hex(publique))
+                    r = self._enregistrer(cle_annoncee_le=time.time())
                 photo = photo_valide(r.get("photo"))
-                if compact.get("ah"):   # d'abord la photo, pour qu'elle soit là quand le profil arrive
-                    envoyer(id_profil, {"v": 1, "type": "photo", "h": compact["ah"], "a": photo})
-                envoyer(id_profil, compact)
+                if compact.get("ah"):
+                    _poster(sujet, "AMS2F:" + _sceller(cle, {"h": compact["ah"], "a": photo}))
+                _poster(sujet, "AMS2P:" + _sceller(cle, compact))
             except ErreurAmis as e:
                 self._enregistrer(erreur=str(e))
                 raise
-            self._enregistrer(id=id_profil, empreinte=empreinte, publie_le=time.time(), erreur="")
+            self._enregistrer(empreinte=empreinte, publie_le=time.time(), erreur="")
             return "Profil publié"
 
-    def publier_en_silence(self):
+    # ----- messages entre deux joueurs (dans la boîte de l'autre)
+
+    def _ecrire_a(self, id_autre, publique_autre, type_, **contenu):
+        prive, publique, id_moi, cle = self._identite()
+        r = self.reglages()
+        charge = {"t": type_, "pour": id_autre, "q": int(time.time()), "p": r["pseudo"] or "Joueur",
+                  "c": _couleur(r["couleur"]), **contenu}
+        photo = photo_valide(r.get("photo"))
+        if photo.startswith("https://"):
+            charge["a"] = photo
+        enveloppe = {"de": id_moi, "pk": crypto.en_hex(publique),
+                     "x": _sceller(crypto.cle_commune(prive, publique_autre), charge)}
+        _poster(BOITE.format(id=id_autre), "AMS2B:" + _b64(json.dumps(enveloppe, separators=(",", ":")).encode("ascii")))
+
+    def _notifier(self, texte):
+        r = self.reglages()
+        self._enregistrer(notifs=(r["notifs"] + [{"texte": texte, "le": int(time.time())}])[-10:])
+
+    def lire_boite(self, forcer=False):
+        """Lit ma boîte : demandes reçues, réponses, retraits. Rien sur le téléphone (c'est le PC qui gère)."""
+        if self.mobile:
+            return
+        r = self.reglages()
+        if not r["actif"] or not r.get("prive"):
+            return
+        if not forcer and time.time() - self._boite_lue < LIRE_BOITE_APRES:
+            return
+        with self._verrou:
+            prive, _, id_moi, cle_moi = self._identite()
+            messages = _lire_sujet(BOITE.format(id=id_moi))
+            self._boite_lue = time.time()
+            r = self.reglages()
+            vus = list(r["vus"])
+            for id_msg, _, texte in messages:
+                if id_msg in vus or not texte.startswith("AMS2B:"):
+                    continue
+                vus.append(id_msg)
+                try:
+                    enveloppe = json.loads((_de_b64(texte[6:]) or b"").decode("ascii") or "{}")
+                    publique = crypto.depuis_hex(enveloppe.get("pk"))
+                    de = id_depuis_code(enveloppe.get("de"))
+                    if not publique or not de or crypto.empreinte(publique) != de or de == id_moi:
+                        continue
+                    charge = _ouvrir(crypto.cle_commune(prive, publique), enveloppe.get("x") or "")
+                except (ValueError, UnicodeDecodeError, AttributeError):
+                    continue
+                if not charge or charge.get("pour") != id_moi:
+                    continue
+                self._traiter(de, crypto.en_hex(publique), charge)
+            self._enregistrer(vus=vus[-400:])
+
+    def _traiter(self, de, pk, charge):
+        r = self.reglages()
+        t = charge.get("t")
+        infos = {"pseudo": _texte(charge.get("p"), 24).strip() or "Joueur", "couleur": _couleur(charge.get("c")),
+                 "photo": photo_valide(charge.get("a"))}
+        k = charge.get("k") if isinstance(charge.get("k"), str) and re.fullmatch(r"[0-9a-f]{64}", charge["k"]) else None
+        ami = next((a for a in r["amis"] if a["id"] == de), None)
+        envoyee = next((a for a in r["envoyees"] if a["id"] == de), None)
+        if t == "demande" and k:
+            if ami:   # déjà amis (il a peut-être réinstallé) : on met sa clé à jour et on lui redonne la mienne
+                ami.update(k=k, pk=pk, **infos)
+                ami["relancer_jusqua"] = time.time() + RELANCES_PENDANT
+                self._enregistrer(amis=r["amis"])
+                self._repondre(de, pk, "accepte")
+            elif envoyee:   # demandes croisées : on devient amis tout de suite
+                self._devenir_amis(r, de, pk, k, infos, envoyee_aussi=True)
+            elif time.time() - (r["refuses"].get(de) or 0) > BLOQUE_APRES_REFUS:
+                recues = [a for a in r["recues"] if a["id"] != de] + [{"id": de, "pk": pk, "k": k, "le": int(time.time()), **infos}]
+                self._enregistrer(recues=recues)
+                if not any(a["id"] == de for a in r["recues"]):
+                    self._notifier(f"{infos['pseudo']} veut être ton ami")
+        elif t == "accepte" and k:
+            if envoyee:
+                self._devenir_amis(r, de, pk, k, infos, envoyee_aussi=True, notif=f"{infos['pseudo']} a accepté ta demande !")
+            elif ami:
+                ami.update(k=k, pk=pk, **infos)
+                self._enregistrer(amis=r["amis"])
+        elif t == "refuse" and envoyee:
+            self._enregistrer(envoyees=[a for a in r["envoyees"] if a["id"] != de])
+            self._notifier(f"{infos['pseudo']} a refusé ta demande")
+        elif t == "annule":
+            self._enregistrer(recues=[a for a in r["recues"] if a["id"] != de])
+        elif t == "retire" and ami:
+            self._enregistrer(amis=[a for a in r["amis"] if a["id"] != de])
+            self._oublier_cache(de)
+            self._notifier(f"{ami.get('pseudo') or infos['pseudo']} n'est plus dans tes amis")
+            self._changer_cle()
+
+    def _devenir_amis(self, r, de, pk, k, infos, envoyee_aussi=False, notif=None):
+        amis = [a for a in r["amis"] if a["id"] != de] + [{"id": de, "pk": pk, "k": k, "depuis": int(time.time()),
+                                                           "relancer_jusqua": time.time() + RELANCES_PENDANT, **infos}]
+        self._enregistrer(amis=amis, envoyees=[a for a in r["envoyees"] if a["id"] != de],
+                          recues=[a for a in r["recues"] if a["id"] != de])
+        self._repondre(de, pk, "accepte")
+        if notif:
+            self._notifier(notif)
+
+    def _repondre(self, de, pk, type_, **contenu):
+        publique = crypto.depuis_hex(pk)
+        if not publique:
+            return
+        if type_ in ("demande", "accepte"):
+            contenu["k"] = self.reglages()["k"]
         try:
-            self.publier()
+            self._ecrire_a(de, publique, type_, **contenu)
         except ErreurAmis as e:
             print(f"[amis] {e}")
 
-    def oublier_mon_profil(self):
-        """Arrête de partager : un dernier message « fermé » remplace mes stats, et le code est oublié."""
+    def _changer_cle(self):
+        """Nouvelle clé de profil (après un retrait) : envoyée aux amis restants, puis profil republié."""
+        self._enregistrer(k=secrets.token_hex(32))
+        for a in self.reglages()["amis"]:
+            a["relancer_jusqua"] = time.time() + RELANCES_PENDANT
+            a["relance_le"] = time.time()
+            self._repondre(a["id"], a["pk"], "accepte")
+        r = self.reglages()
+        self._enregistrer(amis=[{**a, "relancer_jusqua": time.time() + RELANCES_PENDANT, "relance_le": time.time()}
+                                for a in r["amis"]])
+        try:
+            self.publier(forcer=True)
+        except ErreurAmis as e:
+            print(f"[amis] {e}")
+
+    def _relancer_amis(self):
+        r = self.reglages()
+        for a in r["envoyees"]:
+            self._repondre(a["id"], a["pk"], "demande")
+        for a in r["amis"]:
+            self._repondre(a["id"], a["pk"], "accepte")
+
+    def relances(self):
+        """ntfy oublie tout au bout de 12 h : on renvoie les demandes en attente et les réponses récentes
+        toutes les 6 h, pendant 7 jours, au cas où l'autre PC était éteint."""
+        if self.mobile or not self.reglages()["actif"]:
+            return
         with self._verrou:
             r = self.reglages()
-            if r.get("id") and not self.mobile:
-                try:
-                    envoyer(r["id"], {"v": 1, "p": r.get("pseudo") or "Joueur", "c": _couleur(r.get("couleur")),
-                                      "t": datetime.now(timezone.utc).isoformat(timespec="seconds"), "j": {}, "f": 1})
-                except ErreurAmis:
-                    pass
-            self._enregistrer(actif=False, id="", empreinte="", publie_le=0, erreur="")
+            maintenant = time.time()
+            change = False
+            for liste, type_ in (("envoyees", "demande"), ("amis", "accepte")):
+                for a in r[liste]:
+                    limite = a.get("jusqua") if liste == "envoyees" else a.get("relancer_jusqua")
+                    if limite and maintenant < limite and maintenant - (a.get("relance_le") or 0) >= REPUBLIER_APRES:
+                        self._repondre(a["id"], a["pk"], type_)
+                        a["relance_le"] = maintenant
+                        change = True
+            if change:
+                self._enregistrer(envoyees=r["envoyees"], amis=r["amis"])
 
-    # ----- la liste d'amis
-
-    def ajouter(self, code):
-        id_profil = id_depuis_code(code)
-        if not id_profil:
-            raise ErreurAmis("Ce code ami n'a pas la bonne forme (il commence par AMS- et suit avec 24 lettres et chiffres).")
-        r = self.reglages()
-        if id_profil == r.get("id"):
-            raise ErreurAmis("C'est ton propre code ami.")
-        if any(a["id"] == id_profil for a in r["amis"]):
-            raise ErreurAmis("Cet ami est déjà dans ta liste.")
-        if len(r["amis"]) >= MAX_AMIS:
-            raise ErreurAmis(f"{MAX_AMIS} amis maximum.")
-        compact = recevoir(id_profil)
-        profil = developper(compact, self.jeux) if compact else None
-        if not profil:
-            raise ErreurAmis("Aucun profil récent avec ce code : vérifie-le, ou demande à ton ami d'ouvrir AllMyStats "
-                             "(son profil est republié quand son PC est allumé).")
-        self._enregistrer(amis=r["amis"] + [{"id": id_profil, "pseudo": profil["pseudo"], "ajoute": int(time.time())}])
-        self._garder(id_profil, compact)
-        self._lus[id_profil] = time.time()
-        return profil
-
-    def retirer(self, id_profil):
-        r = self.reglages()
-        self._enregistrer(amis=[a for a in r["amis"] if a["id"] != id_profil])
-        self._lus.pop(id_profil, None)
-        with self._verrou:
-            data = self._cache()
-            if data.pop(id_profil, None) is not None:
-                try:
-                    with open(self.fichier_cache, "w", encoding="utf-8") as f:
-                        json.dump(data, f, ensure_ascii=False)
-                except OSError:
-                    pass
-
-    def _lire_ami(self, id_profil, forcer):
-        """(profil complet ou None, erreur, lu_le). Si rien n'est en ligne (PC de l'ami éteint depuis plus de
-        12 h), on montre les dernières stats connues."""
-        erreur = ""
-        if forcer or time.time() - self._lus.get(id_profil, 0) > CACHE_AMIS:
+    def entretien(self):
+        """Ce que fait la boucle de fond : publier, lire la boîte, relancer."""
+        for action in (self.publier, self.lire_boite, self.relances):
             try:
-                compact = recevoir(id_profil)
-                self._lus[id_profil] = time.time()
-                if compact and developper(compact, self.jeux):
-                    self._garder(id_profil, compact)
+                action()
             except ErreurAmis as e:
+                print(f"[amis] {e}")
+
+    # ----- actions de l'interface
+
+    def _verifier_pret(self):
+        if self.mobile:
+            raise ErreurAmis("Les demandes d'amis se gèrent depuis AllMyStats sur ton PC.")
+        if not self.reglages()["actif"]:
+            raise ErreurAmis("Active d'abord le partage (choisis un pseudo) : il faut un profil pour avoir des amis.")
+
+    def demander(self, code):
+        self._verifier_pret()
+        id_autre = id_depuis_code(code)
+        if not id_autre:
+            raise ErreurAmis("Ce code ami n'a pas la bonne forme : AMS- suivi de 24 lettres et chiffres.")
+        r = self.reglages()
+        if id_autre == r.get("id"):
+            raise ErreurAmis("C'est ton propre code ami.")
+        if any(a["id"] == id_autre for a in r["amis"]):
+            raise ErreurAmis("Vous êtes déjà amis.")
+        recue = next((a for a in r["recues"] if a["id"] == id_autre), None)
+        if recue:
+            return self.accepter(id_autre)
+        if any(a["id"] == id_autre for a in r["envoyees"]):
+            raise ErreurAmis("Tu lui as déjà envoyé une demande : elle attend sa réponse.")
+        if len(r["amis"]) + len(r["envoyees"]) >= MAX_AMIS:
+            raise ErreurAmis(f"{MAX_AMIS} amis maximum.")
+        publique = lire_cle_publique(id_autre)
+        if not publique:
+            raise ErreurAmis("Aucun profil récent avec ce code : vérifie-le, ou demande à ton ami d'ouvrir AllMyStats "
+                             "avec le partage activé (son profil est republié quand son PC est allumé).")
+        pk = crypto.en_hex(publique)
+        self._repondre(id_autre, pk, "demande")
+        envoyees = r["envoyees"] + [{"id": id_autre, "pk": pk, "le": int(time.time()), "relance_le": time.time(),
+                                     "jusqua": time.time() + RELANCES_PENDANT}]
+        self._enregistrer(envoyees=envoyees, refuses={k: v for k, v in r["refuses"].items() if k != id_autre})
+        return "Demande envoyée : elle apparaîtra chez ton ami dans quelques minutes."
+
+    def accepter(self, id_autre):
+        self._verifier_pret()
+        r = self.reglages()
+        recue = next((a for a in r["recues"] if a["id"] == id_autre), None)
+        if not recue:
+            raise ErreurAmis("Cette demande n'existe plus.")
+        infos = {k: recue.get(k) for k in ("pseudo", "couleur", "photo")}
+        self._devenir_amis(r, id_autre, recue["pk"], recue["k"], infos)
+        return f"{recue.get('pseudo') or 'Ton ami'} et toi êtes maintenant amis !"
+
+    def refuser(self, id_autre):
+        self._verifier_pret()
+        r = self.reglages()
+        recue = next((a for a in r["recues"] if a["id"] == id_autre), None)
+        if recue:
+            self._repondre(id_autre, recue["pk"], "refuse")
+        self._enregistrer(recues=[a for a in r["recues"] if a["id"] != id_autre],
+                          refuses={**r["refuses"], id_autre: int(time.time())})
+        return "Demande refusée"
+
+    def annuler(self, id_autre):
+        self._verifier_pret()
+        r = self.reglages()
+        envoyee = next((a for a in r["envoyees"] if a["id"] == id_autre), None)
+        if envoyee:
+            self._repondre(id_autre, envoyee["pk"], "annule")
+        self._enregistrer(envoyees=[a for a in r["envoyees"] if a["id"] != id_autre])
+        return "Demande annulée"
+
+    def retirer(self, id_autre):
+        self._verifier_pret()
+        r = self.reglages()
+        ami = next((a for a in r["amis"] if a["id"] == id_autre), None)
+        if ami:
+            self._repondre(id_autre, ami["pk"], "retire")
+        self._enregistrer(amis=[a for a in r["amis"] if a["id"] != id_autre])
+        self._oublier_cache(id_autre)
+        if ami:
+            self._changer_cle()   # il avait ma clé de profil : on en change
+        return "Vous n'êtes plus amis"
+
+    def oublier_mon_profil(self):
+        """Arrête de partager : prévient mes amis, efface mon identité (nouveau code si je reviens)."""
+        with self._verrou:
+            r = self.reglages()
+            if not self.mobile:
+                for a in r["amis"]:
+                    self._repondre(a["id"], a["pk"], "retire")
+                for a in r["envoyees"]:
+                    self._repondre(a["id"], a["pk"], "annule")
+            for a in r["amis"]:
+                self._oublier_cache(a["id"])
+            self._enregistrer(actif=False, id="", prive="", k="", amis=[], envoyees=[], recues=[], empreinte="",
+                              publie_le=0, cle_annoncee_le=0, erreur="")
+
+    # ----- lecture des amis
+
+    def _lire_ami(self, ami, forcer):
+        erreur = ""
+        if forcer or time.time() - self._lus.get(ami["id"], 0) > CACHE_AMIS:
+            try:
+                compact = lire_profil(ami["id"], bytes.fromhex(ami["k"]))
+                self._lus[ami["id"]] = time.time()
+                if compact and developper(compact, self.jeux):
+                    self._garder(ami["id"], compact)
+            except (ErreurAmis, ValueError) as e:
                 erreur = str(e)
-        garde = self._cache().get(id_profil) or {}
+        garde = self._cache().get(ami["id"]) or {}
         profil = developper(garde.get("compact"), self.jeux)
         if not profil:
-            return None, erreur or "Pas encore de stats : ton ami doit ouvrir AllMyStats avec le partage activé.", 0
+            return None, erreur or "Pas encore de stats reçues : elles arrivent quand son AllMyStats est ouvert.", 0
         return profil, erreur, garde.get("lu_le") or 0
 
     def tout(self, forcer=False):
-        """Tout ce qu'il faut à la page Amis : mes réglages, mon profil, et le profil de chaque ami."""
+        """Tout ce qu'il faut à la page Amis."""
+        erreur_boite = ""
+        try:
+            self.lire_boite(forcer=forcer)
+        except ErreurAmis as e:
+            erreur_boite = str(e)
         r = self.reglages()
         amis = r["amis"]
         with ThreadPoolExecutor(max_workers=6) as pool:
-            lus = list(pool.map(lambda a: self._lire_ami(a["id"], forcer), amis))
-        liste, pseudos_changes = [], False
-        for a, (profil, erreur, lu_le) in zip(amis, lus):
+            lus = list(pool.map(lambda a: self._lire_ami(a, forcer), amis))
+        liste = []
+        for a, (profil, erreur, _) in zip(amis, lus):
+            infos = {"id": a["id"], "code": code_depuis_id(a["id"])}
             if not profil:
-                liste.append({"id": a["id"], "code": code_depuis_id(a["id"]), "pseudo": a.get("pseudo") or "Ami",
-                              "couleur": "#8a8fa8", "erreur": erreur, "jeux": []})
-                continue
-            if profil["pseudo"] != a.get("pseudo"):
-                a["pseudo"] = profil["pseudo"]
-                pseudos_changes = True
-            liste.append({"id": a["id"], "code": code_depuis_id(a["id"]), **profil, "avertissement": erreur})
-        if pseudos_changes:
-            self._enregistrer(amis=amis)
+                liste.append({**infos, "pseudo": a.get("pseudo") or "Ami", "couleur": a.get("couleur") or "#8a8fa8",
+                              "photo": a.get("photo") or "", "erreur": erreur, "jeux": []})
+            else:
+                liste.append({**infos, **profil, "avertissement": erreur})
+        notifs = r["notifs"]
+        if notifs:
+            self._enregistrer(notifs=[])
         disponibles = [{"id": j.id, "nom": j.nom, "icone": j.icone or "", "famille": j.famille or ""}
                        for j in self.jeux.values() if j.stats and not self.est_cache(j)]
         return {
             "moi": {"actif": r["actif"], "pseudo": r["pseudo"], "couleur": r["couleur"], "code": code_depuis_id(r.get("id")),
-                    "publie_le": r.get("publie_le") or 0, "erreur": r.get("erreur") or "",
+                    "publie_le": r.get("publie_le") or 0, "erreur": r.get("erreur") or erreur_boite,
                     "jeux_partages": r["jeux_partages"], "jeux_disponibles": disponibles, "mobile": self.mobile,
                     "photo": photo_valide(r.get("photo")), "photos_jeux": self.photos_de_jeux()},
             "mon_profil": self.mon_profil(),
             "amis": liste,
+            "recues": [{"id": a["id"], "code": code_depuis_id(a["id"]), "pseudo": a.get("pseudo") or "Joueur",
+                        "couleur": a.get("couleur"), "photo": a.get("photo") or "", "le": a.get("le")} for a in r["recues"]],
+            "envoyees": [{"id": a["id"], "code": code_depuis_id(a["id"]), "le": a.get("le")} for a in r["envoyees"]],
+            "notifs": [n["texte"] for n in notifs],
             "moins_c_est_mieux": sorted(MOINS_C_EST_MIEUX),
         }
+
+    def nb_demandes(self):
+        return len(self.reglages()["recues"])

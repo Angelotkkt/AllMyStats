@@ -1,12 +1,13 @@
 """Version de AllMyStats. À augmenter à chaque nouvelle version."""
 
-VERSION = "2.25.1"
+VERSION = "2.26.0"
 
 # Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
 # on peut aussi le donner dans Paramètres > Mises à jour.
 DEPOT_MAJ = "Angelotkkt/AllMyStats"
 
 NOUVEAUTES = [
+    "Amis : demandes d'amis à accepter, amitié des deux côtés, stats chiffrées visibles seulement par tes amis (nouveau code ami)",
     "Discord : le statut montre seulement le logo et la description (plus de bouton ni de page regardée)",
     "Photo de profil dans Amis, photo du compte sur Genshin, CS2 (Steam) et Valorant (carte de joueur), et statut Discord avec logo et description",
     "Correction : erreur de certificat (« certificate has expired ») sur certains PC, pour les amis et les autres connexions",

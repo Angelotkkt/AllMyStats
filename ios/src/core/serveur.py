@@ -240,15 +240,15 @@ def est_cache(jeu):
 
 
 AMIS = amis.Amis(CONFIG, JEUX, BDD, est_cache, VERSION, DOSSIER_DONNEES, mobile=chemins.MOBILE)
-PUBLIER_AMIS_TOUTES = 600
+PUBLIER_AMIS_TOUTES = 180
 
 
 def _boucle_amis():
-    """Publie mon profil d'amis quand mes stats changent (vérifié toutes les 10 minutes)."""
-    time.sleep(45)
+    """Toutes les 3 minutes : publie mon profil s'il a changé, lit mes demandes d'amis, relance si besoin."""
+    time.sleep(30)
     while True:
         try:
-            AMIS.publier_en_silence()
+            AMIS.entretien()
         except Exception:
             traceback.print_exc()
         time.sleep(PUBLIER_AMIS_TOUTES)
@@ -306,6 +306,7 @@ def etat_appli():
         "arriere_plan": arriere_plan_actif(),
         "windows": os.name == "nt",
         "discord": {**reglages_discord(), "connecte": DISCORD.connecte, "erreur": DISCORD.erreur},
+        "demandes_amis": AMIS.nb_demandes(),
         "maj": mise_a_jour.chercher(),
         "en_ligne": {
             "depot": depot_maj(),
@@ -599,11 +600,13 @@ class Gestionnaire(BaseHTTPRequestHandler):
                         AMIS.oublier_mon_profil()
                         return self._json({"message": "Tu ne partages plus tes stats.", **AMIS.tout()})
                     if m[2] == "ajouter":
-                        profil = AMIS.ajouter(corps.get("code"))
-                        return self._json({"message": f"{profil['pseudo']} est dans tes amis !", **AMIS.tout()})
-                    if m[2] == "retirer":
-                        AMIS.retirer(str(corps.get("id") or ""))
-                        return self._json({"message": "Ami retiré", **AMIS.tout()})
+                        message = AMIS.demander(corps.get("code"))
+                        return self._json({"message": message, **AMIS.tout()})
+                    actions = {"accepter": AMIS.accepter, "refuser": AMIS.refuser, "annuler": AMIS.annuler,
+                               "retirer": AMIS.retirer}
+                    if m[2] in actions:
+                        message = actions[m[2]](str(corps.get("id") or ""))
+                        return self._json({"message": message, **AMIS.tout()})
                 except amis.ErreurAmis as e:
                     return self._erreur(str(e))
                 return self._erreur("Route inconnue.", 404)
