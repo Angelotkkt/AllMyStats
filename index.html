@@ -346,15 +346,18 @@
   // Le bouton pointe vers la dernière version publiée (fichier AllMyStats.exe d'une « Release » GitHub)
   const DEPOT = "Angelotkkt/AllMyStats";
   const boutons = [document.getElementById("telecharger"), document.getElementById("telecharger-2")];
-  fetch(`https://api.github.com/repos/${DEPOT}/releases/latest`)
+  // D'abord la publication « windows » (fabriquée automatiquement), sinon la dernière publication
+  fetch(`https://api.github.com/repos/${DEPOT}/releases/tags/windows`)
     .then((r) => (r.ok ? r.json() : null))
+    .then((rel) => rel?.assets?.some((a) => /\.exe$/i.test(a.name)) ? rel
+      : fetch(`https://api.github.com/repos/${DEPOT}/releases/latest`).then((r) => (r.ok ? r.json() : null)))
     .then((rel) => {
       const exe = rel?.assets?.find((a) => /\.exe$/i.test(a.name));
       if (!exe) throw new Error("pas encore de fichier");
       boutons.forEach((b) => { b.href = exe.browser_download_url; });
       const mo = (exe.size / 1048576).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
       document.getElementById("meta").textContent =
-        `Version ${rel.tag_name.replace(/^v/, "")} · ${mo} Mo · Gratuit · Windows 10 et 11`;
+        `${rel.tag_name === "windows" ? "Dernière version" : "Version " + rel.tag_name.replace(/^v/, "")} · ${mo} Mo · Gratuit · Windows 10 et 11`;
     })
     .catch(() => {
       boutons.forEach((b) => { b.setAttribute("aria-disabled", "true"); b.removeAttribute("href"); });

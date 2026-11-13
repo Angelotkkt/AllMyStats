@@ -64,6 +64,11 @@ function dateLongue(iso) {
     " à " + d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
+// ---------- Fond animé ----------
+function fondAnime() { try { return localStorage.getItem("fond_anime") !== "0"; } catch (e) { return true; } }
+function appliquerFond() { document.documentElement.classList.toggle("fond-fixe", !fondAnime()); }
+appliquerFond();
+
 // ---------- Démarrage ----------
 async function demarrer() {
   $("#logo").innerHTML = ICONES.ams;
@@ -1840,6 +1845,27 @@ async function chargerAppli() {
         ${maj.nouveautes?.length ? `<span class="nouveautes">${maj.nouveautes.slice(0, 3).map(esc).join(", ")}</span>` : ""}</span>
       <button class="principal" id="btn-installer-maj">${ICONES.maj}Installer la mise à jour</button>`;
     $("#btn-installer-maj").onclick = () => installerMaj();
+  } else if (!HORS_PC && etat.appli.programme_a_jour === false && !etat.programmeRefuse) {
+    // Ancien AllMyStats.exe (fenêtre Edge) : on propose la nouvelle application, avec sa vraie fenêtre
+    b.hidden = false;
+    b.innerHTML = `${ICONES.ams}
+      <span class="texte"><b>Nouvelle application AllMyStats</b> une vraie fenêtre Windows, sans navigateur. Tes stats et tes
+        réglages sont gardés.</span>
+      <button class="principal" id="btn-programme">${ICONES.maj}Installer</button>
+      <button class="discret" id="btn-programme-plus-tard">Plus tard</button>`;
+    $("#btn-programme").onclick = async (e) => {
+      e.currentTarget.disabled = true;
+      e.currentTarget.innerHTML = `${ICONES.maj}Téléchargement…`;
+      try {
+        const r = await api("/api/appli/programme", { method: "POST", body: {} });
+        toast(r.message, "info");
+      } catch (err) {
+        toast(err.message, "erreur");
+        e.currentTarget.disabled = false;
+        e.currentTarget.innerHTML = `${ICONES.maj}Installer`;
+      }
+    };
+    $("#btn-programme-plus-tard").onclick = () => { etat.programmeRefuse = true; b.hidden = true; };
   }
 }
 
@@ -1982,6 +2008,10 @@ function ouvrirParametres() {
       <input type="range" id="p-volume" min="0" max="1" step="0.05" value="${SONS.reglages.volume}" aria-label="Volume des sons">
       ${ICONES.son}</div>
     <label class="interrupteur">
+      <input type="checkbox" id="p-fond" ${fondAnime() ? "checked" : ""}>
+      <span>Fond animé (des lueurs qui bougent doucement, à la couleur du jeu)</span>
+    </label>
+    <label class="interrupteur">
       <input type="checkbox" id="p-intro" ${INTRO.reglages.active ? "checked" : ""}>
       <span>Animation d'ouverture (le logo qui explose)</span>
     </label>
@@ -2040,6 +2070,10 @@ function ouvrirParametres() {
     SONS.reglages.actifs = e.target.checked;
     $(".volume-sons").hidden = !e.target.checked;
     if (e.target.checked) SONS.jouer("succes");
+  });
+  $("#p-fond").addEventListener("change", (e) => {
+    try { localStorage.setItem("fond_anime", e.target.checked ? "1" : "0"); } catch (err) {}
+    appliquerFond();
   });
   $("#p-intro").addEventListener("change", (e) => {
     INTRO.reglages.active = e.target.checked;

@@ -22,7 +22,7 @@ from core import amis, ancrage, chemins, diagnostic_ecran, discord, mise_a_jour,
 from core.version import DEPOT_MAJ, NOUVEAUTES, VERSION
 from core.base_de_donnees import BaseDeDonnees, maintenant
 from core.config import Config
-from core.fenetre import ouvrir_fenetre
+from core.fenetre import FenetreNative, natif_disponible, ouvrir_fenetre
 from jeux import charger_jeux
 from jeux.base import ErreurJeu
 
@@ -152,7 +152,7 @@ def actualiser(jeu):
 
 # ---------------------------------------------------------------- l'appli elle-même
 
-MODE = {"arriere_plan": False, "serveur": None}
+MODE = {"arriere_plan": False, "serveur": None, "fenetre": None}
 
 
 def reglages_appli():
@@ -305,6 +305,8 @@ def etat_appli():
         "nouveautes": NOUVEAUTES,
         "arriere_plan": arriere_plan_actif(),
         "windows": os.name == "nt",
+        "fenetre_native": bool(MODE.get("fenetre")),
+        "programme_a_jour": natif_disponible() or not chemins.FIGE or os.name != "nt",
         "discord": {**reglages_discord(), "connecte": DISCORD.connecte, "erreur": DISCORD.erreur},
         "demandes_amis": AMIS.nb_demandes(),
         "maj": mise_a_jour.chercher(),
@@ -323,6 +325,8 @@ VERIFIER_TOUTES = 10 * 60   # vérification des mises à jour en ligne : toutes 
 
 
 def _fenetre_ouverte():
+    if MODE.get("fenetre"):   # fenêtre native : on sait directement si elle est affichée
+        return MODE["fenetre"].visible
     dernier, au_revoir = _presence["dernier_signe"], _presence["au_revoir"]
     if not dernier or time.time() - dernier > 60:
         return False
@@ -406,11 +410,19 @@ def _arreter_serveur():
 
 
 def relancer():
-    """Redémarre AllMyStats (après une mise à jour). La fenêtre ouverte se recharge toute seule."""
+    """Redémarre AllMyStats (après une mise à jour). La fenêtre ouverte se recharge toute seule
+    (fenêtre native : la nouvelle version rouvre la sienne, sauf si elle était cachée)."""
     def travail():
         time.sleep(0.6)
+        fenetre = MODE.get("fenetre")
+        if fenetre:
+            args = [] if fenetre.visible else ["--arriere-plan"]
+        else:
+            args = ["--arriere-plan" if MODE["arriere_plan"] else "--relance"]
         _arreter_serveur()
-        _relancer_le_programme(["--arriere-plan" if MODE["arriere_plan"] else "--relance"])
+        _relancer_le_programme(args)
+        if fenetre:
+            fenetre.fermer()
         os._exit(0)
     # Pas « daemon » : le programme doit attendre d'avoir relancé la nouvelle version avant de s'arrêter
     threading.Thread(target=travail, daemon=False).start()
@@ -420,6 +432,8 @@ def quitter():
     def travail():
         time.sleep(0.4)
         _arreter_serveur()
+        if MODE.get("fenetre"):
+            MODE["fenetre"].fermer()
         os._exit(0)
     threading.Thread(target=travail, daemon=True).start()
 
@@ -666,6 +680,19 @@ class Gestionnaire(BaseHTTPRequestHandler):
                 else:
                     DISCORD.mettre(reglages_discord()["id"], _presence.get("page") or "")
                 return self._json(etat_appli())
+            if m == ["api", "appli", "montrer"]:
+                if not MODE.get("fenetre"):
+                    return self._erreur("Pas de fenêtre native.", 404)
+                MODE["fenetre"].montrer()
+                return self._json({"ok": True})
+            if m == ["api", "appli", "programme"]:
+                from core import programme
+                try:
+                    message = programme.installer_nouveau_programme(depot_maj())
+                except programme.ErreurProgramme as e:
+                    return self._erreur(str(e))
+                self._json({"message": message})
+                return quitter()
             if m == ["api", "appli", "arriere-plan"]:
                 regler_arriere_plan(bool(corps.get("actif")))
                 return self._json(etat_appli())
@@ -833,6 +860,39 @@ class Gestionnaire(BaseHTTPRequestHandler):
         self._protege(action)
 
 
+def _montrer_fenetre_existante(port):
+    """AllMyStats tourne déjà avec sa fenêtre native (peut-être cachée) : on la remet devant."""
+    try:
+        req = urllib.request.Request(f"http://127.0.0.1:{port}/api/appli/montrer", data=b"{}", method="POST",
+                                     headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=3) as r:
+            return bool(json.loads(r.read()).get("ok"))
+    except Exception:
+        return False
+
+
+def _lancer_avec_fenetre_native(serveur, adresse, cachee):
+    """Le serveur tourne à côté ; la fenêtre native occupe le fil principal jusqu'à la fermeture."""
+    threading.Thread(target=serveur.serve_forever, daemon=True, name="serveur").start()
+    fenetre = FenetreNative(adresse, DOSSIER_DONNEES, cachee=cachee, rester_actif=arriere_plan_actif)
+    MODE["fenetre"] = fenetre
+    try:
+        fenetre.lancer()
+    except Exception:
+        # WebView2 absent ou en panne : on se rabat sur la fenêtre Edge, comme avant
+        traceback.print_exc()
+        MODE["fenetre"] = None
+        if not cachee:
+            ouvrir_fenetre(adresse, DOSSIER_DONNEES)
+        threading.Thread(target=_surveiller_fermeture, args=(serveur,), daemon=True).start()
+        while MODE["serveur"]:
+            time.sleep(1)
+        return
+    # La fenêtre est fermée pour de bon
+    _arreter_serveur()
+    os._exit(0)
+
+
 def _deja_lance(port):
     """Vrai si AllMyStats tourne déjà sur ce port (on ne lance pas deux fois l'appli)."""
     try:
@@ -868,7 +928,7 @@ def _surveiller_fermeture(serveur):
 def demarrer(port=8765, ouvrir_navigateur=True, mode_appli=False, arriere_plan=False):
     MODE["arriere_plan"] = arriere_plan
     if (mode_appli or arriere_plan) and _deja_lance(port):
-        if not arriere_plan and "--relance" not in sys.argv:
+        if not arriere_plan and "--relance" not in sys.argv and not _montrer_fenetre_existante(port):
             ouvrir_fenetre(f"http://localhost:{port}", DOSSIER_DONNEES)
         return
 
@@ -906,6 +966,8 @@ def demarrer(port=8765, ouvrir_navigateur=True, mode_appli=False, arriere_plan=F
     elif reglages_appli().get("telephone") == "oui":
         telephone.demarrer(Gestionnaire, code_telephone, export_telephone)
     surveillance.demarrer(JEUX, CONFIG, DOSSIER_DONNEES, enregistrer_valeurs, actualiser, est_cache)
+    if (mode_appli or arriere_plan) and natif_disponible():
+        return _lancer_avec_fenetre_native(serveur, adresse, cachee=arriere_plan or "--relance" in sys.argv)
     if arriere_plan:
         pass  # pas de fenêtre : AllMyStats tourne en silence
     elif mode_appli:

@@ -87,11 +87,40 @@ nav { display: flex; flex-direction: column; gap: 8px; flex: 1; }
 
 /* ---------------------------------------------------------------- zone principale */
 main {
-  flex: 1; overflow-y: auto; padding: 26px 34px 70px;
-  background-image: radial-gradient(rgba(154, 163, 199, .07) 1px, transparent 1px);
-  background-size: 22px 22px;
+  flex: 1; overflow-y: auto; padding: 26px 34px 70px; position: relative; isolation: isolate;
 }
-#contenu { max-width: 1240px; }
+#contenu { max-width: 1240px; position: relative; z-index: 1; }
+.bandeau-maj { position: relative; z-index: 1; }
+
+/* ---------------------------------------------------------------- fond animé
+   Trois grandes lueurs qui dérivent lentement, teintées par la couleur du jeu affiché (transition douce
+   quand on change de jeu), et une grille de points qui glisse. Coupé si le système demande moins
+   d'animations, ou dans Paramètres. */
+@property --fond-teinte { syntax: "<color>"; inherits: true; initial-value: #FFC44D; }
+.fond-anime { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  --fond-teinte: var(--accent); transition: --fond-teinte 1.4s ease; }
+.fond-anime i { position: absolute; display: block; border-radius: 50%; will-change: transform; }
+.fond-anime .f1 { width: 62vmax; height: 62vmax; left: -12vmax; top: -22vmax; opacity: .28;
+  background: radial-gradient(circle, var(--fond-teinte) 0%, transparent 62%);
+  animation: fond-derive-1 38s ease-in-out infinite alternate; }
+.fond-anime .f2 { width: 54vmax; height: 54vmax; right: -16vmax; bottom: -24vmax; opacity: .16;
+  background: radial-gradient(circle, #33D1C1 0%, transparent 60%);
+  animation: fond-derive-2 46s ease-in-out infinite alternate; }
+.fond-anime .f3 { width: 40vmax; height: 40vmax; left: 38%; top: 30%; opacity: .12;
+  background: radial-gradient(circle, color-mix(in srgb, var(--fond-teinte) 50%, #A47BFF) 0%, transparent 62%);
+  animation: fond-derive-3 31s ease-in-out infinite alternate; }
+.fond-anime .grille { inset: -44px; border-radius: 0; opacity: 1;
+  background-image: radial-gradient(rgba(154, 163, 199, .075) 1px, transparent 1px); background-size: 22px 22px;
+  animation: fond-grille 18s linear infinite; }
+@keyframes fond-derive-1 { from { transform: translate(0, 0) scale(1); } 50% { transform: translate(14vw, 10vh) scale(1.12); }
+  to { transform: translate(4vw, 22vh) scale(.94); } }
+@keyframes fond-derive-2 { from { transform: translate(0, 0) scale(1); } 50% { transform: translate(-16vw, -8vh) scale(.9); }
+  to { transform: translate(-6vw, -20vh) scale(1.1); } }
+@keyframes fond-derive-3 { from { transform: translate(0, 0) scale(.9); } 50% { transform: translate(-20vw, 12vh) scale(1.15); }
+  to { transform: translate(12vw, -14vh) scale(1); } }
+@keyframes fond-grille { to { transform: translate(22px, 22px); } }
+.fond-fixe .fond-anime i { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .fond-anime i { animation: none !important; } }
 .vide { color: var(--brume); padding: 70px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .vide svg.emoji { width: 56px; height: 56px; }
 

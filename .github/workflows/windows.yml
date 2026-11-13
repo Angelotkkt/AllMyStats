@@ -1,0 +1,80 @@
+name: Programme Windows
+
+# Fabrique AllMyStats.exe (avec sa fenêtre native : pywebview + WebView2) sur un PC Windows de GitHub,
+# et le met dans la publication « windows » : le site le propose au téléchargement, et l'appli s'en sert
+# pour remplacer un ancien AllMyStats.exe.
+on:
+  push:
+    branches: [main]
+    paths: ["AllMyStats.zip", ".github/workflows/windows.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Préparation
+        shell: pwsh
+        run: |
+          Expand-Archive -Path AllMyStats.zip -DestinationPath fabrication -Force
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller pywebview 2>&1 | Tee-Object -FilePath journal-windows.txt
+          python -c "import webview, clr_loader; print('pywebview', webview.__version__ if hasattr(webview, '__version__') else '?')" 2>&1 | Tee-Object -FilePath journal-windows.txt -Append
+          $v = python -c "import json;print(json.load(open('maj.json'))['version'])"
+          "APP_VERSION=$v" >> $env:GITHUB_ENV
+
+      - name: Fabrication de AllMyStats.exe
+        shell: pwsh
+        working-directory: fabrication/AllMyStats
+        run: |
+          $env:APP_VERSION | Out-File -Encoding ascii programme_version.txt
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name AllMyStats `
+            --icon web/icone.ico `
+            --add-data "core;app/core" --add-data "jeux;app/jeux" --add-data "web;app/web" `
+            --add-data "programme_version.txt;." `
+            --collect-all webview --collect-all clr_loader --collect-all pythonnet --hidden-import clr `
+            --collect-submodules http --collect-submodules urllib --collect-submodules json `
+            --collect-submodules email --collect-submodules xml --collect-submodules concurrent `
+            --collect-submodules sqlite3 --collect-submodules importlib --collect-submodules ctypes `
+            --hidden-import mimetypes --hidden-import webbrowser --hidden-import socketserver `
+            --hidden-import glob --hidden-import hashlib --hidden-import hmac --hidden-import random `
+            --hidden-import string --hidden-import base64 --hidden-import struct --hidden-import socket `
+            --hidden-import ssl --hidden-import subprocess --hidden-import zipfile --hidden-import io `
+            --hidden-import pkgutil --hidden-import inspect --hidden-import tempfile --hidden-import winreg `
+            --hidden-import csv --hidden-import statistics --hidden-import math --hidden-import uuid `
+            --hidden-import secrets --hidden-import gzip --hidden-import zlib --hidden-import queue `
+            --hidden-import locale --hidden-import calendar --hidden-import platform --hidden-import unicodedata `
+            --hidden-import difflib --hidden-import textwrap --hidden-import fnmatch --hidden-import html `
+            --hidden-import decimal --hidden-import fractions --hidden-import dataclasses --hidden-import pathlib `
+            --hidden-import logging --hidden-import bisect --hidden-import heapq --hidden-import pprint `
+            lancer.py 2>&1 | Tee-Object -FilePath ../../journal-windows.txt -Append
+          if (-not (Test-Path dist/AllMyStats.exe)) { throw "AllMyStats.exe n'a pas été fabriqué" }
+          Copy-Item dist/AllMyStats.exe ../../AllMyStats.exe
+
+      - name: Publication
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES="AllMyStats ${APP_VERSION} pour Windows 10 et 11 : une vraie application, avec sa propre fenêtre."
+          gh release view windows >/dev/null 2>&1 || gh release create windows --title "AllMyStats pour Windows" --notes "$NOTES" --latest=false
+          gh release edit windows --notes "$NOTES" --latest=false
+          gh release upload windows AllMyStats.exe journal-windows.txt --clobber
+
+      - name: Journal en cas d'échec
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view windows-journal >/dev/null 2>&1 || gh release create windows-journal --title "Journal de fabrication Windows" --notes "Dernier échec" --latest=false --prerelease
+          gh release upload windows-journal journal-windows.txt --clobber || true
