@@ -1,6 +1,6 @@
 # AllMyStats
 
-Toutes tes stats de jeux au même endroit : Genshin Impact, Valorant, Call of Duty, Blox Fruits, Pokémon GO.
+Toutes tes stats de jeux au même endroit : Genshin Impact, Valorant, Call of Duty, Blox Fruits, Ect.
 
 **Télécharger : https://angelotkkt.github.io/AllMyStats/**
 
