@@ -1,6 +1,7 @@
 {
-  "version": "2.14.0",
+  "version": "2.14.1",
   "nouveautes": [
+    "Builds & Teams en grand : la grille de tous les persos, puis la fiche du perso sur toute la page (nouveau visuel)",
     "Genshin Impact : nouvelle catégorie « Builds & Teams » (armes, artefacts, stats et équipes pour chaque perso)",
     "Nouvelle catégorie Spotify : le lecteur affiché dans AllMyStats, la musique continue quand tu changes de catégorie",
     "Petits sons dans l'appli (réglables ou coupés dans Paramètres > Sons)",
@@ -53,5 +54,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "218fcbcbaa08ec409ed1513d2d1ccf1854d025436b9751a95659c4b215cc1385"
+  "sha256": "7f7d39145b210dc66a38372427eb1825851fb61cc86d361540d61f77b968b919"
 }

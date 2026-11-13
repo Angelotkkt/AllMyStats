@@ -598,3 +598,4 @@ emoji("son", `<path d="M5 12.5h5l7-6v19l-7-6H5z" fill="#FFC44D" stroke="#7A5418"
   <path d="M21 11.5a6 6 0 0 1 0 9M24.5 8a11 11 0 0 1 0 16" fill="none" stroke="#FFC44D" stroke-width="2" stroke-linecap="round"/>`);
 emoji("son_coupe", `<path d="M5 12.5h5l7-6v19l-7-6H5z" fill="#9AA3C7" stroke="#4A5280" stroke-width="1.2" stroke-linejoin="round"/>
   <path d="M21 12.5l7 7M28 12.5l-7 7" stroke="#FF6B5E" stroke-width="2.2" stroke-linecap="round"/>`);
+emoji("retour", `<path d="M19.5 7.5L11 16l8.5 8.5" stroke="#C9D0F2" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
