@@ -775,7 +775,8 @@ function afficherPageCarte(jeu) {
 const ELEMENTS_BUILDS = [["Pyro", "#ef7a35"], ["Hydro", "#4cc2f1"], ["Anemo", "#74c2a8"], ["Electro", "#b08fc2"],
   ["Dendro", "#a5c83b"], ["Cryo", "#9fd6e3"], ["Geo", "#fab632"]];
 const ARMES_BUILDS = ["Épée", "Espadon", "Arme d'hast", "Arc", "Catalyseur"];
-const builds = { persos: null, filtre: "", element: "", arme: "", rarete: 0, choisi: null, cache: {}, defilement: 0 };
+const builds = { persos: null, filtre: "", element: "", arme: "", rarete: 0, choisi: null, cache: {}, defilement: 0,
+  modeEquipe: false, equipe: [], filtreEquipe: "", elementEquipe: "", resultatEquipe: null, demandeEquipe: 0 };
 const sansAccents = (t) => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 function persosFiltres() {
@@ -787,6 +788,7 @@ function persosFiltres() {
 
 async function afficherPageBuilds(jeu) {
   if (builds.choisi) return afficherFicheBuild(jeu, builds.choisi);
+  if (builds.modeEquipe) return afficherCompleterEquipe(jeu);
   const puce = (attr, valeur, actif, contenu, style = "") =>
     `<button class="puce ${actif ? "actif" : ""}" data-${attr}="${esc(valeur)}" aria-pressed="${actif}" ${style}>${contenu}</button>`;
   $("#contenu").innerHTML = `
@@ -794,6 +796,8 @@ async function afficherPageBuilds(jeu) {
       <header class="bt-entete">
         <div class="bc-titre">${emblemeJeu(jeu)}<div><b>${esc(jeu.nom)}</b><small>${esc(jeu.famille || "")}</small></div></div>
         <span class="bt-compte" id="bt-compte"></span>
+        <button class="bt-bouton-equipe" id="bt-mode-equipe">${ICONES.equipe}<span><b>Compléter une équipe</b>
+          <small>Choisis jusqu'à 3 persos, AMS trouve les autres</small></span></button>
       </header>
       <label class="bt-recherche">${ICONES.loupe}<input type="search" id="builds-cherche"
         placeholder="Chercher un perso (Furina, Kazuha…)" autocomplete="off" value="${esc(builds.filtre)}"></label>
@@ -812,6 +816,10 @@ async function afficherPageBuilds(jeu) {
       <div class="bt-grille" id="builds-grille"><div class="carte-attente"><div class="rond"></div></div></div>
     </div>`;
   $("#builds-cherche").addEventListener("input", (e) => { builds.filtre = e.target.value; dessinerGrilleBuilds(); });
+  $("#bt-mode-equipe").addEventListener("click", () => {
+    builds.modeEquipe = true; builds.defilement = document.querySelector("main").scrollTop;
+    son("ouvrir"); afficherCompleterEquipe(jeu); document.querySelector("main").scrollTop = 0;
+  });
   document.querySelectorAll(".bt-filtres [data-element], .bt-filtres [data-arme], .bt-filtres [data-rarete]").forEach((b) =>
     b.addEventListener("click", () => {
       if (b.dataset.element !== undefined) builds.element = b.dataset.element;
@@ -850,6 +858,207 @@ function dessinerGrilleBuilds() {
     builds.defilement = document.querySelector("main").scrollTop;
     afficherFicheBuild(etat.donnees.jeu, b.dataset.perso);
   }));
+}
+
+// ---------- Compléter une équipe : jusqu'à 3 persos choisis, AMS propose les meilleurs coéquipiers ----------
+const persoBuild = (id) => builds.persos?.find((p) => p.id === id);
+
+async function afficherCompleterEquipe(jeu) {
+  $("#contenu").innerHTML = `
+    <div class="bt-grille-page bt-eq-page">
+      <div class="bt-nav" role="navigation" aria-label="Navigation">
+        <button class="secondaire" id="bt-eq-retour">${ICONES.retour}Tous les persos</button>
+        <button class="discret" id="bt-eq-vider" ${builds.equipe.length ? "" : "hidden"}>Tout retirer</button>
+      </div>
+      <header class="bt-eq-entete">
+        <h2>Compléter une équipe</h2>
+        <p>Choisis jusqu'à 3 persos que tu veux jouer ensemble. AllMyStats regarde les équipes conseillées par
+          Genshin-Builds pour chacun et te propose ceux qui vont le mieux avec eux.</p>
+      </header>
+      <div class="bt-eq-slots" id="bt-eq-slots"></div>
+      <div id="bt-eq-resultats"></div>
+      <section class="bt-eq-choix">
+        <h3>${ICONES.loupe}Choisir un perso <small id="bt-eq-reste"></small></h3>
+        <label class="bt-recherche">${ICONES.loupe}<input type="search" id="eq-cherche"
+          placeholder="Chercher un perso…" autocomplete="off" value="${esc(builds.filtreEquipe)}"></label>
+        <div class="bt-groupe bt-eq-elements" role="group" aria-label="Élément">
+          <button class="puce ${builds.elementEquipe ? "" : "actif"}" data-el="">Tous</button>
+          ${ELEMENTS_BUILDS.map(([e, c]) => `<button class="puce ${builds.elementEquipe === e ? "actif" : ""}" data-el="${esc(e)}"
+            style="--el:${c}">${icone(e.toLowerCase())}${e}</button>`).join("")}
+        </div>
+        <div class="bt-grille bt-grille-mini" id="eq-grille"><div class="carte-attente"><div class="rond"></div></div></div>
+      </section>
+      <button class="bt-eq-voir" id="bt-eq-voir" hidden></button>
+    </div>`;
+  // Quand on choisit des persos tout en bas, un bouton flottant remonte vers l'équipe proposée
+  const voir = $("#bt-eq-voir");
+  voir.addEventListener("click", () => $("#bt-eq-slots").scrollIntoView({ behavior: mouvementReduit() ? "auto" : "smooth", block: "start" }));
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => { voir.dataset.horsVue = e.isIntersecting ? "" : "1"; majBoutonVoir(); })
+      .observe($("#bt-eq-slots"));
+  }
+  $("#bt-eq-retour").addEventListener("click", () => { builds.modeEquipe = false; son("fermer"); afficherPageBuilds(jeu); });
+  $("#bt-eq-vider").addEventListener("click", () => { builds.equipe = []; builds.resultatEquipe = null; majEquipe(); });
+  $("#eq-cherche").addEventListener("input", (e) => { builds.filtreEquipe = e.target.value; dessinerChoixEquipe(); });
+  document.querySelectorAll(".bt-eq-elements [data-el]").forEach((b) => b.addEventListener("click", () => {
+    builds.elementEquipe = b.dataset.el;
+    document.querySelectorAll(".bt-eq-elements .puce").forEach((x) => x.classList.toggle("actif", x === b));
+    dessinerChoixEquipe();
+  }));
+  try {
+    if (!builds.persos) builds.persos = (await api(`/api/jeux/${jeu.id}/page/persos`)).persos;
+  } catch (e) {
+    $("#eq-grille").innerHTML = `<div class="vide">${ICONES.erreur}${esc(e.message)}</div>`;
+    return;
+  }
+  majEquipe(true);
+}
+
+function basculerEquipe(id) {
+  const i = builds.equipe.indexOf(id);
+  if (i >= 0) builds.equipe.splice(i, 1);
+  else if (builds.equipe.length >= 3) return toast("3 persos maximum : retire-en un, AllMyStats propose le 4e.", "info");
+  else builds.equipe.push(id);
+  son(i >= 0 ? "fermer" : "clic");
+  majEquipe();
+}
+
+function majEquipe(garder) {
+  if (!$("#bt-eq-slots")) return;
+  const r = builds.resultatEquipe;
+  const encoreValable = r && r.cle === builds.equipe.join(",");
+  if (!garder || !encoreValable) builds.resultatEquipe = encoreValable ? r : null;
+  $("#bt-eq-vider").hidden = !builds.equipe.length;
+  const reste = 3 - builds.equipe.length;
+  $("#bt-eq-reste").textContent = reste ? `encore ${reste} possible${reste > 1 ? "s" : ""}` : "3 choisis : c'est le maximum";
+  dessinerSlotsEquipe();
+  dessinerChoixEquipe();
+  dessinerResultatsEquipe();
+  majBoutonVoir();
+  if (builds.equipe.length && !builds.resultatEquipe) chercherEquipe();
+}
+
+async function chercherEquipe() {
+  const cle = builds.equipe.join(",");
+  const numero = ++builds.demandeEquipe;
+  try {
+    const d = await api(`/api/jeux/genshin_builds/page/equipe/${encodeURIComponent(cle)}`);
+    if (numero !== builds.demandeEquipe) return;
+    builds.resultatEquipe = { ...d, cle };
+  } catch (e) {
+    if (numero !== builds.demandeEquipe) return;
+    builds.resultatEquipe = { cle, erreur: e.message };
+  }
+  dessinerSlotsEquipe();
+  dessinerResultatsEquipe();
+  majBoutonVoir();
+}
+
+function majBoutonVoir() {
+  const voir = $("#bt-eq-voir");
+  if (!voir) return;
+  const n = builds.equipe.length, r = builds.resultatEquipe;
+  voir.hidden = !n || !voir.dataset.horsVue;
+  const noms = builds.equipe.map((id) => persoBuild(id)?.nom || id).join(" + ");
+  voir.innerHTML = `${ICONES.equipe}<span><b>${esc(noms)}</b><small>${!r ? "Recherche des coéquipiers…"
+    : r.erreur ? "Voir le problème" : "Voir les coéquipiers proposés"}</small></span><i>↑</i>`;
+}
+
+function dessinerSlotsEquipe() {
+  const zone = $("#bt-eq-slots");
+  if (!zone) return;
+  const r = builds.resultatEquipe;
+  const proposes = (r?.proposition || []).filter((p) => p.propose);
+  const cases = [];
+  for (let i = 0; i < 4; i++) {
+    const id = builds.equipe[i];
+    if (id) {
+      const p = persoBuild(id) || { id, nom: id };
+      cases.push(`<div class="bt-slot choisi r${p.rarete || 4}" style="--el:${p.couleur || "var(--accent)"}">
+        <span class="bt-visuel">${p.image ? `<img src="${esc(p.image)}" alt="">` : ""}<span class="bt-elem">${icone((p.element || "").toLowerCase())}</span></span>
+        <span class="bt-nom">${esc(p.nom)}</span>
+        <button class="bt-slot-retirer" data-retirer="${esc(id)}" title="Retirer ${esc(p.nom)}" aria-label="Retirer ${esc(p.nom)}">×</button></div>`);
+      continue;
+    }
+    const prop = proposes[i - builds.equipe.length];
+    if (prop) {
+      cases.push(`<button class="bt-slot propose r${prop.rarete || 4}" data-ajouter="${esc(prop.id)}" style="--el:${prop.couleur || "var(--or)"}"
+          title="${builds.equipe.length < 3 ? "Ajouter " + esc(prop.nom) + " à ta sélection" : esc(prop.nom)}">
+        <span class="bt-visuel">${prop.image ? `<img src="${esc(prop.image)}" alt="">` : ""}<span class="bt-elem">${icone((prop.element || "").toLowerCase())}</span>
+          <em class="bt-slot-tag">${ICONES.etincelle || ""}Proposé</em></span>
+        <span class="bt-nom">${esc(prop.nom)}</span></button>`);
+      continue;
+    }
+    const attente = builds.equipe.length && !r;
+    cases.push(`<div class="bt-slot vide">${attente ? `<div class="rond"></div>` : `<b>+</b>`}
+      <span>${attente ? "Recherche…" : i < 3 ? (i === builds.equipe.length ? "Choisis un perso plus bas" : "Libre") : "AMS te propose le dernier"}</span></div>`);
+  }
+  zone.innerHTML = cases.join("");
+  zone.querySelectorAll("[data-retirer]").forEach((b) => b.addEventListener("click", () => basculerEquipe(b.dataset.retirer)));
+  zone.querySelectorAll("[data-ajouter]").forEach((b) => b.addEventListener("click", () => {
+    if (builds.equipe.length < 3) basculerEquipe(b.dataset.ajouter);
+    else ouvrirBuildDepuisEquipe(b.dataset.ajouter);
+  }));
+}
+
+function ouvrirBuildDepuisEquipe(id) {
+  builds.defilement = 0;
+  son("ouvrir");
+  afficherFicheBuild(etat.donnees.jeu, id);
+}
+
+function dessinerResultatsEquipe() {
+  const zone = $("#bt-eq-resultats");
+  if (!zone) return;
+  const r = builds.resultatEquipe;
+  if (!builds.equipe.length) { zone.innerHTML = ""; return; }
+  if (!r) { zone.innerHTML = `<div class="bt-attente"><div class="rond"></div><p>Recherche des meilleurs coéquipiers…</p></div>`; return; }
+  if (r.erreur) { zone.innerHTML = `<div class="vide">${ICONES.erreur}${esc(r.erreur)}</div>`; return; }
+  const plein = builds.equipe.length >= 3;
+  const manque = r.manquants?.length
+    ? `<p class="bt-eq-note">${ICONES.astuce}Genshin-Builds n'a pas encore d'équipes conseillées pour ${esc(r.manquants.join(", "))} : AllMyStats se base sur les autres persos choisis.</p>` : "";
+  const sugg = (r.suggestions || []).map((p) => `
+    <li style="--el:${p.couleur || "var(--accent)"}">
+      ${vignetteBuild(p)}
+      <div class="bt-eq-sugg-texte">
+        <b>${p.element ? icone(p.element.toLowerCase()) : ""}${esc(p.nom)}</b>
+        <span class="bt-eq-jauge" title="${p.score} %"><i style="width:${Math.max(6, p.score)}%"></i></span>
+        <small>${esc(p.avis)} · dans ${p.nb_equipes} équipe${p.nb_equipes > 1 ? "s" : ""} conseillée${p.nb_equipes > 1 ? "s" : ""}${p.equipes_vues?.length ? ` (${esc(p.equipes_vues.join(", "))})` : ""}</small>
+      </div>
+      <div class="bt-eq-actions">
+        <button class="secondaire" data-ajouter="${esc(p.id)}" ${plein ? "disabled title='3 persos déjà choisis'" : ""}>+ Ajouter</button>
+        <button class="discret" data-build="${esc(p.id)}">Build</button>
+      </div>
+    </li>`).join("");
+  const equipes = (r.equipes || []).map((t) => `
+    <li class="bt-equipe ${t.complete ? "complete" : ""}">
+      <div class="bt-membres">${t.membres.map((m) => `<button class="bt-membre ${m.choisi ? "choisi" : ""}" data-build="${esc(m.id)}"
+        title="Voir le build de ${esc(m.nom)}" style="--el:${m.couleur || "var(--accent)"}">${vignetteBuild(m)}<small>${esc(m.nom)}</small></button>`).join("")}</div>
+      <p>${esc(t.nom)}${t.complete ? "" : ` · ${t.communs} de tes persos`}</p>
+    </li>`).join("");
+  zone.innerHTML = `${manque}
+    ${sugg ? `<section class="bt-bloc bt-eq-sugg"><h3>${ICONES.equipe}Meilleurs coéquipiers <small>du plus conseillé au moins conseillé</small></h3><ol>${sugg}</ol></section>`
+      : `<div class="vide">${ICONES.astuce}Pas assez d'équipes conseillées pour proposer des coéquipiers à cette sélection.</div>`}
+    ${equipes ? `<section class="bt-equipes bt-eq-connues"><h3>${ICONES.equipe}Équipes conseillées avec ta sélection</h3><ul>${equipes}</ul></section>` : ""}
+    <p class="bt-source">Équipes conseillées par <a href="https://genshin-builds.com/fr" target="_blank" rel="noopener">Genshin-Builds</a>, classées par AllMyStats.</p>`;
+  zone.querySelectorAll("[data-ajouter]").forEach((b) => b.addEventListener("click", () => basculerEquipe(b.dataset.ajouter)));
+  zone.querySelectorAll("[data-build]").forEach((b) => b.addEventListener("click", () => ouvrirBuildDepuisEquipe(b.dataset.build)));
+}
+
+function dessinerChoixEquipe() {
+  const grille = $("#eq-grille");
+  if (!grille || !builds.persos) return;
+  const f = sansAccents(builds.filtreEquipe.trim());
+  const liste = builds.persos.filter((p) => (!builds.elementEquipe || p.element === builds.elementEquipe) && (!f || sansAccents(p.nom).includes(f)));
+  grille.innerHTML = liste.length ? liste.map((p) => {
+    const choisi = builds.equipe.includes(p.id);
+    return `<button class="bt-perso r${p.rarete} ${choisi ? "choisi" : ""}" data-perso="${esc(p.id)}" style="--el:${p.couleur}"
+        aria-pressed="${choisi}" title="${choisi ? "Retirer" : "Choisir"} ${esc(p.nom)}">
+      <span class="bt-visuel">${p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+        <span class="bt-elem">${icone((p.element || "").toLowerCase())}</span>${choisi ? `<span class="bt-coche">${ICONES.ok}</span>` : ""}</span>
+      <span class="bt-nom">${esc(p.nom)}</span></button>`;
+  }).join("") : `<p class="gris bt-rien">Aucun perso ne correspond à ta recherche.</p>`;
+  grille.querySelectorAll("[data-perso]").forEach((b) => b.addEventListener("click", () => basculerEquipe(b.dataset.perso)));
 }
 
 function retourGrilleBuilds() {

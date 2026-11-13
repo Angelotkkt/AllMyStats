@@ -1,6 +1,7 @@
 {
-  "version": "2.21.0",
+  "version": "2.22.0",
   "nouveautes": [
+    "Builds & Teams : « Compléter une équipe », choisis jusqu'à 3 persos et AMS propose les meilleurs coéquipiers",
     "Nouvelle ouverture : le logo explose en objets de tous les jeux (désactivable dans Paramètres > Sons)",
     "iPhone : correction de l'écran blanc au démarrage, et message clair en cas de problème",
     "Version iPhone (gratuite, à installer avec Sideloadly) : reliée une fois au PC, puis autonome",
@@ -67,5 +68,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "948574f1d9f7b436038453b6c017f0b193383dc8dc512eac3776123986cc1a4d"
+  "sha256": "73108a46eba75b7336445fb1ac3fcc34af7ab886f6ca1fa88fc1b2a9dcc7bfab"
 }

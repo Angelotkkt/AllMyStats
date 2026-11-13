@@ -226,12 +226,130 @@ class BuildsGenshin(Jeu):
             "age": int(age),
         }
 
+    # ------------------------------------------------------------------ compléter une équipe
+
+    def completer(self, ids, dossier):
+        """Jusqu'à 3 persos choisis -> les persos qui vont le mieux avec eux.
+
+        On réunit les équipes conseillées par Genshin-Builds pour chacun des persos choisis, puis on compte
+        qui revient le plus souvent à leurs côtés : une équipe qui contient plusieurs des persos choisis compte
+        beaucoup plus, et les premières équipes de chaque liste (les meilleures) comptent plus que les dernières."""
+        choisis = []
+        for i in ids:
+            i = slug(i)
+            if i and i not in choisis:
+                choisis.append(i)
+        if not choisis:
+            raise ErreurJeu("Choisis au moins un perso.")
+        if len(choisis) > 3:
+            raise ErreurJeu("Choisis 3 persos au maximum : AllMyStats propose le reste.")
+        tous = {p["id"]: p for p in self.persos(dossier)}
+
+        def fiche(id_perso, nom=None):
+            p = tous.get(id_perso)
+            if p:
+                return {k: p.get(k) for k in ("id", "nom", "element", "couleur", "rarete", "arme", "image")}
+            noms = self._enka(dossier)
+            return {"id": id_perso, "nom": nom or id_perso, "element": None, "couleur": None, "rarete": None,
+                    "arme": "", "image": noms.image_par_nom(nom) if nom else None}
+
+        # Les équipes conseillées de chaque perso choisi (gardées 24 h comme les fiches)
+        equipes = {}          # membres (frozenset d'ids) -> infos
+        manquants = []
+        alias = {}            # autre nom chez Genshin-Builds -> id choisi
+        for c in choisis:
+            try:
+                d = self.build(c, dossier)
+            except ErreurJeu:
+                manquants.append(fiche(c)["nom"])
+                continue
+            for autre in (d.get("id"), d.get("nom")):
+                if autre and slug(autre) != c:
+                    alias[slug(autre)] = c
+            for rang, t in enumerate(d.get("equipes") or []):
+                membres = []
+                for m in t.get("membres") or []:
+                    mid = slug(m.get("nom"))
+                    if mid and mid not in [x for x, _ in membres]:
+                        membres.append((mid, m.get("nom")))
+                if len(membres) < 2:
+                    continue
+                cle = frozenset(x for x, _ in membres)
+                poids = 1 / (1 + 0.25 * rang)
+                e = equipes.setdefault(cle, {"nom": t.get("nom") or "", "membres": membres, "poids": 0, "sources": 0})
+                e["poids"] = max(e["poids"], poids)
+                e["sources"] += 1
+        # Les noms de Genshin-Builds qui désignent un perso choisi sous un autre nom
+        if alias:
+            for e in list(equipes.values()):
+                e["membres"] = [(alias.get(x, x), n) for x, n in e["membres"]]
+            equipes = {frozenset(x for x, _ in e["membres"]): e for e in equipes.values()}
+
+        def scores(selection):
+            sel = set(selection)
+            res = {}
+            for e in equipes.values():
+                ids_e = [x for x, _ in e["membres"]]
+                communs = len(sel.intersection(ids_e))
+                if not communs:
+                    continue
+                w = e["poids"] * (communs / len(sel)) ** 2 * (1 + 0.3 * (e["sources"] - 1))
+                for x, nom in e["membres"]:
+                    if x in sel:
+                        continue
+                    r = res.setdefault(x, {"score": 0.0, "nom": nom, "equipes": []})
+                    r["score"] += w
+                    if e["nom"] and e["nom"] not in r["equipes"]:
+                        r["equipes"].append(e["nom"])
+            return res
+
+        # Les meilleurs coéquipiers pour la sélection
+        brut = scores(choisis)
+        meilleurs = sorted(brut.items(), key=lambda kv: -kv[1]["score"])[:10]
+        haut = meilleurs[0][1]["score"] if meilleurs else 1
+        suggestions = []
+        for x, r in meilleurs:
+            part = r["score"] / haut
+            suggestions.append({**fiche(x, r["nom"]), "score": round(100 * part),
+                                "avis": "Excellent choix" if part >= .75 else "Très bon choix" if part >= .45 else "Bon choix",
+                                "nb_equipes": len(r["equipes"]), "equipes_vues": r["equipes"][:3]})
+
+        # L'équipe complète proposée : on ajoute un par un celui qui va le mieux avec ceux déjà là
+        equipe = list(choisis)
+        while len(equipe) < 4:
+            s = scores(equipe)
+            if not s:
+                break
+            equipe.append(max(s.items(), key=lambda kv: kv[1]["score"])[0])
+        proposition = [{**fiche(x), "propose": x not in choisis} for x in equipe]
+
+        # Les équipes conseillées qui contiennent le plus de persos choisis
+        connues = []
+        for e in equipes.values():
+            ids_e = [x for x, _ in e["membres"]]
+            communs = len(set(choisis).intersection(ids_e))
+            if communs:
+                connues.append((communs, e["poids"], e))
+        connues.sort(key=lambda t: (-t[0], -t[1]))
+        return {
+            "selection": [fiche(c) for c in choisis],
+            "proposition": proposition,
+            "suggestions": suggestions,
+            "equipes": [{"nom": e["nom"], "communs": n, "complete": n == len(choisis),
+                         "membres": [{**fiche(x, nom), "choisi": x in choisis} for x, nom in e["membres"]]}
+                        for n, _, e in connues[:6]],
+            "manquants": manquants,
+            "source": "Genshin-Builds",
+        }
+
     # ------------------------------------------------------------------ pour le serveur
 
     def page_donnees(self, chemin, dossier):
-        """GET /api/jeux/genshin_builds/page/persos  et  /page/build/<id>"""
+        """GET /api/jeux/genshin_builds/page/persos, /page/build/<id> et /page/equipe/<id>,<id>,<id>"""
         if chemin == ["persos"]:
             return {"persos": self.persos(dossier)}
+        if len(chemin) == 2 and chemin[0] == "equipe":
+            return self.completer([x for x in urllib.parse.unquote(chemin[1]).split(",") if x], dossier)
         if len(chemin) == 2 and chemin[0] == "build":
             return self.build(urllib.parse.unquote(chemin[1]), dossier)
         raise ErreurJeu("Demande inconnue.")
