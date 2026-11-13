@@ -1,6 +1,10 @@
 {
-  "version": "2.16.0",
+  "version": "2.17.0",
   "nouveautes": [
+    "Call of Duty est de retour (la 2.16.0 l'empêchait de se charger)",
+    "Nouveau : Counter-Strike 2 (Steam + Leetify : Premier, K/D, headshots, dernières parties)",
+    "Nouveau : Fortnite (victoires, K/D, tops, passe de combat, saison en cours)",
+    "Nouveau : Apex Legends (rang et RP, niveau, légendes, statut en ligne)",
     "Call of Duty sans lecture d'écran : importe ton fichier « Mes données » d'Activision, toutes tes parties d'un coup",
     "Pokémon GO retiré",
     "Ambiance sonore douce quand AllMyStats est au premier plan (bouton en bas à gauche pour la couper)",
@@ -57,5 +61,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "5da8f231e62bc8708419a7dd1d1124b0494c6890c27daa1e9eb08dbad4118bdc"
+  "sha256": "72532269d1170a0cced3a115924b8b9ba10f8724bb0d4519aed4d0c566010ed9"
 }

@@ -591,3 +591,47 @@ emoji("son", `<path d="M5 12.5h5l7-6v19l-7-6H5z" fill="#FFC44D" stroke="#7A5418"
 emoji("son_coupe", `<path d="M5 12.5h5l7-6v19l-7-6H5z" fill="#9AA3C7" stroke="#4A5280" stroke-width="1.2" stroke-linejoin="round"/>
   <path d="M21 12.5l7 7M28 12.5l-7 7" stroke="#FF6B5E" stroke-width="2.2" stroke-linecap="round"/>`);
 emoji("retour", `<path d="M19.5 7.5L11 16l8.5 8.5" stroke="#C9D0F2" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
+
+// ---------- Counter-Strike 2 (dessins maison : pas le logo du jeu) ----------
+emoji("jeu_cs2", `${deg("gcs", "#F6C35B", "#C8761E")}
+  <rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#1B1F2E" stroke="url(#gcs)" stroke-width="2"/>
+  <rect x="7" y="11" width="18" height="12" rx="2" fill="url(#gcs)" stroke="#6B3E0E" stroke-width="1.1"/>
+  <rect x="10" y="14" width="7" height="5" rx="1" fill="#1B1F2E"/>
+  <circle cx="21" cy="15.2" r="1.2" fill="#2BD97C"/><circle cx="21" cy="19" r="1.2" fill="#FF5A4E"/>
+  <path d="M11 11V8.5h4V11" fill="none" stroke="#F6C35B" stroke-width="1.6"/>
+  <path d="M12 16.5h1.6M14.4 16.5H16" stroke="#F6C35B" stroke-width="1.3" stroke-linecap="round"/>`);
+emoji("cs_premier", `${deg("gcp", "#C9A6FF", "#6B3FD1")}
+  <path d="M4 9l6-4h12l6 4-12 19z" fill="url(#gcp)" stroke="#2E1670" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M4 9h24M10 5l6 23M22 5l-6 23" stroke="#EBDDFF" stroke-width=".9" opacity=".7"/>`);
+emoji("cs_faceit", `<circle cx="16" cy="16" r="13" fill="#2A2F45" stroke="#FF7A2E" stroke-width="2"/>
+  <path d="M10 21l6-11 6 11z" fill="#FF7A2E"/><path d="M13.5 18h5" stroke="#2A2F45" stroke-width="1.6"/>`);
+emoji("cs_carte", `${deg("gcc", "#E9D3A0", "#B98F4C")}
+  <path d="M3 7l8-3 10 3 8-3v21l-8 3-10-3-8 3z" fill="url(#gcc)" stroke="#6B4E1F" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M11 4v21M21 7v21" stroke="#6B4E1F" stroke-width="1" opacity=".6"/>
+  <path d="M14 14l4 4M18 14l-4 4" stroke="#D64533" stroke-width="2" stroke-linecap="round"/>`);
+
+// ---------- Fortnite (dessins maison) ----------
+emoji("jeu_fortnite", `${deg("gfn", "#B58CFF", "#3E5BE0")}
+  <rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="url(#gfn)"/>
+  <path d="M6 22c3-1.5 6-1.5 9 0s6 1.5 11 0" fill="none" stroke="#E9DFFF" stroke-width="1.6" opacity=".7"/>
+  <path d="M10 25L21.5 9.5" stroke="#7A4A22" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M15.5 6.5c3.2-1 6.6-.2 9 2.2l-3.2 1.3c-1.6-1.2-3.6-1.7-5.6-1.5z" fill="#E6ECF5" stroke="#2B2F55" stroke-width="1.1" stroke-linejoin="round"/>`);
+emoji("fn_victoire", `${deg("gfv", "#FFE07A", "#F29A1E")}
+  <path d="M4 14a12 9 0 0 1 24 0c-2-1.6-4-1.6-6 0-2-1.6-4-1.6-6 0-2-1.6-4-1.6-6 0-2-1.6-4-1.6-6 0z" fill="url(#gfv)" stroke="#8A4D0A" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M16 14v11a3 3 0 0 1-6 0" fill="none" stroke="#5A3A1A" stroke-width="2" stroke-linecap="round"/>`);
+emoji("fn_passe", `${deg("gfp", "#7FE3FF", "#3A7BF0")}
+  <rect x="5" y="3" width="22" height="26" rx="3" fill="url(#gfp)" stroke="#1C2E6B" stroke-width="1.2"/>
+  <path d="M9 9h14M9 14h14M9 19h9" stroke="#EAF7FF" stroke-width="2" stroke-linecap="round"/>
+  <path d="M22 18l2 2 3.5-4" stroke="#FFE07A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
+
+// ---------- Apex Legends (dessins maison) ----------
+emoji("jeu_apex", `${deg("gax", "#FF6A5A", "#9E1B1B")}
+  <rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#22161A" stroke="url(#gax)" stroke-width="2"/>
+  <path d="M16 6l9 4v6c0 5.5-4 9-9 11-5-2-9-5.5-9-11v-6z" fill="url(#gax)" stroke="#4A0D0D" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M11 17l5-4 5 4M11 21l5-4 5 4" fill="none" stroke="#FFE3DD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`);
+emoji("apex_rang", `${deg("gar", "#9FE6FF", "#3C7FD8")}
+  <path d="M16 3l11 6v14l-11 6-11-6V9z" fill="url(#gar)" stroke="#173D72" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M10 18l6-5 6 5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`);
+emoji("apex_legende", `<circle cx="16" cy="11" r="6" fill="#FF8A6A"/>
+  <path d="M5 28c1.5-7 5.5-10 11-10s9.5 3 11 10z" fill="#DA3A35"/>
+  <path d="M12.5 10.5h7" stroke="#3A1010" stroke-width="2" stroke-linecap="round"/>`);
