@@ -664,3 +664,12 @@ emoji("relique", `${deg("gre", "#FFD9D3", "#C2202C")}
   <path d="M9 22h14" stroke="#E9C046" stroke-width="2.6" stroke-linecap="round"/>
   <path d="M16 23v6" stroke="#3A2A2A" stroke-width="2.6" stroke-linecap="round"/>
   <circle cx="16" cy="12" r="1.8" fill="#7FF2FF" stroke="#173D72" stroke-width=".7"/>`);
+
+// ---------- Amis ----------
+emoji("amis", `${deg("gam1", "#FFD36B", "#F29A2E")}${deg("gam2", "#6FE0D2", "#2A9C93")}
+  <circle cx="11" cy="11" r="5" fill="url(#gam2)"/><path d="M2.5 27c.6-6.2 3.9-9.6 8.5-9.6s7.9 3.4 8.5 9.6z" fill="url(#gam2)"/>
+  <circle cx="21.5" cy="9.5" r="5.4" fill="url(#gam1)"/><path d="M12.5 27.5c.6-6.8 4.2-10.4 9-10.4s8.4 3.6 9 10.4z" fill="url(#gam1)"/>`);
+emoji("podium", `<rect x="11" y="10" width="10" height="19" rx="1.5" fill="#FFC44D"/><rect x="2" y="16" width="9" height="13" rx="1.5" fill="#C9D2E8"/>
+  <rect x="21" y="20" width="9" height="9" rx="1.5" fill="#D98B4E"/>
+  <text x="16" y="21" font-size="8" font-weight="700" text-anchor="middle" fill="#3A2A05">1</text>
+  <path d="M16 2.5l1.3 2.7 3 .4-2.2 2 .5 3-2.6-1.4-2.6 1.4.5-3-2.2-2 3-.4z" fill="#FFE28A"/>`);

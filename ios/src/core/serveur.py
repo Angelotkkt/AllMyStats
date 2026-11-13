@@ -18,7 +18,7 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlparse
 
-from core import ancrage, chemins, diagnostic_ecran, mise_a_jour, reseau, surveillance, telephone, windows
+from core import amis, ancrage, chemins, diagnostic_ecran, mise_a_jour, reseau, surveillance, telephone, windows
 from core.version import DEPOT_MAJ, NOUVEAUTES, VERSION
 from core.base_de_donnees import BaseDeDonnees, maintenant
 from core.config import Config
@@ -32,6 +32,8 @@ DOSSIER_DONNEES = chemins.DONNEES
 BDD = BaseDeDonnees(chemins.FICHIER_BDD)
 CONFIG = Config(chemins.FICHIER_CONFIG)
 JEUX = charger_jeux()
+
+AMIS = None   # créé plus bas (il a besoin de est_cache)
 
 # Connexions en cours (une par jeu) : {id_jeu: {"etat": "attente"|"ok"|"erreur", "message": ...}}
 CONNEXIONS = {}
@@ -235,6 +237,21 @@ def est_cache(jeu):
     """Jeu masqué dans les Paramètres (lui-même ou toute sa famille) : pas affiché, pas surveillé."""
     caches = jeux_caches()
     return jeu.id in caches or bool(jeu.famille and f"famille:{jeu.famille}" in caches)
+
+
+AMIS = amis.Amis(CONFIG, JEUX, BDD, est_cache, VERSION, mobile=chemins.MOBILE)
+PUBLIER_AMIS_TOUTES = 600
+
+
+def _boucle_amis():
+    """Publie mon profil d'amis quand mes stats changent (vérifié toutes les 10 minutes)."""
+    time.sleep(45)
+    while True:
+        try:
+            AMIS.publier_en_silence()
+        except Exception:
+            traceback.print_exc()
+        time.sleep(PUBLIER_AMIS_TOUTES)
 
 
 def depot_maj():
@@ -457,6 +474,8 @@ class Gestionnaire(BaseHTTPRequestHandler):
                 if getattr(self, "distant", False):
                     return self._erreur("Ça se règle sur le PC.", 403)
                 return self._json(infos_telephone())
+            if m[:2] == ["api", "amis"] and len(m) == 2:
+                return self._json(AMIS.tout(forcer=self.path.endswith("?frais=1")))
             if len(m) == 4 and m[1] == "jeux" and m[3] == "connexion":
                 return self._json(CONNEXIONS.get(m[2], {"etat": "aucune"}))
             if len(m) >= 5 and m[1] == "jeux" and m[3] == "page":   # données d'une page spéciale (Builds & Teams…)
@@ -526,6 +545,27 @@ class Gestionnaire(BaseHTTPRequestHandler):
                 except mise_a_jour.ErreurMaj as e:
                     return self._erreur(str(e))
                 return self._json({"message": message, **etat_appli()})
+            if len(m) == 3 and m[:2] == ["api", "amis"]:
+                try:
+                    if m[2] == "reglages":
+                        message = AMIS.regler(actif=corps.get("actif"), pseudo=corps.get("pseudo"), couleur=corps.get("couleur"),
+                                              jeux_partages=corps.get("jeux_partages"), tous_les_jeux=bool(corps.get("tous_les_jeux")))
+                        return self._json({"message": message or "Enregistré", **AMIS.tout()})
+                    if m[2] == "publier":
+                        message = AMIS.publier(forcer=True)
+                        return self._json({"message": message or "Profil publié", **AMIS.tout()})
+                    if m[2] == "arreter":
+                        AMIS.oublier_mon_profil()
+                        return self._json({"message": "Tu ne partages plus tes stats.", **AMIS.tout()})
+                    if m[2] == "ajouter":
+                        profil = AMIS.ajouter(corps.get("code"))
+                        return self._json({"message": f"{profil['pseudo']} est dans tes amis !", **AMIS.tout()})
+                    if m[2] == "retirer":
+                        AMIS.retirer(str(corps.get("id") or ""))
+                        return self._json({"message": "Ami retiré", **AMIS.tout()})
+                except amis.ErreurAmis as e:
+                    return self._erreur(str(e))
+                return self._erreur("Route inconnue.", 404)
             if m == ["api", "carte-collee"]:   # la carte connectée posée dans la fenêtre d'AllMyStats
                 action = corps.get("action")
                 if action == "cacher":
@@ -776,6 +816,7 @@ def demarrer(port=8765, ouvrir_navigateur=True, mode_appli=False, arriere_plan=F
     if not chemins.MOBILE:   # sur le téléphone, c'est l'appli (APK / iPhone) qui se met à jour
         _installer_au_demarrage()
         threading.Thread(target=_boucle_maj, daemon=True, name="mises-a-jour").start()
+        threading.Thread(target=_boucle_amis, daemon=True, name="amis").start()
 
     serveur = None
     for essai in range(port, port + 20):

@@ -68,6 +68,8 @@ function dateLongue(iso) {
 async function demarrer() {
   $("#logo").innerHTML = ICONES.ams;
   $("#ic-parametres").innerHTML = ICONES.reglages;
+  $("#ic-amis").innerHTML = ICONES.amis;
+  $("#btn-amis").addEventListener("click", () => { son("onglet"); afficherPageAmis(); });
   try {
     etat.jeux = await api("/api/jeux");
   } catch (e) {
@@ -126,6 +128,8 @@ function afficherListeJeux() {
     if (!f) blocs.push((f = { famille: j.famille, jeux: [] }));
     f.jeux.push(j);
   }
+  $("#btn-amis").classList.toggle("actif", etat.jeuActif === "_amis");
+  if (etat.jeuActif === "_amis") $("#btn-amis").setAttribute("aria-current", "page"); else $("#btn-amis").removeAttribute("aria-current");
   $("#liste-jeux").innerHTML = blocs.map((b) => {
     if (b.jeu) return cartouche(b.jeu);
     const actif = b.jeux.some((j) => j.id === etat.jeuActif);
@@ -858,6 +862,227 @@ function dessinerGrilleBuilds() {
     builds.defilement = document.querySelector("main").scrollTop;
     afficherFicheBuild(etat.donnees.jeu, b.dataset.perso);
   }));
+}
+
+// ================= Amis : code ami et classement =================
+const amis = { data: null, jeu: null, edition: false };
+const PALETTE_AMIS = ["#FFC44D", "#FF6B5E", "#33D1C1", "#7C8CFF", "#B98CFF", "#5BD67A", "#FF8FC7", "#4CC2F1"];
+
+function depuis(secondes) {
+  const s = Math.max(0, Date.now() / 1000 - secondes);
+  if (s < 90) return "à l'instant";
+  if (s < 3600) return `il y a ${Math.round(s / 60)} min`;
+  if (s < 86400) return `il y a ${Math.round(s / 3600)} h`;
+  return `il y a ${Math.round(s / 86400)} j`;
+}
+const pastille = (p) => `<span class="am-pastille" style="--c:${esc(p.couleur || "#8a8fa8")}">${esc((p.pseudo || "?").trim().charAt(0).toUpperCase())}</span>`;
+
+async function afficherPageAmis(frais = false) {
+  etat.jeuActif = "_amis";
+  etat.donnees = null;
+  fermerMenu();
+  cacherCarteCollee();
+  $("#titre-mobile").textContent = "Amis";
+  document.documentElement.style.setProperty("--accent", "#FFC44D");
+  afficherListeJeux();
+  if (!amis.data) $("#contenu").innerHTML = `<div class="bt-attente"><div class="rond"></div><p>Chargement de tes amis…</p></div>`;
+  try {
+    amis.data = await api("/api/amis" + (frais ? "?frais=1" : ""));
+  } catch (e) {
+    $("#contenu").innerHTML = `<div class="vide">${ICONES.erreur}${esc(e.message)}</div>`;
+    return;
+  }
+  if (etat.jeuActif === "_amis") dessinerPageAmis();
+}
+
+async function actionAmis(route, corps, bouton) {
+  if (bouton) bouton.disabled = true;
+  try {
+    const d = await api(`/api/amis/${route}`, { method: "POST", body: corps || {} });
+    amis.data = d;
+    if (d.message) toast(d.message);
+    return true;
+  } catch (e) {
+    toast(e.message, "erreur");
+    return false;
+  } finally {
+    if (bouton) bouton.disabled = false;
+    if (etat.jeuActif === "_amis") dessinerPageAmis();
+  }
+}
+
+function blocMoiAmis(moi) {
+  const partages = moi.jeux_partages;
+  const formulaire = (titre, bouton) => `
+    <div class="am-form">
+      <label class="am-champ"><span>Ton pseudo (ce que tes amis verront)</span>
+        <input id="am-pseudo" maxlength="24" value="${esc(moi.pseudo)}" placeholder="Ex. Angelo" autocomplete="off"></label>
+      <div class="am-champ"><span>Ta couleur</span>
+        <div class="am-couleurs" role="radiogroup" aria-label="Couleur">${PALETTE_AMIS.map((c) => `<button type="button" role="radio"
+          aria-checked="${c === moi.couleur}" aria-label="${c}" data-couleur="${c}" style="--c:${c}"></button>`).join("")}</div></div>
+      <details class="am-jeux" ${partages ? "open" : ""}><summary>Jeux partagés : ${partages ? `${partages.length} sur ${moi.jeux_disponibles.length}` : "tous"}</summary>
+        <div>${moi.jeux_disponibles.map((j) => `<label class="interrupteur"><input type="checkbox" data-jeu-partage="${esc(j.id)}"
+          ${!partages || partages.includes(j.id) ? "checked" : ""}><span>${icone(j.icone || "jeu_" + j.id, ICONES.jeu)}${esc(j.nom)}</span></label>`).join("")}</div>
+      </details>
+      <p class="am-prive">${ICONES.astuce}<span>Seuls ton pseudo et la dernière valeur de tes stats sont partagés : jamais tes connexions,
+        tes UID ou ton historique. Tout le monde qui a ton code ami peut les voir.</span></p>
+      <div class="am-boutons"><button class="principal" id="am-valider">${bouton}</button>
+        ${titre ? `<button class="discret" id="am-annuler">Annuler</button>` : ""}</div>
+    </div>`;
+  if (moi.mobile && !moi.code) return `<section class="bt-bloc am-moi"><h3>${ICONES.amis}Ton profil</h3>
+    <p class="gris">Ton profil d'amis se règle et se publie depuis AllMyStats sur ton PC. Ici, tu peux ajouter des amis et voir le classement.</p></section>`;
+  if (!moi.actif || amis.edition) return `<section class="bt-bloc am-moi">
+    <h3>${ICONES.amis}${moi.actif ? "Modifier ton profil" : "Partage tes stats avec tes amis"}</h3>
+    ${moi.actif ? "" : `<p class="am-intro">Choisis un pseudo : AllMyStats te donne un code ami. Envoie-le à tes amis qui ont AllMyStats,
+      ils l'ajoutent, et vous êtes dans le même classement.</p>`}
+    ${formulaire(moi.actif, moi.actif ? "Enregistrer" : "Partager mes stats")}
+  </section>`;
+  return `<section class="bt-bloc am-moi">
+    <div class="am-moi-tete">${pastille(moi)}<div><b>${esc(moi.pseudo)}</b>
+      <small>${moi.mobile ? "Publié depuis ton PC" : moi.erreur ? `<span class="rouge">${esc(moi.erreur)}</span>` : moi.publie_le ? `Profil publié ${depuis(moi.publie_le)}` : "Pas encore publié"}</small></div></div>
+    <div class="am-code"><span>Ton code ami</span><b id="am-mon-code">${esc(moi.code || "…")}</b>
+      <button class="secondaire" id="am-copier" ${moi.code ? "" : "disabled"}>Copier</button></div>
+    <p class="am-note">Envoie ce code à tes amis. Tes stats sont republiées toutes seules quand elles changent.</p>
+    ${moi.mobile ? "" : `<div class="am-boutons">
+      <button class="secondaire" id="am-publier">Publier maintenant</button>
+      <button class="discret" id="am-modifier">Modifier le profil</button>
+      <button class="discret" id="am-arreter">Arrêter de partager</button></div>`}
+  </section>`;
+}
+
+function dessinerPageAmis() {
+  const d = amis.data;
+  const moi = d.moi;
+  const moiProfil = { ...d.mon_profil, pseudo: moi.pseudo || "Toi", couleur: moi.couleur, moi: true };
+  const amisOk = d.amis.filter((a) => !a.erreur && !a.ferme);
+  const listeAmis = d.amis.map((a) => `
+    <li class="${a.erreur || a.ferme ? "souci" : ""}">${pastille(a)}<div><b>${esc(a.pseudo)}</b>
+      <small>${a.erreur ? esc(a.erreur) : a.ferme ? "N'est plus en partage" : a.maj ? `Stats du ${esc(dateLongue(a.maj))}` : ""}</small></div>
+      <button class="am-retirer" data-retirer="${esc(a.id)}" title="Retirer ${esc(a.pseudo)}" aria-label="Retirer ${esc(a.pseudo)}">×</button></li>`).join("");
+  $("#amis-sous").textContent = d.amis.length ? `${d.amis.length} ami${d.amis.length > 1 ? "s" : ""}` : "Classement entre amis";
+
+  // Les jeux du classement : ceux où au moins un ami a des stats
+  const joueurs = [moiProfil, ...amisOk];
+  const jeuxClasses = [];
+  for (const p of amisOk) for (const j of p.jeux) if (!jeuxClasses.some((x) => x.id === j.id)) jeuxClasses.push(j);
+  if (!jeuxClasses.some((j) => j.id === amis.jeu)) amis.jeu = jeuxClasses[0]?.id || null;
+
+  $("#contenu").innerHTML = `
+    <div class="am-page">
+      <header class="am-entete">
+        <h2>Amis</h2>
+        <p>Compare tes stats avec tes amis qui ont AllMyStats, jeu par jeu.</p>
+        <button class="discret" id="am-rafraichir">${ICONES.actualiser || ""}Rafraîchir</button>
+      </header>
+      <div class="am-haut">
+        ${blocMoiAmis(moi)}
+        <section class="bt-bloc am-ajout">
+          <h3>${ICONES.ajouter || ICONES.amis}Ajouter un ami</h3>
+          <form id="am-form-ajout" class="am-ajout-ligne">
+            <input id="am-code-ami" placeholder="Colle son code ami (AMS-…)" autocomplete="off" spellcheck="false">
+            <button class="principal">Ajouter</button>
+          </form>
+          ${listeAmis ? `<ul class="am-liste">${listeAmis}</ul>` : `<p class="gris am-vide">Pas encore d'ami. Demande-leur leur code ami, dans la page Amis de leur AllMyStats.</p>`}
+        </section>
+      </div>
+      <section class="am-classement">
+        <h3>${ICONES.podium}Classement</h3>
+        ${jeuxClasses.length ? `
+          <div class="bt-groupe am-jeux-choix" role="group" aria-label="Jeu">${jeuxClasses.map((j) => `<button class="puce ${j.id === amis.jeu ? "actif" : ""}"
+            data-jeu-classement="${esc(j.id)}" aria-pressed="${j.id === amis.jeu}" style="--el:${esc(j.couleur)}">${icone(j.icone || "jeu_" + j.id, ICONES.jeu)}${esc(j.nom)}</button>`).join("")}</div>
+          <div id="am-podium"></div>`
+        : `<div class="vide am-vide-classement">${ICONES.podium}<span>${d.amis.length ? "Tes amis n'ont pas encore de stats partagées." : "Ajoute un ami avec son code pour voir le classement."}</span></div>`}
+      </section>
+    </div>`;
+  if (amis.jeu) dessinerClassement(joueurs, d.moins_c_est_mieux || []);
+
+  // Événements
+  $("#am-rafraichir").onclick = () => { son("clic"); afficherPageAmis(true); };
+  $("#am-form-ajout").onsubmit = async (e) => {
+    e.preventDefault();
+    const code = $("#am-code-ami").value.trim();
+    if (!code) return toast("Colle d'abord le code ami (il commence par AMS-).", "info");
+    await actionAmis("ajouter", { code }, e.submitter);
+  };
+  document.querySelectorAll("[data-retirer]").forEach((b) => b.onclick = () => {
+    const a = d.amis.find((x) => x.id === b.dataset.retirer);
+    if (confirm(`Retirer ${a?.pseudo || "cet ami"} de tes amis ?`)) actionAmis("retirer", { id: b.dataset.retirer });
+  });
+  document.querySelectorAll("[data-jeu-classement]").forEach((b) => b.onclick = () => {
+    amis.jeu = b.dataset.jeuClassement; son("onglet"); dessinerPageAmis();
+  });
+  $("#am-copier")?.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(moi.code); toast("Code ami copié : envoie-le à tes amis !"); }
+    catch (e) { const r = document.createRange(); r.selectNodeContents($("#am-mon-code")); getSelection().removeAllRanges(); getSelection().addRange(r);
+      toast("Sélectionné : fais Ctrl+C pour le copier.", "info"); }
+  });
+  $("#am-publier")?.addEventListener("click", (e) => actionAmis("publier", {}, e.currentTarget));
+  $("#am-modifier")?.addEventListener("click", () => { amis.edition = true; dessinerPageAmis(); });
+  $("#am-arreter")?.addEventListener("click", (e) => {
+    if (confirm("Arrêter de partager ? Ton profil en ligne sera vidé et tes amis ne verront plus tes stats.")) actionAmis("arreter", {}, e.currentTarget);
+  });
+  let couleur = moi.couleur;
+  document.querySelectorAll(".am-couleurs [data-couleur]").forEach((b) => b.onclick = () => {
+    couleur = b.dataset.couleur;
+    document.querySelectorAll(".am-couleurs [data-couleur]").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+  });
+  $("#am-annuler")?.addEventListener("click", () => { amis.edition = false; dessinerPageAmis(); });
+  $("#am-valider")?.addEventListener("click", async (e) => {
+    const cases = [...document.querySelectorAll("[data-jeu-partage]")];
+    const coches = cases.filter((c) => c.checked).map((c) => c.dataset.jeuPartage);
+    const ok = await actionAmis("reglages", {
+      pseudo: $("#am-pseudo").value, couleur, actif: true,
+      ...(coches.length === cases.length ? { tous_les_jeux: true } : { jeux_partages: coches }),
+    }, e.currentTarget);
+    if (ok) { amis.edition = false; dessinerPageAmis(); }
+  });
+}
+
+function dessinerClassement(joueurs, moinsMieux) {
+  const zone = $("#am-podium");
+  // Toutes les stats de ce jeu qu'au moins 2 joueurs ont
+  const stats = [];
+  for (const p of joueurs) {
+    const j = p.jeux.find((x) => x.id === amis.jeu);
+    for (const s of j?.stats || []) if (!stats.some((x) => x.cle === s.cle)) stats.push(s);
+  }
+  const cartes = [];
+  const premiers = new Map();
+  for (const s of stats) {
+    const moins = moinsMieux.includes(s.cle);
+    const lignes = joueurs.map((p) => ({ p, v: p.jeux.find((x) => x.id === amis.jeu)?.stats.find((x) => x.cle === s.cle)?.valeur }))
+      .filter((l) => typeof l.v === "number");
+    if (lignes.length < 2) continue;
+    lignes.sort((a, b) => moins ? a.v - b.v : b.v - a.v);
+    let rang = 0;
+    lignes.forEach((l, i) => { if (i === 0 || l.v !== lignes[i - 1].v) rang = i + 1; l.rang = rang; });
+    lignes.filter((l) => l.rang === 1).forEach((l) => premiers.set(l.p, (premiers.get(l.p) || 0) + 1));
+    const max = Math.max(...lignes.map((l) => Math.abs(l.v))) || 1;
+    const min = Math.min(...lignes.map((l) => Math.abs(l.v)));
+    cartes.push(`<article class="am-stat">
+      <h4>${s.icone ? icone(s.icone) : ""}<span>${esc(s.nom)}</span>${moins ? `<small>moins, c'est mieux</small>` : ""}</h4>
+      <ol>${lignes.map((l) => {
+        const part = moins ? (min || 0.0001) / (Math.abs(l.v) || 0.0001) : Math.abs(l.v) / max;
+        return `<li class="${l.p.moi ? "moi" : ""} r${Math.min(l.rang, 4)}">
+          <span class="am-rang">${l.rang}</span>${pastille(l.p)}
+          <span class="am-nom">${esc(l.p.moi ? `${l.p.pseudo} (toi)` : l.p.pseudo)}</span>
+          <b>${esc(nombre(l.v, s))}</b>
+          <span class="am-barre"><i style="width:${Math.max(4, Math.round(part * 100))}%;--c:${esc(l.p.couleur)}"></i></span></li>`;
+      }).join("")}</ol></article>`);
+  }
+  if (!cartes.length) {
+    zone.innerHTML = `<div class="vide">${ICONES.astuce}<span>Pas encore de stat en commun sur ce jeu : il faut qu'au moins deux d'entre vous aient la même stat.</span></div>`;
+    return;
+  }
+  const champion = [...premiers.entries()].sort((a, b) => b[1] - a[1]);
+  const [chef, nb] = champion[0] || [];
+  const egalite = champion.length > 1 && champion[1][1] === nb;
+  zone.innerHTML = `
+    ${chef ? `<div class="am-champion" style="--c:${esc(chef.couleur)}">${ICONES.podium}<div>
+      <b>${egalite ? "Égalité en tête !" : `${esc(chef.moi ? "Tu es" : chef.pseudo + " est")} en tête`}</b>
+      <span>${egalite ? champion.filter((c) => c[1] === nb).map((c) => esc(c[0].moi ? "toi" : c[0].pseudo)).join(", ") + ` : ${nb} première${nb > 1 ? "s" : ""} place${nb > 1 ? "s" : ""} chacun`
+        : `${nb} première${nb > 1 ? "s" : ""} place${nb > 1 ? "s" : ""} sur ${cartes.length} stat${cartes.length > 1 ? "s" : ""}`}</span></div></div>` : ""}
+    <div class="am-stats">${cartes.join("")}</div>`;
 }
 
 // ---------- Compléter une équipe : jusqu'à 3 persos choisis, AMS propose les meilleurs coéquipiers ----------

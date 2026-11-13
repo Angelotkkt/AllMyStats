@@ -1,12 +1,13 @@
 """Version de AllMyStats. À augmenter à chaque nouvelle version."""
 
-VERSION = "2.23.0"
+VERSION = "2.24.0"
 
 # Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
 # on peut aussi le donner dans Paramètres > Mises à jour.
 DEPOT_MAJ = "Angelotkkt/AllMyStats"
 
 NOUVEAUTES = [
+    "Amis : partage tes stats avec un code ami et compare-toi à tes amis dans un classement par jeu",
     "Builds & Teams : choisis 4 persos et AMS build chacun (arme, artefacts, stats) avec alternatives et ajustements d'équipe",
     "Builds & Teams : « Compléter une équipe », choisis jusqu'à 3 persos et AMS propose les meilleurs coéquipiers",
     "Nouvelle ouverture : le logo explose en objets de tous les jeux (désactivable dans Paramètres > Sons)",
