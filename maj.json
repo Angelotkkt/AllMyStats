@@ -1,6 +1,7 @@
 {
-  "version": "2.24.1",
+  "version": "2.24.2",
   "nouveautes": [
+    "Correction : erreur de certificat (« certificate has expired ») sur certains PC, pour les amis et les autres connexions",
     "Amis : nouveau serveur (ntfy.sh) pour corriger l'erreur 403 à la création du profil",
     "Amis : partage tes stats avec un code ami et compare-toi à tes amis dans un classement par jeu",
     "Builds & Teams : choisis 4 persos et AMS build chacun (arme, artefacts, stats) avec alternatives et ajustements d'équipe",
@@ -71,5 +72,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "1878e4710fb54e59f100210ee9c204172e1605ef837bdad5ae0ff579af6b83b4"
+  "sha256": "6802f40ac2bc0e1cb6a6a582e059f068a7660dcb37314c58d1283ef9d77561fe"
 }

@@ -81,7 +81,11 @@ def _requete(methode, url, corps=None, timeout=15):
             raise ErreurAmis("Le serveur des amis demande d'attendre un peu (trop de demandes) : réessaie dans quelques minutes.")
         return e.code, ""
     except (urllib.error.URLError, TimeoutError, OSError) as e:
-        raise ErreurAmis(f"Impossible de joindre le serveur des amis ({getattr(e, 'reason', e)}). Vérifie ta connexion.")
+        raison = getattr(e, "reason", e)
+        if "CERTIFICATE" in str(raison).upper():
+            raise ErreurAmis("Ton PC n'arrive pas à vérifier le certificat de sécurité du serveur des amis. Vérifie que "
+                             "la date et l'heure de Windows sont justes, puis réessaie.")
+        raise ErreurAmis(f"Impossible de joindre le serveur des amis ({raison}). Vérifie ta connexion.")
 
 
 def emballer(compact):
