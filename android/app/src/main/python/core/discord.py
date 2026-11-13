@@ -1,5 +1,5 @@
-"""Discord : affiche AllMyStats dans ton statut (« Joue à AllMyStats ») avec son logo, une courte description,
-la page que tu regardes et un bouton pour télécharger l'appli (Rich Presence).
+"""Discord : affiche AllMyStats dans ton statut (« Joue à AllMyStats ») avec son logo et une courte description
+(Rich Presence).
 
 Ça passe par le canal local que l'application Discord ouvre sur le PC (\\\\.\\pipe\\discord-ipc-0 sous Windows) :
 rien ne part sur Internet depuis AllMyStats, aucun compte ni jeton Discord n'est utilisé. Discord a seulement
@@ -107,15 +107,13 @@ class Presence:
             raise
         self._canal, self._id, self._derniere = canal, id_application, None
 
-    def mettre(self, id_application, page=""):
+    def mettre(self, id_application, page=""):   # page : gardé pour compatibilité, plus affiché
         """Affiche (ou met à jour) le statut. Ne fait rien si rien n'a changé."""
         activite = {
             "type": 0,
             "details": DESCRIPTION,
-            "state": page[:120] if page else "Regarde ses stats",
             "timestamps": {"start": self.debut},
             "assets": {"large_image": LOGO, "large_text": "AllMyStats : stats de Genshin, Valorant, CS2, Fortnite…"},
-            "buttons": [{"label": "Télécharger AllMyStats", "url": SITE}],
         }
         with self._verrou:
             if self._canal and self._derniere == activite and self._id == id_application:

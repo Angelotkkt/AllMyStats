@@ -2050,7 +2050,7 @@ function sectionDiscord(d) {
     <h3 class="section-reglages">${ICONES.discord_statut}Discord</h3>
     <label class="interrupteur">
       <input type="checkbox" id="p-discord" ${d.actif ? "checked" : ""}>
-      <span>Montrer AllMyStats sur mon statut Discord (logo, description, page regardée et bouton Télécharger)</span>
+      <span>Montrer AllMyStats sur mon statut Discord (logo et description)</span>
     </label>
     ${etatTexte ? `<p class="gris petit ${d.connecte ? "" : "discord-attente"}">${esc(etatTexte)}</p>` : ""}
     ${d.id_integre ? "" : `<details class="discord-id" ${d.id ? "" : "open"}>

@@ -1,6 +1,7 @@
 {
-  "version": "2.25.0",
+  "version": "2.25.1",
   "nouveautes": [
+    "Discord : le statut montre seulement le logo et la description (plus de bouton ni de page regardée)",
     "Photo de profil dans Amis, photo du compte sur Genshin, CS2 (Steam) et Valorant (carte de joueur), et statut Discord avec logo et description",
     "Correction : erreur de certificat (« certificate has expired ») sur certains PC, pour les amis et les autres connexions",
     "Amis : nouveau serveur (ntfy.sh) pour corriger l'erreur 403 à la création du profil",
@@ -73,5 +74,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "48cc56648d75d4ca10107370d41bfdaaca841c109c7126e47d3923622988d3ec"
+  "sha256": "7455599233db052716a08e79df22b04d242f2b43215abeb22b5d86ad0044f0d4"
 }
