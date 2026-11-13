@@ -1,12 +1,13 @@
 """Version de AllMyStats. À augmenter à chaque nouvelle version."""
 
-VERSION = "2.27.1"
+VERSION = "2.28.0"
 
 # Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
 # on peut aussi le donner dans Paramètres > Mises à jour.
 DEPOT_MAJ = "Angelotkkt/AllMyStats"
 
 NOUVEAUTES = [
+    "Nouvelles icônes des jeux en pixel art, et la carte HoYoLAB dans sa propre fenêtre AllMyStats (connexion gardée)",
     "Correction : le redémarrage après l'installation de la nouvelle application (erreur « Failed to load Python DLL »)",
     "Nouvelle application AllMyStats : une vraie fenêtre Windows (plus de navigateur), et un fond animé aux couleurs du jeu",
     "Amis : demandes d'amis à accepter, amitié des deux côtés, stats chiffrées visibles seulement par tes amis (nouveau code ami)",

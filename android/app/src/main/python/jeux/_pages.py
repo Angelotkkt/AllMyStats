@@ -52,6 +52,15 @@ class PageEnLigne(Jeu):
         if mode == "navigateur":
             webbrowser.open(carte["url"])
             return f"{carte['nom']} ouverte dans ton navigateur"
+        # Nouvelle application : la vraie page du site dans une fenêtre AllMyStats
+        from core import fenetre
+        if fenetre.ACTIVE:
+            nouvelle = fenetre.ACTIVE.ouvrir_page(f"{carte['nom']} · AllMyStats", carte["url"], plein_ecran=(mode == "fenetre"))
+            if not nouvelle:
+                return f"{carte['nom']} remise devant"
+            if mode == "connexion" or carte.get("collee"):
+                return self.texte_connexion
+            return f"{carte['nom']} ouverte"
         # Même profil que la fenêtre d'AllMyStats : une connexion faite ici sert aussi à la carte intégrée
         profil = os.path.join(dossier, "fenetre")
         taille = ["--window-size=1280,820"] if mode == "connexion" else ["--start-maximized"]

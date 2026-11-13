@@ -558,7 +558,8 @@ class CarteGenshin(PageEnLigne):
     ordre = 1
     page = "carte"
     stats = []
-    texte_connexion = "Carte ouverte avec ton compte : connecte-toi une fois, tes repères y seront gardés"
+    texte_connexion = ("Carte ouverte : connecte-toi une fois en haut à droite, sur la vraie page HoYoLAB. "
+                       "Ta connexion et tes repères seront gardés")
     cartes_en_ligne = [
         {"id": "hoyolab", "nom": "Carte officielle (HoYoLAB)",
          "url": "https://act.hoyolab.com/ys/app/interactive-map/index.html?lang=fr-fr",

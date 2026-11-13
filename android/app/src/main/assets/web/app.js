@@ -1631,6 +1631,7 @@ async function chargerCarte(jeu, carte) {
       <a class="bouton-lien" href="${esc(carte.url)}" target="_blank" rel="noopener">${ICONES.jeu}Ouvrir ${esc(carte.nom)}</a></div>`;
     return;
   }
+  if (carte.collee && etat.appli?.fenetre_native) return montrerCarteFenetreNative(jeu, carte);
   if (carte.collee) return montrerCarteCollee(jeu, carte);
   let integrable = null;
   try {
@@ -1648,6 +1649,28 @@ async function chargerCarte(jeu, carte) {
   }
   cadre.innerHTML = `<iframe src="${esc(carte.url)}" title="${esc(carte.nom)}" allow="fullscreen; clipboard-write"
     referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+}
+
+// Nouvelle application : la vraie page HoYoLAB s'ouvre dans sa propre fenêtre AllMyStats (ouverte tout de suite)
+function montrerCarteFenetreNative(jeu, carte) {
+  const cadre = $("#cadre-carte");
+  cadre.innerHTML = `<div class="carte-native">${icone(jeu.icone || "carte_teyvat")}
+    <h3>${esc(carte.nom)}</h3>
+    <p>La carte s'ouvre dans sa propre fenêtre AllMyStats : c'est la vraie page de HoYoverse.</p>
+    <ul>
+      <li>${ICONES.connexion}<span>Connecte-toi une fois en haut à droite de la carte (e-mail et mot de passe HoYoverse) :
+        la connexion et tes repères sont gardés pour les fois suivantes.</span></li>
+      <li>${ICONES.cle}<span>Tu te connectes directement chez HoYoverse : AllMyStats ne voit jamais ton mot de passe,
+        et ta session reste dans la fenêtre de la carte, sur ton PC.</span></li>
+      <li>${ICONES.astuce}<span>Connexion avec Google ou Apple : elle s'ouvre dans ton navigateur. Dans ce cas, utilise
+        plutôt « Dans mon navigateur ».</span></li>
+    </ul>
+    <button class="principal" id="carte-native-ouvrir">${ICONES.ecran}Ouvrir la carte</button></div>`;
+  $("#carte-native-ouvrir").addEventListener("click", () => ouvrirCarteFenetre(jeu, carte.id, "connexion"));
+  if (!etat.carteOuverte?.[carte.id]) {   // ouverte toute seule la première fois qu'on vient ici
+    etat.carteOuverte = { ...(etat.carteOuverte || {}), [carte.id]: true };
+    ouvrirCarteFenetre(jeu, carte.id, "connexion");
+  }
 }
 
 async function ouvrirCarteFenetre(jeu, idCarte, mode = "fenetre") {

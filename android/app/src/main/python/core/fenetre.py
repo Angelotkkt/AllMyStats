@@ -26,6 +26,9 @@ def natif_disponible():
         return False
 
 
+ACTIVE = None   # la fenêtre native en cours (pour ouvrir d'autres pages dans des fenêtres AllMyStats)
+
+
 class FenetreNative:
     """La fenêtre native. lancer() doit tourner sur le fil principal et ne rend la main qu'à la fermeture
     définitive. Si AllMyStats doit rester actif (mode « Toujours actif »), fermer la fenêtre la cache."""
@@ -37,9 +40,12 @@ class FenetreNative:
         self.visible = not cachee
         self.prete = threading.Event()
         self._quitter = False
+        self._pages = {}
 
     def lancer(self):
+        global ACTIVE
         import webview
+        ACTIVE = self
         self.fenetre = webview.create_window(
             "AllMyStats", self.adresse, width=1320, height=860, min_size=(900, 600),
             background_color="#141832", hidden=self.cachee, text_select=False, zoomable=False)
@@ -57,6 +63,7 @@ class FenetreNative:
             # Toujours actif : on cache la fenêtre au lieu de fermer AllMyStats
             threading.Timer(0.05, self._cacher).start()
             return False
+        self._fermer_pages()   # sinon les fenêtres de pages garderaient AllMyStats ouvert
         return True
 
     def _cacher(self):
@@ -75,8 +82,37 @@ class FenetreNative:
             pass
         self.visible = True
 
+    def ouvrir_page(self, titre, url, plein_ecran=False):
+        """Ouvre un vrai site (ex. la carte HoYoLAB) dans une fenêtre AllMyStats à part. C'est la vraie page du
+        site : on s'y connecte directement, AllMyStats ne voit ni le mot de passe ni les cookies. La session
+        est gardée par le moteur d'affichage (profil de la fenêtre, chiffré par Windows) : connexion une fois,
+        ensuite c'est retenu. Si la fenêtre est déjà ouverte, on la remet devant."""
+        import webview
+        deja = self._pages.get(url)
+        if deja is not None:
+            try:
+                deja.show()
+                deja.restore()
+                return False
+            except Exception:
+                self._pages.pop(url, None)
+        fenetre = webview.create_window(titre, url, width=1400, height=900, min_size=(800, 560),
+                                        background_color="#141832", maximized=plein_ecran, text_select=True)
+        fenetre.events.closed += lambda: self._pages.pop(url, None)
+        self._pages[url] = fenetre
+        return True
+
+    def _fermer_pages(self):
+        for f in list(self._pages.values()):
+            try:
+                f.destroy()
+            except Exception:
+                pass
+        self._pages.clear()
+
     def fermer(self):
         """Ferme vraiment (Quitter, mise à jour)."""
+        self._fermer_pages()
         self._quitter = True
         if self.fenetre:
             try:

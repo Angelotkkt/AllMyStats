@@ -678,3 +678,376 @@ emoji("discord_statut", `${deg("gds", "#8E9BFF", "#5865F2")}
   <rect x="8.5" y="12" width="15" height="7" rx="3.5" fill="#fff"/>
   <path d="M12 13.6v3.8M10.1 15.5h3.8" stroke="#5865F2" stroke-width="1.6" stroke-linecap="round"/>
   <circle cx="19.4" cy="14.4" r="1.1" fill="#5865F2"/><circle cx="21" cy="16.6" r="1.1" fill="#5865F2"/>`);
+
+// ================= Icônes des jeux en pixel art =================
+// Pas de logo officiel (ce sont des marques) : une tuile à la couleur du jeu + un objet emblématique,
+// dessiné à la main en pixels (16 × 16). Chaque ligne : 16 caractères, chaque caractère une couleur de la palette.
+function pixels(lignes, palette, x = 4, y = 4, taille = 1.5) {
+  let r = "";
+  lignes.forEach((l, j) => {
+    let i = 0;
+    while (i < l.length) {
+      const c = l[i];
+      if (!palette[c]) { i++; continue; }
+      let k = i;
+      while (k < l.length && l[k] === c) k++;
+      r += `<rect x="${i}" y="${j}" width="${k - i}" height="1" fill="${palette[c]}"/>`;
+      i = k;
+    }
+  });
+  return `<g transform="translate(${x} ${y}) scale(${taille})" shape-rendering="crispEdges">${r}</g>`;
+}
+const tuilePixel = (id, a, b) => `${deg(id, a, b)}<rect x="1" y="1" width="30" height="30" rx="8" fill="url(#${id})"/>
+  <rect x="1.5" y="1.5" width="29" height="29" rx="7.5" fill="none" stroke="#fff" stroke-opacity=".22"/>
+  <rect x="3" y="3" width="26" height="12" rx="6" fill="#fff" opacity=".07"/>`;
+const iconePixel = (nom, id, a, b, ...calques) => emoji(nom, tuilePixel(id, a, b) + calques.map(([l, p]) => pixels(l, p)).join(""));
+const K = "#14152B";
+
+// Genshin Impact : une gemme-étoile (monnaie du jeu, pas son logo)
+iconePixel("jeu_genshin", "px_gen", "#3F72C0", "#152447", [[
+  ".......kk.......",
+  ".......yy.......",
+  "......kyyk......",
+  "......yWWy......",
+  ".....kyWWyk.....",
+  ".....yyWWyy.....",
+  "..kyyyyWWyyyyk..",
+  "kyyyyWWttWWyyyyk",
+  "kyyyyWWttWWyyyyk",
+  "..kyyyyWWyyyyk..",
+  ".....yyWWyy.....",
+  ".....kyWWyk.....",
+  "......yWWy......",
+  "......kyyk......",
+  ".......yy.......",
+  ".......kk.......",
+], { k: "#8A5A12", y: "#F5C542", W: "#FFF4C2", t: "#7FE3F0" }]);
+ICONES.famille_genshin_impact = ICONES.jeu_genshin;
+
+// Carte interactive : une carte pliée et une punaise
+iconePixel("carte_teyvat", "px_map", "#5B8DEF", "#22386E", [[
+  "................",
+  "................",
+  "................",
+  "................",
+  ".kkkkkkkkkkkkkk.",
+  ".kppppqqqqppppk.",
+  ".kpggpqqqqpppgk.",
+  ".kpgggqqbqppggk.",
+  ".kppgpqbbqpgggk.",
+  ".kpppdqbqqpdgpk.",
+  ".kppdpqqqqdpppk.",
+  ".kpdppqqdqppppk.",
+  ".kppppqdqqppppk.",
+  ".kppppqqqqppppk.",
+  ".kkkkkkkkkkkkkk.",
+  "................",
+], { k: "#5A3C1A", p: "#F3E3B5", q: "#E2CC92", g: "#7DBF5A", b: "#5AA9E6", d: "#B5452F" }], [[
+  "..........kkk...",
+  ".........kRRRk..",
+  ".........RwRRR..",
+  ".........RRRRR..",
+  ".........kRRRk..",
+  "..........RRR...",
+  "...........R....",
+  "...........k....",
+], { k: "#7A1414", R: "#E8433A", w: "#FFD0C8" }]);
+
+// Builds & Teams : une épée et une étoile de rareté
+iconePixel("builds_genshin", "px_bld", "#E8B04B", "#7A4E12", [[
+  "............kkk.",
+  "...........kwwk.",
+  "..........kwwWk.",
+  ".........kwwWk..",
+  "........kwwWk...",
+  ".......kwwWk....",
+  "......kwwWk.....",
+  "..k..kwwWk......",
+  "..kk.kwWk.......",
+  "...kggkk........",
+  "....gggk........",
+  "...kbgggk.......",
+  "..kbbk.kgk......",
+  ".kbbk....k......",
+  ".kok............",
+  "..k.............",
+], { k: "#2B1A08", w: "#E8EEF8", W: "#9FB0C8", g: "#F5C542", b: "#7A4A22", o: "#E8433A" }], [[
+  "................",
+  "..y.............",
+  ".yyy............",
+  "yyWyy...........",
+  ".yyy............",
+  "..y.............",
+], { y: "#FFE07A", W: "#FFFFFF" }]);
+
+// Blox Fruits : un fruit du démon à spirales
+iconePixel("jeu_bloxfruits", "px_bf", "#2F9BE0", "#123C73", [[
+  "........gg......",
+  ".......gGg......",
+  "......kkbkk.....",
+  "....kkppppkk....",
+  "...kppPPPPppk...",
+  "..kpPPpppPPPpk..",
+  "..kpPpPPPpPPpk..",
+  ".kppPpPpPpPPppk.",
+  ".kpPPpPpPPpPPpk.",
+  ".kpPpPPpppPpPpk.",
+  ".kppPpPPPPpPppk.",
+  "..kpPpppppPPpk..",
+  "..kppPPPPPPppk..",
+  "...kppppppppk...",
+  "....kkppppkk....",
+  "......kkkk......",
+], { k: "#2A0F45", p: "#7A3DC8", P: "#C9A0FF", g: "#4CC26A", G: "#9BEA7A", b: "#5A3A1A" }]);
+
+// Valorant : un engin explosif à cœur lumineux (pas le logo)
+iconePixel("jeu_valorant", "px_val", "#FF5A66", "#7E1020", [[
+  "......kkkk......",
+  ".....kwwwwk.....",
+  ".....kkkkkk.....",
+  "....kddddddk....",
+  "....kdccccdk....",
+  "...kddcwwcddk...",
+  "...kdcwccwcdk...",
+  "...kdcwccwcdk...",
+  "...kdcwccwcdk...",
+  "...kddcwwcddk...",
+  "....kdccccdk....",
+  "....kddddddk....",
+  "...kkkkkkkkkk...",
+  "..kddddddddddk..",
+  "..kkkkkkkkkkkk..",
+  "................",
+], { k: "#1E1320", w: "#F2F0F4", d: "#4A4458", c: "#5FF2E0" }]);
+
+// Counter-Strike 2 : une charge explosive avec son clavier
+iconePixel("jeu_cs2", "px_cs", "#F2B246", "#8A4A10", [[
+  "................",
+  "...rr......bb...",
+  "....rr....bb....",
+  ".kkkkkkkkkkkkkk.",
+  ".kttttttttttttk.",
+  ".ktkkkkkkkttRtk.",
+  ".ktkgggggkttttk.",
+  ".ktkgGgGgkttttk.",
+  ".ktkgggggkttttk.",
+  ".ktkkkkkkkttttk.",
+  ".kttttttttttttk.",
+  ".ktwtwtwtwtwttk.",
+  ".kttttttttttttk.",
+  ".kkkkkkkkkkkkkk.",
+  "..ss........ss..",
+  "................",
+], { k: "#1F1A10", t: "#B8A271", r: "#E8433A", b: "#4AA3F0", R: "#FF3B30", g: "#1E4D2B", G: "#7CFF8A", w: "#F0E6C8", s: "#3B3420" }]);
+
+// Fortnite : une pioche
+iconePixel("jeu_fortnite", "px_fn", "#A77BFF", "#2E46C8", [[
+  "................",
+  "..kkkkkkkkkkkk..",
+  ".kwwwwwwwwwwwwk.",
+  "kwwWkkkbbkkkWwwk",
+  "kwWk...bb...kWwk",
+  "kwk....bb....kwk",
+  "kk.....bb.....kk",
+  ".......bb.......",
+  ".......BB.......",
+  ".......bb.......",
+  ".......bb.......",
+  ".......BB.......",
+  ".......bb.......",
+  ".......bb.......",
+  ".......kk.......",
+  "................",
+], { k: "#1C1440", w: "#D9E4FF", W: "#8EA6F5", b: "#9A6234", B: "#5FD3FF" }]);
+
+// Apex Legends : un bouclier à chevrons
+iconePixel("jeu_apex", "px_apx", "#FF6450", "#7A1414", [[
+  "..kkkkkkkkkkkk..",
+  "..kwwwwwwwwwwk..",
+  "..kwccccccccwk..",
+  "..kwcccwwcccwk..",
+  "..kwccwccwccwk..",
+  "..kwcwcwwcwcwk..",
+  "..kwwcwccwcwwk..",
+  "..kwccwccwccwk..",
+  "..kwcwcwwcwcwk..",
+  "..kwwccwwccwwk..",
+  "...kwccccccwk...",
+  "...kwwccccwwk...",
+  "....kwwccwwk....",
+  ".....kwwwwk.....",
+  "......kkkk......",
+  "................",
+], { k: "#24101A", w: "#F4F1F6", c: "#B57BFF" }]);
+
+// ----- Call of Duty : une tuile par titre, chacun son objet
+iconePixel("famille_call_of_duty", "px_cod", "#AEB6C4", "#4A5262", [[
+  "......kkkk......",
+  "....kk.ww.kk....",
+  "...k...ww...k...",
+  "..k....ww....k..",
+  ".k.....ww.....k.",
+  ".k.....ww.....k.",
+  "k......rr......k",
+  "kwwwwwrRRrwwwwwk",
+  "kwwwwwrRRrwwwwwk",
+  "k......rr......k",
+  ".k.....ww.....k.",
+  ".k.....ww.....k.",
+  "..k....ww....k..",
+  "...k...ww...k...",
+  "....kk.ww.kk....",
+  "......kkkk......",
+], { k: "#20242E", w: "#F2F4F8", r: "#C42B2B", R: "#FF5A4A" }]);
+// Black Ops 6 : une plaque d'identité
+iconePixel("jeu_cod_bo6", "px_bo6", "#F0AE48", "#7A4410", [[
+  "..c.c.c.c.c.....",
+  ".c.........c....",
+  "c...........c...",
+  ".c....kkkkk..c..",
+  "..c.kkssssskk.c.",
+  "...ksskkkkkssk..",
+  "...ksssssssssk..",
+  "...kskkkkkkssk..",
+  "...ksssssssssk..",
+  "...kskkkkssssk..",
+  "...ksssssssssk..",
+  "...kskkkkkkssk..",
+  "...ksssssssssk..",
+  "....kssssssssk..",
+  ".....kkkkkkkk...",
+  "................",
+], { k: "#2A1C08", s: "#D9DEE6", c: "#B8BEC8" }]);
+// Black Ops 7 : un drone
+iconePixel("jeu_cod_bo7", "px_bo7", "#F56A48", "#7A1E10", [[
+  "................",
+  ".kkkk......kkkk.",
+  ".wwww......wwww.",
+  "...kk......kk...",
+  "....kk....kk....",
+  ".....kkkkkk.....",
+  ".....kddddk.....",
+  "....kddrrddk....",
+  "....kddrrddk....",
+  ".....kddddk.....",
+  ".....kkkkkk.....",
+  "....kk....kk....",
+  "...kk......kk...",
+  ".wwww......wwww.",
+  ".kkkk......kkkk.",
+  "................",
+], { k: "#1E1210", w: "#F2E8E4", d: "#4A4A55", r: "#FF4A3A" }]);
+// Cold War : un talkie-walkie
+iconePixel("jeu_cod_coldwar", "px_cw", "#5AB0EA", "#163E6E", [[
+  "..........k.....",
+  "..........k.....",
+  "..........k.....",
+  "....kkkkkkkk....",
+  "....kddddddk....",
+  "....kdggggdk....",
+  "....kdgGGgdk....",
+  "....kdggggdk....",
+  "....kddddddk....",
+  "....kdkdkddk....",
+  "....kddddddk....",
+  "....kdkdkddk....",
+  "....kddddddk....",
+  "....kdkdkddk....",
+  "....kkkkkkkk....",
+  "................",
+], { k: "#0E1A2A", d: "#3C4A3A", g: "#1E3A28", G: "#8CFF9E" }]);
+// MW4 : des jumelles de vision nocturne
+iconePixel("jeu_cod_mw4", "px_mw4", "#8FD06A", "#2E5A1C", [[
+  "................",
+  "......kkkk......",
+  "......kddk......",
+  "...kkkkddkkkk...",
+  "..kddddddddddk..",
+  ".kkkkkddddkkkkk.",
+  ".kgggkddddkgggk.",
+  ".kgGgkddddkgGgk.",
+  ".kgggkkkkkkgggk.",
+  ".kkkkk....kkkkk.",
+  "................",
+  "................",
+  "................",
+  "................",
+  "................",
+  "................",
+], { k: "#121A10", d: "#3E4636", g: "#1C4A22", G: "#9CFF7A" }]);
+// Warzone : un parachute
+iconePixel("jeu_cod_warzone", "px_wz", "#D6C266", "#5E521C", [[
+  "....kkkkkkkk....",
+  "..kkoowwoowwkk..",
+  ".koowwoowwoowwk.",
+  "kowwoowwoowwoowk",
+  "kkkkkkkkkkkkkkkk",
+  ".k....k..k....k.",
+  "..k...k..k...k..",
+  "...k..k..k..k...",
+  "....k.k..k.k....",
+  ".....kk..kk.....",
+  "......kkkk......",
+  "......kbbk......",
+  "......kbbk......",
+  ".....kbbbbk.....",
+  ".....kk..kk.....",
+  "................",
+], { k: "#221E0A", o: "#F07A2A", w: "#F4EED8", b: "#5A6A3A" }]);
+// Warzone MW4 : une caisse de ravitaillement
+iconePixel("jeu_cod_warzone_mw4", "px_wz4", "#62D0AE", "#13513F", [[
+  "................",
+  "................",
+  "..kkkkkkkkkkkk..",
+  "..kccccccccccK..",
+  "..kckkkkkkkkcK..",
+  "..kcktccccvtcK..",
+  "..kckcvccvcccK..",
+  "..kckccvvcccck..",
+  "..kckcvccvcckK..",
+  "..kckvccccvkcK..",
+  "..kcktkkkkktcK..",
+  "..kccccccccccK..",
+  "..kkkkkkkkkkkk..",
+  "...ss......ss...",
+  "................",
+  "................",
+], { k: "#1A140A", K: "#1A140A", c: "#B07A3A", t: "#D9A35A", v: "#7A4E1E" }]);
+// MW3 (2023) : un casque de combat
+iconePixel("jeu_cod_mw3", "px_mw3", "#A898F4", "#3A2E86", [[
+  "................",
+  "................",
+  "................",
+  ".....kkkkkk.....",
+  "...kkhhhhhhkk...",
+  "..khhHhhhhhhhk..",
+  ".khhHhhhhhhhhhk.",
+  ".khHhhhhhhhhhhk.",
+  ".khhhhhhhhhhhhk.",
+  "kkkkkkkkkkkkkkkk",
+  "kssk........kssk",
+  ".kk..........kk.",
+  "................",
+  "................",
+  "................",
+  "................",
+], { k: "#14102A", h: "#5A6A46", H: "#8A9A6E", s: "#2E3424" }]);
+// MW2 (2022) : un masque à gaz
+iconePixel("jeu_cod_mw2", "px_mw2", "#66C4D6", "#14505E", [[
+  ".........kkk....",
+  "........k...k...",
+  "........k...k...",
+  ".....kkkkkk.k...",
+  ".....kmmmmkk....",
+  "....kkkkkkkk....",
+  "...kggGggGggk...",
+  "..kgGggGggGggk..",
+  "..kggggggggggk..",
+  "..kgGggGggGggk..",
+  "..kggggggggggk..",
+  "..kgGggGggGggk..",
+  "...kggggggggk...",
+  "....kggggggk....",
+  ".....kkkkkk.....",
+  "................",
+], { k: "#0E1A1E", m: "#C8D0D6", g: "#3E5A2E", G: "#7E9A5A" }]);
