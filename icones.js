@@ -564,3 +564,37 @@ emoji("bf_arme", `<path d="M4 12h20l3-2v6h-6l-2 3h-4l-1 4H9l1-6H4z" fill="#8C95A
 emoji("bf_fruit", `${rad("gbf", "#C79BFF", "#6A2FC9")}<circle cx="16" cy="18" r="10.5" fill="url(#gbf)" stroke="#3A1477" stroke-width="1.3"/>
   <path d="M11 15c2-3 4 1 6-2s4 0 5 2M10 20c2-2 4 1 6-1s4 1 6 0" stroke="#EADBFF" stroke-width="1.4" fill="none" stroke-linecap="round"/>
   <path d="M16 7.5c0-2 1-3.5 3-4.5" stroke="#5B3A12" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M17.5 5.5c2.5-1.5 5-.5 6 1-2 1.5-4.5 1-6-1z" fill="#3FC46B"/>`);
+
+// ---------- Builds & Teams (Genshin) ----------
+emoji("builds_genshin", `${deg("gbg", "#FFE7A6", "#E8B04B")}
+  <path d="M5 6.5c4-1.6 7.6-1.2 11 1.2v19c-3.4-2.4-7-2.8-11-1.2z" fill="url(#gbg)" stroke="#7A5418" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M27 6.5c-4-1.6-7.6-1.2-11 1.2v19c3.4-2.4 7-2.8 11-1.2z" fill="#F6D27E" stroke="#7A5418" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="${ETOILE4}" transform="translate(18.6 9.2) scale(.27)" fill="#fff8e0" stroke="#B9852C" stroke-width="2.4"/>
+  <path d="M8 11.5h5M8 14.5h5M8 17.5h4" stroke="#9A6C22" stroke-width="1.1" stroke-linecap="round"/>`);
+emoji("loupe", `<circle cx="13.5" cy="13.5" r="8" fill="#2E3570" stroke="#9AA3C7" stroke-width="2.4"/>
+  <path d="M19.5 19.5l7 7" stroke="#9AA3C7" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M9.6 11.2a4.6 4.6 0 0 1 3.4-2.6" stroke="#EEF0FA" stroke-width="1.6" stroke-linecap="round" fill="none"/>`);
+emoji("artefact", `${rad("gaf", "#FFF1C9", "#E0A43A")}
+  <g transform="translate(16 15)">${[0, 72, 144, 216, 288].map((a) =>
+    `<ellipse cx="0" cy="-7" rx="4.3" ry="7" transform="rotate(${a})" fill="url(#gaf)" stroke="#8C5E1C" stroke-width="1"/>`).join("")}
+  <circle r="3.4" fill="#7FD3E8" stroke="#2C6E80" stroke-width="1"/></g>
+  <path d="M16 23v7" stroke="#5E8C3A" stroke-width="2" stroke-linecap="round"/>`);
+emoji("equipe", `${[[6, "#ef7a35"], [12.7, "#4cc2f1"], [19.3, "#a5c83b"], [26, "#b08fc2"]].map(([x, c]) =>
+    `<circle cx="${x}" cy="12" r="3.6" fill="${c}"/><path d="M${x - 4.6} 25c.4-5 2.2-7.6 4.6-7.6s4.2 2.6 4.6 7.6z" fill="${c}"/>`).join("")}
+  <path d="M2 27.5h28" stroke="#9AA3C7" stroke-width="1.4" stroke-linecap="round"/>`);
+
+// ---------- Spotify (dessin maison : casque + note, pas le logo) ----------
+emoji("jeu_spotify", `${deg("gsp", "#3BE08A", "#128A4B")}
+  <rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="url(#gsp)"/>
+  <path d="M8 19v-3a8 8 0 0 1 16 0v3" fill="none" stroke="#0B2A1A" stroke-width="2.2" stroke-linecap="round"/>
+  <rect x="6.2" y="17.5" width="4.4" height="7.5" rx="2" fill="#0B2A1A"/>
+  <rect x="21.4" y="17.5" width="4.4" height="7.5" rx="2" fill="#0B2A1A"/>
+  <path d="M17.5 10.5v8.3" stroke="#F2FFF6" stroke-width="1.7" stroke-linecap="round"/>
+  <path d="M17.5 10.5l3.4 1.2" stroke="#F2FFF6" stroke-width="1.7" stroke-linecap="round"/>
+  <ellipse cx="15.6" cy="19.2" rx="2.3" ry="1.8" fill="#F2FFF6"/>`);
+emoji("musique", `<path d="M12 24V8l14-3v15" fill="none" stroke="#3BE08A" stroke-width="2.2" stroke-linejoin="round"/>
+  <ellipse cx="8.5" cy="24" rx="4" ry="3.2" fill="#3BE08A"/><ellipse cx="22.5" cy="20" rx="4" ry="3.2" fill="#3BE08A"/>`);
+emoji("son", `<path d="M5 12.5h5l7-6v19l-7-6H5z" fill="#FFC44D" stroke="#7A5418" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M21 11.5a6 6 0 0 1 0 9M24.5 8a11 11 0 0 1 0 16" fill="none" stroke="#FFC44D" stroke-width="2" stroke-linecap="round"/>`);
+emoji("son_coupe", `<path d="M5 12.5h5l7-6v19l-7-6H5z" fill="#9AA3C7" stroke="#4A5280" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M21 12.5l7 7M28 12.5l-7 7" stroke="#FF6B5E" stroke-width="2.2" stroke-linecap="round"/>`);
