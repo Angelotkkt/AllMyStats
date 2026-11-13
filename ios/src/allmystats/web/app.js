@@ -83,6 +83,8 @@ async function demarrer() {
   }
   afficherListeJeux();
   await chargerAppli();
+  // Page rechargée (mise à jour…) : une carte restée posée dans la fenêtre est d'abord retirée
+  if (etat.appli?.fenetre_native) api("/api/carte-collee", { method: "POST", body: { action: "cacher" } }).catch(() => {});
   setInterval(chargerAppli, 60 * 1000);
   if (IOS && !etat.appli?.lie) return afficherLiaison();   // première ouverture sur iPhone : on relie au PC
   let memo = null;
@@ -1579,6 +1581,8 @@ async function montrerCarteCollee(jeu, carte) {
       return;
     }
     etat.carteCollee = null;
+    // Nouvelle application : si la carte ne peut pas être posée ici, elle s'ouvre dans sa propre fenêtre
+    if (etat.appli?.fenetre_native) return montrerCarteFenetreNative(jeu, carte);
     afficherCarteDansCadre(carte, rep.raison);
   } catch (e) {
     etat.carteCollee = null;
@@ -1631,7 +1635,6 @@ async function chargerCarte(jeu, carte) {
       <a class="bouton-lien" href="${esc(carte.url)}" target="_blank" rel="noopener">${ICONES.jeu}Ouvrir ${esc(carte.nom)}</a></div>`;
     return;
   }
-  if (carte.collee && etat.appli?.fenetre_native) return montrerCarteFenetreNative(jeu, carte);
   if (carte.collee) return montrerCarteCollee(jeu, carte);
   let integrable = null;
   try {

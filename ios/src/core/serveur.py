@@ -624,6 +624,22 @@ class Gestionnaire(BaseHTTPRequestHandler):
                 except amis.ErreurAmis as e:
                     return self._erreur(str(e))
                 return self._erreur("Route inconnue.", 404)
+            if m == ["api", "carte-collee"] and MODE.get("fenetre"):
+                # Nouvelle application : la vraie page posée dans la fenêtre d'AllMyStats, sur le cadre
+                f, action = MODE["fenetre"], corps.get("action")
+                try:
+                    if action == "cacher":
+                        return self._json({"ok": f.cacher_incrustation()})
+                    if action == "placer":
+                        return self._json({"ok": f.placer_incrustation(corps.get("zone") or {})})
+                    jeu = JEUX.get(str(corps.get("jeu") or ""))
+                    carte = next((c for c in getattr(jeu, "cartes_en_ligne", []) if c["id"] == corps.get("carte")), None)
+                    if not carte:
+                        return self._erreur("Carte inconnue.")
+                    return self._json({"ok": f.incruster(carte["url"], corps.get("zone") or {}), "mode": "OK"})
+                except Exception as e:   # noqa: BLE001
+                    traceback.print_exc()
+                    return self._json({"ok": False, "raison": "fenetre", "detail": str(e)})
             if m == ["api", "carte-collee"]:   # la carte connectée posée dans la fenêtre d'AllMyStats
                 action = corps.get("action")
                 if action == "cacher":

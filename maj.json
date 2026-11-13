@@ -1,6 +1,7 @@
 {
-  "version": "2.28.0",
+  "version": "2.28.1",
   "nouveautes": [
+    "Interactive Map : la carte HoYoLAB s'affiche directement dans la page d'AllMyStats (plus de fenêtre à part)",
     "Nouvelles icônes des jeux en pixel art, et la carte HoYoLAB dans sa propre fenêtre AllMyStats (connexion gardée)",
     "Correction : le redémarrage après l'installation de la nouvelle application (erreur « Failed to load Python DLL »)",
     "Nouvelle application AllMyStats : une vraie fenêtre Windows (plus de navigateur), et un fond animé aux couleurs du jeu",
@@ -78,5 +79,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "ffdbce80e8cbcff86d7ef243170cb355e34af7e920923ed3c11cc72b0aa4d32c"
+  "sha256": "ac8e98753c5c56862b51bcd3edcd573b5d584c31bb77b5cb458f4f4ad04e6df0"
 }

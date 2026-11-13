@@ -102,6 +102,97 @@ class FenetreNative:
         self._pages[url] = fenetre
         return True
 
+    # ----- une page posée DANS la fenêtre (ex. carte HoYoLAB à la place du cadre de la page)
+    # C'est un second affichage WebView2 ajouté dans la même fenêtre Windows, placé exactement sur le cadre
+    # mesuré par la page d'AllMyStats. Il partage le profil de la fenêtre : même connexion, gardée.
+    # Le site est affiché tel quel (on ne contourne pas son refus d'être mis dans une autre page).
+
+    def _sur_fil_fenetre(self, fonction):
+        from System import Action
+        forme = self.fenetre.native
+        resultat = {}
+
+        def faire():
+            try:
+                resultat["valeur"] = fonction(forme)
+            except Exception as e:   # noqa: BLE001 — on remonte l'erreur au fil appelant
+                resultat["erreur"] = e
+        if forme.InvokeRequired:
+            forme.Invoke(Action(faire))
+        else:
+            faire()
+        if "erreur" in resultat:
+            raise resultat["erreur"]
+        return resultat.get("valeur")
+
+    @staticmethod
+    def _affichage_principal(controle):
+        for c in controle.Controls:
+            if c.GetType().Name == "WebView2":
+                return c
+            trouve = FenetreNative._affichage_principal(c)
+            if trouve is not None:
+                return trouve
+        return None
+
+    @staticmethod
+    def _rectangle(zone):
+        from System.Drawing import Rectangle
+        dpr = float(zone.get("dpr") or 1)
+        x, y = int(round(float(zone.get("x") or 0) * dpr)), int(round(float(zone.get("y") or 0) * dpr))
+        l, h = int(round(float(zone.get("l") or 0) * dpr)), int(round(float(zone.get("h") or 0) * dpr))
+        return Rectangle(max(0, x), max(0, y), max(50, l), max(50, h))
+
+    def incruster(self, url, zone):
+        def faire(forme):
+            from System.Drawing import Color
+            from Microsoft.Web.WebView2.WinForms import WebView2
+            vue = getattr(self, "_incrust", None)
+            if vue is None:
+                principal = self._affichage_principal(forme)
+                if principal is None or principal.CoreWebView2 is None:
+                    raise RuntimeError("affichage principal introuvable")
+                vue = WebView2()
+                vue.DefaultBackgroundColor = Color.FromArgb(255, 20, 24, 50)
+                forme.Controls.Add(vue)
+                self._incrust, self._incrust_url, self._incrust_a_charger = vue, None, None
+
+                def pret(expediteur, args):
+                    if args.IsSuccess and self._incrust_a_charger:
+                        expediteur.CoreWebView2.Navigate(self._incrust_a_charger)
+                        self._incrust_url, self._incrust_a_charger = self._incrust_a_charger, None
+                vue.CoreWebView2InitializationCompleted += pret
+                vue.EnsureCoreWebView2Async(principal.CoreWebView2.Environment)
+            vue.Bounds = self._rectangle(zone)
+            vue.Visible = True
+            vue.BringToFront()
+            if url != self._incrust_url:
+                if vue.CoreWebView2 is not None:
+                    vue.CoreWebView2.Navigate(url)
+                    self._incrust_url = url
+                else:
+                    self._incrust_a_charger = url
+            return True
+        return self._sur_fil_fenetre(faire)
+
+    def placer_incrustation(self, zone):
+        def faire(forme):
+            vue = getattr(self, "_incrust", None)
+            if vue is not None and vue.Visible:
+                vue.Bounds = self._rectangle(zone)
+            return True
+        return self._sur_fil_fenetre(faire)
+
+    def cacher_incrustation(self):
+        def faire(forme):
+            vue = getattr(self, "_incrust", None)
+            if vue is not None:
+                vue.Visible = False
+            return True
+        if getattr(self, "_incrust", None) is None:
+            return True
+        return self._sur_fil_fenetre(faire)
+
     def _fermer_pages(self):
         for f in list(self._pages.values()):
             try:
