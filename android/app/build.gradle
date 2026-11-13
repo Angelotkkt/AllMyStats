@@ -1,0 +1,49 @@
+plugins {
+    id "com.android.application"
+}
+
+def versionAms = System.getenv("APP_VERSION") ?: "2.0.0"
+def numero = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
+android {
+    namespace "io.github.angelotkkt.allmystats"
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "io.github.angelotkkt.allmystats"
+        minSdk 24
+        targetSdk 34
+        versionCode numero
+        versionName versionAms
+    }
+
+    signingConfigs {
+        release {
+            // La clé de signature vient du secret GitHub ANDROID_KEYSTORE (jamais dans le dépôt)
+            def cle = file("../cle.jks")
+            if (cle.exists()) {
+                storeFile cle
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias "allmystats"
+                keyPassword System.getenv("KEYSTORE_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig file("../cle.jks").exists() ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Le lecteur de QR code de Google (fourni par les services Google Play : pas besoin d'autoriser l'appareil photo)
+    implementation "com.google.android.gms:play-services-code-scanner:16.1.0"
+}

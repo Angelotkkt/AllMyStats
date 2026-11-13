@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AllMyStats" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">#141832</item>
+        <item name="android:colorAccent">#FFC44D</item>
+        <item name="android:windowBackground">#141832</item>
+        <item name="android:statusBarColor">#12162E</item>
+        <item name="android:navigationBarColor">#12162E</item>
+    </style>
+</resources>

@@ -1,6 +1,8 @@
 {
-  "version": "2.17.0",
+  "version": "2.18.0",
   "nouveautes": [
+    "AllMyStats sur ton téléphone : appli Android reliée à ton PC par le Wi-Fi (Paramètres > Téléphone)",
+    "L'interface s'adapte aux petits écrans (menu des jeux en tiroir)",
     "Call of Duty est de retour (la 2.16.0 l'empêchait de se charger)",
     "Nouveau : Counter-Strike 2 (Steam + Leetify : Premier, K/D, headshots, dernières parties)",
     "Nouveau : Fortnite (victoires, K/D, tops, passe de combat, saison en cours)",
@@ -61,5 +63,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "72532269d1170a0cced3a115924b8b9ba10f8724bb0d4519aed4d0c566010ed9"
+  "sha256": "7faebfa4a04ff16d91270ed8e8c7d36a22cf421feb10200dd94bfa5ea7fc84b8"
 }

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AllMyStats</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <div class="marque"><img src="icone.png" alt=""><div><b>AllMyStats</b><small>tes jeux, tes stats</small></div></div>
+  <h1>Relie ton téléphone à ton PC</h1>
+  <p>Tes stats sont calculées par AllMyStats sur ton PC. Le téléphone les affiche par ton Wi-Fi.</p>
+
+  <div class="carte">
+    <div class="etape"><i>1</i><span>Sur ton PC : AllMyStats &gt; <b>Paramètres</b> &gt; <b>Téléphone</b>, coche
+      « Voir AllMyStats sur mon téléphone ».</span></div>
+    <div class="etape"><i>2</i><span>Le téléphone doit être sur le <b>même Wi-Fi</b> que le PC.</span></div>
+    <div class="etape"><i>3</i><span>Scanne le QR code affiché sur le PC.</span></div>
+    <button class="principal" id="scanner">Scanner le QR code</button>
+  </div>
+
+  <div id="message" class="message" role="alert"></div>
+
+  <div class="carte">
+    <p style="margin-bottom:4px"><b>Ou tape l'adresse et le code</b> affichés sous le QR code :</p>
+    <label for="hote">Adresse du PC</label>
+    <input id="hote" inputmode="decimal" autocomplete="off" placeholder="192.168.1.20:8790">
+    <label for="code">Code</label>
+    <input id="code" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder="ABCD-2345">
+    <button class="secondaire" id="relier" style="margin-top:14px">Relier</button>
+  </div>
+  <p class="petit" id="version"></p>
+</main>
+<script>
+  const A = window.Android;
+  const msg = document.getElementById("message");
+  window.afficherMessage = (texte) => {
+    msg.textContent = texte; msg.classList.add("visible");
+    document.body.classList.remove("attente");
+    msg.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+  document.getElementById("scanner").onclick = () => { msg.classList.remove("visible"); A && A.scannerQr(); };
+  document.getElementById("relier").onclick = () => {
+    const h = document.getElementById("hote").value.trim(), c = document.getElementById("code").value.trim();
+    if (!h || !c) return afficherMessage("Remplis l'adresse et le code affichés sur ton PC.");
+    msg.classList.remove("visible");
+    document.body.classList.add("attente");
+    A && A.relierPc(h, c);
+  };
+  const avant = A ? A.pcRelie() : "";
+  if (avant) document.getElementById("hote").value = avant;
+  if (A) document.getElementById("version").textContent = "Version " + A.version();
+</script>
+</body>
+</html>

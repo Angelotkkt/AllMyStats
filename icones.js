@@ -635,3 +635,9 @@ emoji("apex_rang", `${deg("gar", "#9FE6FF", "#3C7FD8")}
 emoji("apex_legende", `<circle cx="16" cy="11" r="6" fill="#FF8A6A"/>
   <path d="M5 28c1.5-7 5.5-10 11-10s9.5 3 11 10z" fill="#DA3A35"/>
   <path d="M12.5 10.5h7" stroke="#3A1010" stroke-width="2" stroke-linecap="round"/>`);
+emoji("menu", `<path d="M6 9h20M6 16h20M6 23h20" stroke="#EEF0FA" stroke-width="2.6" stroke-linecap="round"/>`);
+emoji("telephone", `${deg("gtel", "#5EE0D2", "#2A8FB8")}
+  <rect x="9" y="2.5" width="14" height="27" rx="3.5" fill="#1C2146" stroke="url(#gtel)" stroke-width="2"/>
+  <rect x="11.5" y="6.5" width="9" height="16" rx="1.5" fill="url(#gtel)"/>
+  <path d="M13.5 18l2-3 2 2 2-4" fill="none" stroke="#1C2146" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="16" cy="26" r="1.3" fill="#9AA3C7"/>`);

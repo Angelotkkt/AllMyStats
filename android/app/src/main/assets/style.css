@@ -1,0 +1,32 @@
+:root { --nuit: #141832; --encre: #1C2146; --encre-2: #242A57; --trait: #2E3570; --brume: #9AA3C7; --craie: #EEF0FA;
+  --corail: #FF6B5E; --or: #FFC44D; --turquoise: #33D1C1; }
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: var(--nuit); color: var(--craie);
+  font: 16px/1.5 "Segoe UI", Roboto, system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+main { max-width: 520px; margin: 0 auto; padding: 28px 20px 40px; }
+.marque { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.marque img { width: 56px; height: 56px; }
+.marque b { display: block; font: 700 26px/1 "Bahnschrift", Roboto, sans-serif;
+  background: linear-gradient(90deg, var(--corail), var(--or) 50%, var(--turquoise)); -webkit-background-clip: text; color: transparent; }
+.marque small { color: var(--brume); font-size: 14px; }
+h1 { font: 700 23px/1.2 "Bahnschrift", Roboto, sans-serif; margin: 0 0 8px; }
+p { margin: 0 0 14px; color: #C8CDEA; }
+.carte { background: var(--encre); border: 1.5px solid var(--trait); border-radius: 20px; padding: 18px; margin: 16px 0; }
+.etape { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.etape i { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 700 14px/1 sans-serif;
+  font-style: normal; background: var(--or); color: #12152B; }
+button, .bouton { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px;
+  border-radius: 14px; border: 1.5px solid transparent; font: 700 17px/1 inherit; cursor: pointer; }
+.principal { background: var(--or); color: #12152B; }
+.secondaire { background: var(--encre-2); color: var(--craie); border-color: var(--trait); }
+button + button { margin-top: 10px; }
+label { display: block; font-size: 14px; color: var(--brume); margin: 12px 0 6px; }
+input { width: 100%; min-height: 52px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--trait);
+  background: var(--nuit); color: var(--craie); font: 600 18px/1 inherit; }
+input:focus { outline: none; border-color: var(--or); }
+#code { letter-spacing: 3px; text-transform: uppercase; }
+.message { display: none; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--corail);
+  background: rgba(255, 107, 94, .1); margin: 14px 0; }
+.message.visible { display: block; }
+.attente { opacity: .6; pointer-events: none; }
+.petit { font-size: 13px; color: var(--brume); }

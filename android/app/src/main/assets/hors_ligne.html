@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AllMyStats</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <div class="marque"><img src="icone.png" alt=""><div><b>AllMyStats</b><small id="pc"></small></div></div>
+  <h1>Ton PC ne répond pas</h1>
+  <p>Vérifie que :</p>
+  <div class="carte">
+    <div class="etape"><i>1</i><span>ton PC est allumé et qu'AllMyStats tourne (« Toujours actif » dans les Paramètres
+      le garde lancé même fenêtre fermée) ;</span></div>
+    <div class="etape"><i>2</i><span>ton téléphone est sur le <b>même Wi-Fi</b> que le PC (pas en 4G/5G) ;</span></div>
+    <div class="etape"><i>3</i><span>« Téléphone » est toujours coché dans les Paramètres d'AllMyStats, et Windows
+      autorise AllMyStats sur les <b>réseaux privés</b>.</span></div>
+  </div>
+  <button class="principal" id="reessayer">Réessayer</button>
+  <button class="secondaire" id="changer">Relier un autre PC</button>
+</main>
+<script>
+  const A = window.Android;
+  if (A && A.pcRelie()) document.getElementById("pc").textContent = "PC : " + A.pcRelie();
+  document.getElementById("reessayer").onclick = () => A && A.reessayer();
+  document.getElementById("changer").onclick = () => A && A.oublierPc();
+</script>
+</body>
+</html>

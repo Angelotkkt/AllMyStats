@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AllMyStats : toutes tes stats de jeux au même endroit</title>
-<meta name="description" content="AllMyStats (AMS) est une appli Windows gratuite qui suit toute seule tes stats sur Genshin Impact, Valorant, Call of Duty, Blox Fruits et Pokémon GO.">
+<meta name="description" content="AllMyStats (AMS) est une appli Windows gratuite, avec son appli Android, qui suit toute seule tes stats sur Genshin Impact, Valorant, Call of Duty, Counter-Strike 2, Fortnite, Apex Legends et Blox Fruits.">
 <link rel="icon" href="icone.png">
 <style>
   :root {
@@ -109,6 +109,10 @@
   details ol { padding-left: 22px; }
 
   /* Bas de page */
+  .tel { display: grid; grid-template-columns: auto 1fr; gap: 48px; align-items: start; margin-bottom: 22px; }
+  .tel .telecharger { background: var(--turquoise); box-shadow: 0 5px 0 #1F8579; }
+  .tel .telecharger:hover { box-shadow: 0 3px 0 #1F8579; }
+  @media (max-width: 860px) { .tel { grid-template-columns: 1fr; gap: 28px; } }
   .final { text-align: center; padding: 84px 0; border-top: 1px dashed var(--trait); }
   .final h2 { margin-bottom: 26px; }
   footer { color: var(--brume); font-size: 13px; padding: 28px 0 48px; border-top: 1px solid var(--trait); line-height: 1.6; }
@@ -134,7 +138,7 @@
   <header>
     <a class="marque" href="#"><span class="logo" data-ico="ams"></span><b>AllMyStats</b></a>
     <nav aria-label="Sections">
-      <a href="#jeux">Les jeux</a><a href="#installer">Installer</a><a href="#questions">Questions</a>
+      <a href="#jeux">Les jeux</a><a href="#installer">Installer</a><a href="#telephone">Téléphone</a><a href="#questions">Questions</a>
     </nav>
   </header>
 
@@ -142,8 +146,9 @@
     <div class="heros">
       <div>
         <h1>Toutes tes stats de jeux, au même endroit.</h1>
-        <p class="intro">AllMyStats suit tout seul ta progression sur Genshin Impact, Valorant, Call of Duty, Blox Fruits et
-          Pokémon GO. Tu te connectes une fois, il s'occupe du reste, et il se met à jour tout seul.</p>
+        <p class="intro">AllMyStats suit tout seul ta progression sur Genshin Impact, Valorant, Call of Duty,
+          Counter-Strike 2, Fortnite, Apex Legends et Blox Fruits. Tu te connectes une fois, il s'occupe du reste,
+          et tu retrouves tout sur ton téléphone.</p>
         <a class="telecharger" id="telecharger" href="#installer">
           <span class="ico" data-ico="telecharger"></span><span id="texte-telecharger">Télécharger pour Windows</span></a>
         <div class="meta" id="meta">Gratuit · Windows 10 et 11</div>
@@ -181,8 +186,8 @@
         <article class="sticker-jeu" style="--c:#C9CED8">
           <div class="rond" data-ico="famille_call_of_duty"></div>
           <h3>Call of Duty</h3>
-          <p>BO6, BO7, Cold War, MW4, Warzone, MW3 et MW2 : ton Combat Record et ton temps de jeu.</p>
-          <span class="comment">Lecture d'écran · compte Activision</span>
+          <p>BO6, BO7, Cold War, MW4, Warzone, MW3 et MW2 : toutes tes parties importées d'un coup, et ton temps de jeu.</p>
+          <span class="comment">Données Activision · sans lecture d'écran</span>
         </article>
         <article class="sticker-jeu" style="--c:#8FB7FF">
           <div class="rond" data-ico="jeu_genshin"></div>
@@ -196,11 +201,23 @@
           <p>Niveau, Beli et fragments lus pendant que tu joues, badges, game pass et amis en ligne.</p>
           <span class="comment">Lecture d'écran · compte Roblox</span>
         </article>
-        <article class="sticker-jeu" style="--c:#3FB6E8">
-          <div class="rond" data-ico="jeu_pokemongo"></div>
-          <h3>Pokémon GO</h3>
-          <p>Niveau, PX, distance, Pokémon attrapés et PokéStops, lus sur tes captures du profil.</p>
-          <span class="comment">Captures d'écran</span>
+        <article class="sticker-jeu" style="--c:#E8A33A">
+          <div class="rond" data-ico="jeu_cs2"></div>
+          <h3>Counter-Strike 2</h3>
+          <p>Premier CS Rating, ELO FACEIT, K/D, headshots, précision et tes dernières parties.</p>
+          <span class="comment">Automatique · Steam + Leetify</span>
+        </article>
+        <article class="sticker-jeu" style="--c:#9D6BFF">
+          <div class="rond" data-ico="jeu_fortnite"></div>
+          <h3>Fortnite</h3>
+          <p>Victoires Royales, tops, K/D, niveau du passe et ta saison en cours, par mode et par appareil.</p>
+          <span class="comment">Automatique · pseudo Epic</span>
+        </article>
+        <article class="sticker-jeu" style="--c:#DA3A35">
+          <div class="rond" data-ico="jeu_apex"></div>
+          <h3>Apex Legends</h3>
+          <p>Rang et RP, niveau, tes légendes et leurs trackers, ton statut en ligne.</p>
+          <span class="comment">Automatique · pseudo EA</span>
         </article>
       </div>
     </section>
@@ -219,6 +236,30 @@
           <p>Active « Toujours actif » dans les Paramètres : tes stats, ton temps de jeu et les mises à jour
             arrivent tout seuls.</p></li>
       </ol>
+    </section>
+
+    <section id="telephone">
+      <h2>Sur ton téléphone</h2>
+      <p class="chapeau">L'appli Android affiche AllMyStats de ton PC, par ton Wi-Fi : toutes tes stats, partout dans la maison.</p>
+      <div class="tel">
+        <div>
+          <a class="telecharger" id="telecharger-android" href="#telephone">
+            <span class="ico" data-ico="telephone"></span><span id="texte-android">Télécharger pour Android</span></a>
+          <div class="meta" id="meta-android">Gratuit · Android 7 et plus</div>
+        </div>
+        <ol class="etapes">
+          <li><h3>Installe l'APK</h3>
+            <p>Ouvre AllMyStats.apk sur ton téléphone. Android demande d'autoriser l'installation depuis ton
+              navigateur : accepte, c'est normal pour une appli hors Play Store.</p></li>
+          <li><h3>Active le téléphone sur le PC</h3>
+            <p>Dans AllMyStats sur ton PC : Paramètres, Téléphone. Si Windows le demande, autorise AllMyStats sur les
+              réseaux privés.</p></li>
+          <li><h3>Scanne le QR code</h3>
+            <p>Dans l'appli du téléphone : Scanner le QR code. Elle s'ouvre ensuite directement sur tes stats.</p></li>
+        </ol>
+      </div>
+      <p class="meta">Sur iPhone, pas d'appli (Apple ne permet pas d'en installer hors App Store) : ouvre dans Safari le
+        lien affiché sous le QR code, sur ton PC, puis Partager, « Sur l'écran d'accueil ».</p>
     </section>
 
     <section>
@@ -256,7 +297,7 @@
             les trackers : la clé est gratuite (api.henrikdev.xyz, Dashboard, API Keys) et se colle une seule fois dans
             les Réglages de Valorant.</p></details>
         <details><summary>Comment mettre à jour ?</summary>
-          <p>Tu n'as rien à faire : AllMyStats vérifie toutes les 6 heures. Pour l'avoir tout de suite :
+          <p>Tu n'as rien à faire : AllMyStats vérifie toutes les 10 minutes. Pour l'avoir tout de suite :
             Paramètres, Mises à jour, Vérifier maintenant.</p></details>
       </div>
     </section>
@@ -270,7 +311,7 @@
 
   <footer>
     AllMyStats (AMS) est un projet perso, gratuit, sans lien avec HoYoverse, Riot Games, Activision, Roblox,
-    Niantic ou Scopely. Les noms des jeux appartiennent à leurs éditeurs.
+    Valve, Epic Games ou Electronic Arts. Les noms des jeux appartiennent à leurs éditeurs.
     · <a href="https://github.com/Angelotkkt/AllMyStats">Code et mises à jour sur GitHub</a>
   </footer>
 </div>
@@ -297,6 +338,21 @@
       boutons.forEach((b) => { b.setAttribute("aria-disabled", "true"); b.removeAttribute("href"); });
       document.getElementById("texte-telecharger").textContent = "Bientôt disponible";
       document.getElementById("meta").textContent = "Le téléchargement arrive très bientôt.";
+    });
+  // L'appli Android : le fichier AllMyStats.apk de la publication « android »
+  fetch(`https://api.github.com/repos/${DEPOT}/releases/tags/android`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((rel) => {
+      const apk = rel?.assets?.find((a) => /\.apk$/i.test(a.name));
+      if (!apk) throw new Error("pas encore d'APK");
+      document.getElementById("telecharger-android").href = apk.browser_download_url;
+      const mo = (apk.size / 1048576).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+      document.getElementById("meta-android").textContent = `${mo} Mo · Gratuit · Android 7 et plus`;
+    })
+    .catch(() => {
+      const b = document.getElementById("telecharger-android");
+      b.setAttribute("aria-disabled", "true"); b.removeAttribute("href");
+      document.getElementById("texte-android").textContent = "Android : bientôt disponible";
     });
   fetch("maj.json").then((r) => r.json()).then((m) => {
     const meta = document.getElementById("meta");
