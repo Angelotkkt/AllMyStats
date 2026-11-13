@@ -302,18 +302,26 @@ function afficherJeu(animer = false) {
   if (animer) animerVedette();
 }
 
+// Une adresse d'image sûre à mettre dans la page (https, caractères simples seulement)
+const urlImage = (u) => typeof u === "string" && /^https:\/\/[\w.\-\/%?=&~+]+$/.test(u) && u.length < 500 ? u : "";
+
 // La carte de joueur : l'emblème, ton pseudo, et la stat la plus importante en très grand
 function carteJoueur() {
   const { jeu, stats, connecte, compte, derniere_maj, details } = etat.donnees;
   const vedette = jeu.stats.find((s) => s.cle === jeu.vedette) || jeu.stats.find((s) => stats[s.cle].actuelle !== null);
   const valeur = vedette ? stats[vedette.cle].actuelle : null;
   const pseudo = pseudoCourt(compte) || jeu.nom;
+  // La photo du compte (Genshin, Steam, carte Valorant) et la bannière du jeu, quand on les connaît
+  const avatar = urlImage(details?.avatar), banniere = urlImage(details?.banniere);
   return `
-  <section class="carte-joueur" aria-label="Carte de joueur ${esc(jeu.nom)}">
-    <div class="deco" aria-hidden="true"><div class="filigrane">${emblemeJeu(jeu)}</div></div>
-    <div class="cj-emblem">${emblemeJeu(jeu)}</div>
+  <section class="carte-joueur ${banniere ? "avec-banniere" : ""}" aria-label="Carte de joueur ${esc(jeu.nom)}"
+      ${banniere ? `style="--banniere:url('${banniere}')"` : ""}>
+    <div class="deco" aria-hidden="true">${banniere ? `<div class="cj-banniere"></div>` : ""}<div class="filigrane">${emblemeJeu(jeu)}</div></div>
+    <div class="cj-emblem ${avatar ? "a-photo" : ""}">${avatar
+      ? `<img class="cj-photo" src="${avatar}" alt="Photo du compte" onerror="this.parentNode.classList.remove('a-photo');this.remove()"><span class="cj-mini">${emblemeJeu(jeu)}</span>`
+      : emblemeJeu(jeu)}</div>
     <div class="cj-identite">
-      <div class="cj-jeu">${jeu.famille ? esc(jeu.famille) + " " : ""}${esc(jeu.nom)}</div>
+      <div class="cj-jeu">${jeu.famille && jeu.famille !== jeu.nom ? esc(jeu.famille) + " · " : ""}${esc(jeu.nom)}</div>
       <div class="cj-pseudo">${esc(pseudo)}</div>
       ${details?.badge?.texte ? `<div class="cj-badge">${details.badge.image ? `<img src="${esc(details.badge.image)}" alt="">` : icone(details.badge.icone)}${esc(details.badge.texte)}</div>` : ""}
       <div class="cj-maj">${derniere_maj ? "Actualisé le " + esc(dateLongue(derniere_maj)) : "Pas encore actualisé"}</div>
@@ -875,7 +883,41 @@ function depuis(secondes) {
   if (s < 86400) return `il y a ${Math.round(s / 3600)} h`;
   return `il y a ${Math.round(s / 86400)} j`;
 }
-const pastille = (p) => `<span class="am-pastille" style="--c:${esc(p.couleur || "#8a8fa8")}">${esc((p.pseudo || "?").trim().charAt(0).toUpperCase())}</span>`;
+// Photo de profil : petite image en base64, ou adresse d'une photo de compte de jeu
+const photoSure = (v) => typeof v === "string" && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/]+={0,2}$/.test(v) && v.length <= 2800
+  ? v : urlImage(v);
+function pastille(p) {
+  const photo = photoSure(p.photo);
+  return `<span class="am-pastille ${photo ? "photo" : ""}" style="--c:${esc(p.couleur || "#8a8fa8")}">${photo
+    ? `<img src="${photo}" alt="" loading="lazy">` : esc((p.pseudo || "?").trim().charAt(0).toUpperCase())}</span>`;
+}
+
+// Une photo choisie sur le PC ou le téléphone -> petite image carrée JPEG (elle doit tenir dans un message)
+async function reduirePhoto(fichier) {
+  const adresse = URL.createObjectURL(fichier);
+  try {
+    const img = await new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = adresse; });
+    const cote = Math.min(img.naturalWidth, img.naturalHeight);
+    for (const taille of [72, 64, 56, 48, 40]) {
+      for (const qualite of [0.85, 0.72, 0.6, 0.5, 0.4]) {
+        const c = document.createElement("canvas");
+        c.width = c.height = taille;
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#1C2146";
+        ctx.fillRect(0, 0, taille, taille);
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, (img.naturalWidth - cote) / 2, (img.naturalHeight - cote) / 2, cote, cote, 0, 0, taille, taille);
+        const donnees = c.toDataURL("image/jpeg", qualite);
+        if (donnees.length <= 2700) return donnees;
+      }
+    }
+    throw new Error("Cette photo est trop détaillée : essaie-en une autre.");
+  } catch (e) {
+    throw new Error(e?.message || "Cette image ne s'ouvre pas : choisis une photo JPEG ou PNG.");
+  } finally {
+    URL.revokeObjectURL(adresse);
+  }
+}
 
 async function afficherPageAmis(frais = false) {
   etat.jeuActif = "_amis";
@@ -917,6 +959,14 @@ function blocMoiAmis(moi) {
     <div class="am-form">
       <label class="am-champ"><span>Ton pseudo (ce que tes amis verront)</span>
         <input id="am-pseudo" maxlength="24" value="${esc(moi.pseudo)}" placeholder="Ex. Angelo" autocomplete="off"></label>
+      <div class="am-champ"><span>Ta photo de profil</span>
+        <div class="am-photo-choix">
+          <span id="am-apercu">${pastille(moi)}</span>
+          <label class="secondaire am-fichier" tabindex="0">Choisir une photo<input type="file" accept="image/*" id="am-fichier" hidden></label>
+          ${(moi.photos_jeux || []).map((p) => `<button type="button" class="discret am-photo-jeu" data-photo-jeu="${esc(p.photo)}"
+            title="Prendre ta photo ${esc(p.jeu)}"><img src="${urlImage(p.photo)}" alt="">${esc(p.jeu)}</button>`).join("")}
+          <button type="button" class="discret" id="am-sans-photo">Sans photo</button>
+        </div></div>
       <div class="am-champ"><span>Ta couleur</span>
         <div class="am-couleurs" role="radiogroup" aria-label="Couleur">${PALETTE_AMIS.map((c) => `<button type="button" role="radio"
           aria-checked="${c === moi.couleur}" aria-label="${c}" data-couleur="${c}" style="--c:${c}"></button>`).join("")}</div></div>
@@ -1022,17 +1072,32 @@ function dessinerPageAmis() {
   $("#am-arreter")?.addEventListener("click", (e) => {
     if (confirm("Arrêter de partager ? Ton profil en ligne sera vidé et tes amis ne verront plus tes stats.")) actionAmis("arreter", {}, e.currentTarget);
   });
-  let couleur = moi.couleur;
+  let couleur = moi.couleur, photo = moi.photo || "";
+  const apercu = () => { const a = $("#am-apercu"); if (a) a.innerHTML = pastille({ pseudo: $("#am-pseudo")?.value || moi.pseudo, couleur, photo }); };
   document.querySelectorAll(".am-couleurs [data-couleur]").forEach((b) => b.onclick = () => {
     couleur = b.dataset.couleur;
     document.querySelectorAll(".am-couleurs [data-couleur]").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+    apercu();
   });
+  $("#am-pseudo")?.addEventListener("input", apercu);
+  $("#am-fichier")?.addEventListener("change", async (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    try { photo = await reduirePhoto(f); apercu(); son("clic"); }
+    catch (err) { toast(err.message, "erreur"); }
+    e.target.value = "";
+  });
+  document.querySelector(".am-fichier")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("#am-fichier").click(); }
+  });
+  document.querySelectorAll("[data-photo-jeu]").forEach((b) => b.onclick = () => { photo = b.dataset.photoJeu; apercu(); son("clic"); });
+  $("#am-sans-photo")?.addEventListener("click", () => { photo = ""; apercu(); });
   $("#am-annuler")?.addEventListener("click", () => { amis.edition = false; dessinerPageAmis(); });
   $("#am-valider")?.addEventListener("click", async (e) => {
     const cases = [...document.querySelectorAll("[data-jeu-partage]")];
     const coches = cases.filter((c) => c.checked).map((c) => c.dataset.jeuPartage);
     const ok = await actionAmis("reglages", {
-      pseudo: $("#am-pseudo").value, couleur, actif: true,
+      pseudo: $("#am-pseudo").value, couleur, photo, actif: true,
       ...(coches.length === cases.length ? { tous_les_jeux: true } : { jeux_partages: coches }),
     }, e.currentTarget);
     if (ok) { amis.edition = false; dessinerPageAmis(); }
@@ -1864,6 +1929,8 @@ function ouvrirParametres() {
     <p class="gris petit">Conseillé : le temps de jeu, la lecture d'écran (Blox Fruits, Call of Duty) et les actualisations
       continuent même fenêtre fermée. AllMyStats reste léger (une petite vérification par minute).</p>`}
 
+    ${HORS_PC || !a.discord ? "" : sectionDiscord(a.discord)}
+
     <h3 class="section-reglages">${ICONES.son}Sons</h3>
     <label class="interrupteur">
       <input type="checkbox" id="p-sons" ${SONS.reglages.actifs ? "checked" : ""}>
@@ -1943,6 +2010,7 @@ function ouvrirParametres() {
   });
   $("#p-volume-ambiance").addEventListener("input", (e) => AMBIANCE.volume(Number(e.target.value)));
   $("#p-volume").addEventListener("change", (e) => { SONS.reglages.volume = Number(e.target.value); SONS.jouer("clic", true); });
+  brancherDiscord();
   $("#p-arriere")?.addEventListener("change", async (e) => {
     try {
       etat.appli = await api("/api/appli/arriere-plan", { method: "POST", body: { actif: e.target.checked } });
@@ -1974,6 +2042,44 @@ function ouvrirMenu() {
   $("#voile").hidden = false;
   $("#btn-menu").setAttribute("aria-expanded", "true");
 }
+// ---------- Discord : « Joue à AllMyStats » avec le logo, une description et un bouton ----------
+function sectionDiscord(d) {
+  const etatTexte = !d.actif ? "" : !d.id ? "Il manque l'identifiant de l'application Discord (voir plus bas)."
+    : d.connecte ? "Affiché sur ton statut Discord." : d.erreur ? d.erreur : "Ouvre Discord sur ce PC : le statut s'affichera tout seul.";
+  return `
+    <h3 class="section-reglages">${ICONES.discord_statut}Discord</h3>
+    <label class="interrupteur">
+      <input type="checkbox" id="p-discord" ${d.actif ? "checked" : ""}>
+      <span>Montrer AllMyStats sur mon statut Discord (logo, description, page regardée et bouton Télécharger)</span>
+    </label>
+    ${etatTexte ? `<p class="gris petit ${d.connecte ? "" : "discord-attente"}">${esc(etatTexte)}</p>` : ""}
+    ${d.id_integre ? "" : `<details class="discord-id" ${d.id ? "" : "open"}>
+      <summary>Identifiant de l'application Discord${d.id ? " : réglé" : ""}</summary>
+      <ol class="petit">
+        <li>Va sur <b>discord.com/developers/applications</b> et connecte-toi avec ton compte Discord.</li>
+        <li><b>New Application</b>, nomme-la <b>AllMyStats</b> (c'est le nom affiché après « Joue à »), accepte et crée.</li>
+        <li>Dans <b>General Information</b>, mets le logo d'AllMyStats en <b>App Icon</b>, puis copie l'<b>Application ID</b>.</li>
+        <li>Colle-le ici. Ce n'est pas un mot de passe : c'est un numéro public.</li>
+      </ol>
+      <label>Application ID
+        <input id="p-discord-id" value="${esc(d.id || "")}" inputmode="numeric" placeholder="Ex. 1234567890123456789" autocomplete="off" spellcheck="false">
+      </label>
+      <button type="button" class="secondaire" id="p-discord-ok">${ICONES.enregistrer}Enregistrer</button>
+    </details>`}`;
+}
+
+function brancherDiscord() {
+  const envoyer = async (corps, message) => {
+    try {
+      etat.appli = await api("/api/appli/discord", { method: "POST", body: corps });
+      if (message) toast(message, "info");
+    } catch (err) { toast(err.message, "erreur"); }
+  };
+  $("#p-discord")?.addEventListener("change", (e) => envoyer({ actif: e.target.checked },
+    e.target.checked ? "AllMyStats s'affichera sur ton statut Discord" : "AllMyStats ne s'affichera plus sur Discord"));
+  $("#p-discord-ok")?.addEventListener("click", () => envoyer({ id: $("#p-discord-id").value }, "Identifiant Discord enregistré"));
+}
+
 function fermerMenu() {
   if (!document.body.classList.contains("menu-ouvert")) return;
   document.body.classList.remove("menu-ouvert");

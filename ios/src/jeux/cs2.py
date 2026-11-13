@@ -299,4 +299,6 @@ class CounterStrike2(Jeu):
             bande, couleur = bande_premier(premier)
             badge = {"texte": f"Premier {premier:,}".replace(",", " "), "icone": "cs_premier"}
             tuiles["premier"] = {"texte": f"{premier:,}".replace(",", " ") + f" · {bande}"}
-        return {"etat": etat, "sections": sections, "tuiles": tuiles, **({"badge": badge} if badge else {})}
+        avatar = (profil or {}).get("avatar")
+        return {"etat": etat, "sections": sections, "tuiles": tuiles, **({"badge": badge} if badge else {}),
+                **({"avatar": avatar} if isinstance(avatar, str) and avatar.startswith("https://") else {})}

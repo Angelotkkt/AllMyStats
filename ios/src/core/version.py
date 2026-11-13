@@ -1,12 +1,13 @@
 """Version de AllMyStats. À augmenter à chaque nouvelle version."""
 
-VERSION = "2.24.2"
+VERSION = "2.25.0"
 
 # Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
 # on peut aussi le donner dans Paramètres > Mises à jour.
 DEPOT_MAJ = "Angelotkkt/AllMyStats"
 
 NOUVEAUTES = [
+    "Photo de profil dans Amis, photo du compte sur Genshin, CS2 (Steam) et Valorant (carte de joueur), et statut Discord avec logo et description",
     "Correction : erreur de certificat (« certificate has expired ») sur certains PC, pour les amis et les autres connexions",
     "Amis : nouveau serveur (ntfy.sh) pour corriger l'erreur 403 à la création du profil",
     "Amis : partage tes stats avec un code ami et compare-toi à tes amis dans un classement par jeu",

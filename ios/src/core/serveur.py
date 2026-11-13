@@ -18,7 +18,7 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlparse
 
-from core import amis, ancrage, chemins, diagnostic_ecran, mise_a_jour, reseau, surveillance, telephone, windows
+from core import amis, ancrage, chemins, diagnostic_ecran, discord, mise_a_jour, reseau, surveillance, telephone, windows
 from core.version import DEPOT_MAJ, NOUVEAUTES, VERSION
 from core.base_de_donnees import BaseDeDonnees, maintenant
 from core.config import Config
@@ -254,6 +254,43 @@ def _boucle_amis():
         time.sleep(PUBLIER_AMIS_TOUTES)
 
 
+# ---------------------------------------------------------------- Discord (statut « Joue à AllMyStats »)
+
+DISCORD = discord.Presence()
+_presence["page"] = ""
+
+
+def reglages_discord():
+    r = reglages_appli()
+    return {"actif": r.get("discord") != "non", "id": r.get("discord_id") or discord.ID_APPLICATION,
+            "id_integre": bool(discord.ID_APPLICATION)}
+
+
+def _texte_page(jeu):
+    if jeu is None:
+        return "Compare ses stats avec ses amis"
+    if getattr(jeu, "page", "") == "builds":
+        return "Prépare ses builds et ses équipes Genshin"
+    if getattr(jeu, "page", "") == "carte":
+        return "Explore la carte de Genshin"
+    return f"Regarde ses stats {jeu.nom}"
+
+
+def _boucle_discord():
+    """Toutes les 15 secondes : statut Discord affiché tant que la fenêtre d'AllMyStats est ouverte."""
+    time.sleep(5)
+    while True:
+        try:
+            r = reglages_discord()
+            if r["actif"] and r["id"] and _fenetre_ouverte():
+                DISCORD.mettre(r["id"], _presence.get("page") or "")
+            else:
+                DISCORD.effacer()
+        except Exception:
+            traceback.print_exc()
+        time.sleep(15)
+
+
 def depot_maj():
     return (reglages_appli().get("depot_maj") or DEPOT_MAJ or "").strip()
 
@@ -268,6 +305,7 @@ def etat_appli():
         "nouveautes": NOUVEAUTES,
         "arriere_plan": arriere_plan_actif(),
         "windows": os.name == "nt",
+        "discord": {**reglages_discord(), "connecte": DISCORD.connecte, "erreur": DISCORD.erreur},
         "maj": mise_a_jour.chercher(),
         "en_ligne": {
             "depot": depot_maj(),
@@ -475,6 +513,7 @@ class Gestionnaire(BaseHTTPRequestHandler):
                     return self._erreur("Ça se règle sur le PC.", 403)
                 return self._json(infos_telephone())
             if m[:2] == ["api", "amis"] and len(m) == 2:
+                _presence["page"] = _texte_page(None)
                 return self._json(AMIS.tout(forcer=self.path.endswith("?frais=1")))
             if len(m) == 4 and m[1] == "jeux" and m[3] == "connexion":
                 return self._json(CONNEXIONS.get(m[2], {"etat": "aucune"}))
@@ -496,6 +535,7 @@ class Gestionnaire(BaseHTTPRequestHandler):
             if len(m) == 3 and m[1] == "jeux":
                 jeu = self._jeu(m[2])
                 if jeu:
+                    _presence["page"] = _texte_page(jeu)
                     if jeu.famille and CONFIG.reglages(jeu.cle_reglages).get("dernier_titre") != jeu.id:
                         # Le dernier jeu de la famille regardé (sert à deviner à quoi tu joues)
                         CONFIG.enregistrer(jeu.cle_reglages, {**CONFIG.reglages(jeu.cle_reglages),
@@ -549,7 +589,8 @@ class Gestionnaire(BaseHTTPRequestHandler):
                 try:
                     if m[2] == "reglages":
                         message = AMIS.regler(actif=corps.get("actif"), pseudo=corps.get("pseudo"), couleur=corps.get("couleur"),
-                                              jeux_partages=corps.get("jeux_partages"), tous_les_jeux=bool(corps.get("tous_les_jeux")))
+                                              jeux_partages=corps.get("jeux_partages"), tous_les_jeux=bool(corps.get("tous_les_jeux")),
+                                              photo=corps.get("photo"))
                         return self._json({"message": message or "Enregistré", **AMIS.tout()})
                     if m[2] == "publier":
                         message = AMIS.publier(forcer=True)
@@ -606,6 +647,22 @@ class Gestionnaire(BaseHTTPRequestHandler):
                 nb = telephone.importer_depuis_pc(str(corps.get("hote") or ""), str(corps.get("code") or ""),
                                                   DOSSIER_DONNEES)
                 return self._json({"ok": True, "fichiers": nb})
+            if m == ["api", "appli", "discord"]:
+                r = reglages_appli()
+                if "actif" in corps:
+                    r["discord"] = "" if corps.get("actif") else "non"
+                if "id" in corps:
+                    ident = re.sub(r"\D", "", str(corps.get("id") or ""))
+                    if ident and not 17 <= len(ident) <= 21:
+                        return self._erreur("Cet identifiant n'a pas la bonne forme : c'est un nombre de 17 à 21 chiffres "
+                                            "(« Application ID » sur discord.com/developers).")
+                    r["discord_id"] = ident
+                CONFIG.enregistrer("_appli", r)
+                if r.get("discord") == "non" or not reglages_discord()["id"]:
+                    DISCORD.effacer()
+                else:
+                    DISCORD.mettre(reglages_discord()["id"], _presence.get("page") or "")
+                return self._json(etat_appli())
             if m == ["api", "appli", "arriere-plan"]:
                 regler_arriere_plan(bool(corps.get("actif")))
                 return self._json(etat_appli())
@@ -817,6 +874,7 @@ def demarrer(port=8765, ouvrir_navigateur=True, mode_appli=False, arriere_plan=F
         _installer_au_demarrage()
         threading.Thread(target=_boucle_maj, daemon=True, name="mises-a-jour").start()
         threading.Thread(target=_boucle_amis, daemon=True, name="amis").start()
+        threading.Thread(target=_boucle_discord, daemon=True, name="discord").start()
 
     serveur = None
     for essai in range(port, port + 20):

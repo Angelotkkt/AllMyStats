@@ -673,3 +673,8 @@ emoji("podium", `<rect x="11" y="10" width="10" height="19" rx="1.5" fill="#FFC4
   <rect x="21" y="20" width="9" height="9" rx="1.5" fill="#D98B4E"/>
   <text x="16" y="21" font-size="8" font-weight="700" text-anchor="middle" fill="#3A2A05">1</text>
   <path d="M16 2.5l1.3 2.7 3 .4-2.2 2 .5 3-2.6-1.4-2.6 1.4.5-3-2.2-2 3-.4z" fill="#FFE28A"/>`);
+emoji("discord_statut", `${deg("gds", "#8E9BFF", "#5865F2")}
+  <path d="M5 6.5h22a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H14l-6 5v-5H5a3 3 0 0 1-3-3v-11a3 3 0 0 1 3-3z" fill="url(#gds)"/>
+  <rect x="8.5" y="12" width="15" height="7" rx="3.5" fill="#fff"/>
+  <path d="M12 13.6v3.8M10.1 15.5h3.8" stroke="#5865F2" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="19.4" cy="14.4" r="1.1" fill="#5865F2"/><circle cx="21" cy="16.6" r="1.1" fill="#5865F2"/>`);

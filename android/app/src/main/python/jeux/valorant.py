@@ -319,6 +319,15 @@ def session_web(dossier, region_reglee=""):
     return session
 
 
+def images_carte(carte):
+    """La carte de joueur Valorant (son identifiant) -> photo de profil et bannière, comme dans le jeu.
+    Images publiques de valorant-api.com."""
+    if not isinstance(carte, str) or not re.fullmatch(r"[0-9a-fA-F-]{36}", carte):
+        return {}
+    base = f"https://media.valorant-api.com/playercards/{carte.lower()}/"
+    return {"avatar": base + "smallart.png", "banniere": base + "wideart.png"}
+
+
 def _pd(session, chemin, methode="GET", corps=None):
     req = urllib.request.Request(
         f"https://pd.{session['shard']}.a.pvp.net{chemin}", method=methode,
@@ -732,7 +741,9 @@ class Valorant(Jeu):
         if problemes and len(problemes) == 2 and not compte_hd:
             raise ErreurJeu(problemes[0])
         nom_hd = f"{compte_hd.get('name') or nom}#{compte_hd.get('tag') or tag}"
+        carte = compte_hd.get("card")
         compte = {**compte, "puuid": puuid or compte.get("puuid"), "nom": nom_hd, "region": region,
+                  "carte": (carte.get("id") if isinstance(carte, dict) else carte) or compte.get("carte"),
                   "niveau": compte_hd.get("account_level", compte.get("niveau")), "mmr": mmr,
                   "quand": time.time(), "source": "henrik", "reste": 0, "problemes": problemes}
         _ecrire(_fichier(dossier, "valo_compte.json"), compte)
@@ -776,7 +787,13 @@ class Valorant(Jeu):
             parties = dict(sorted(parties.items(), key=lambda e: e[1].get("debut", 0))[-GARDER:])
         _ecrire(chemin_parties, parties)
 
-        compte = {**compte, "puuid": puuid, "nom": session["nom"] or compte.get("nom", ""),
+        carte = compte.get("carte")
+        try:   # la carte de joueur équipée dans le jeu (pour la photo de profil)
+            identite = (_pd(session, f"/personalization/v2/players/{puuid}/playerloadout") or {}).get("Identity") or {}
+            carte = identite.get("PlayerCardID") or carte
+        except ErreurJeu:
+            pass
+        compte = {**compte, "puuid": puuid, "nom": session["nom"] or compte.get("nom", ""), "carte": carte,
                   "region": session["region"], "shard": session["shard"], "version": session["version"],
                   "source": "web" if session.get("web") else "client", "niveau": niveau, "mmr": mmr, "quand": time.time(),
                   "reste": max(0, len(nouvelles) - NOUVELLES_PAR_SYNCHRO)}
@@ -959,4 +976,4 @@ class Valorant(Jeu):
         if mmr.get("tier") is not None:
             tuiles["points_rang"] = {"texte": rang, "image": image_rang}   # les RR ont déjà leur propre case
         return {"etat": etat, "sections": sections, "tuiles": tuiles,
-                "badge": {"texte": badge, "icone": "valo_rang", "image": image_rang}}
+                "badge": {"texte": badge, "icone": "valo_rang", "image": image_rang}, **images_carte(compte.get("carte"))}

@@ -202,6 +202,7 @@ class GenshinImpact(Jeu):
             raise ErreurJeu("Mets ton UID Genshin (9 ou 10 chiffres) dans les Réglages.")
 
         valeurs, sections, etat = {}, [], []
+        images = {}
         noms = _Noms(dossier_donnees)
 
         # 1) Profil public via Enka.Network
@@ -222,6 +223,11 @@ class GenshinImpact(Jeu):
             garder("theatre", info.get("theaterActIndex"))
             garder("amities_max", info.get("fetterCount"))
             sections += self._construire_details(info, data.get("avatarInfoList"), noms)
+            try:   # la photo de profil et la carte de visite du jeu, pour l'en-tête
+                images = {k: v for k, v in (("avatar", noms.image_profil(info.get("profilePicture"))),
+                                            ("banniere", noms.image_carte_nom(info.get("nameCardId")))) if v}
+            except Exception:
+                images = {}
             nom_joueur = info.get("nickname") or uid
             if info.get("nickname"):
                 _ecrire_json(os.path.join(dossier_donnees, "genshin_compte.json"), {"pseudo": info["nickname"], "uid": uid})
@@ -285,7 +291,7 @@ class GenshinImpact(Jeu):
 
         reussies = [e["nom"] for e in etat if e["ok"]]
         message = "Récupéré : " + ", ".join(reussies) if reussies else "Rien de nouveau"
-        return valeurs, {"etat": etat, "sections": sections}, message
+        return valeurs, {"etat": etat, "sections": sections, **images}, message
 
     # ------------------------------------------------------------------
 
@@ -465,6 +471,35 @@ class _Noms:
         except Exception:
             # Pas grave : on garde l'ancienne version si on l'a
             return _lire_json(chemin) if existe else None
+
+    def image_profil(self, pp):
+        """La photo de profil choisie dans le jeu (playerInfo.profilePicture) -> adresse de l'image."""
+        if not isinstance(pp, dict):
+            return None
+        if pp.get("id"):
+            if getattr(self, "_pfps", None) is None:
+                self._pfps = (self._store(self._dossier, "gi/pfps.json", "genshin_pfps_v2.json")
+                              or self._store(self._dossier, "pfps.json", "genshin_pfps.json") or {})
+            e = self._pfps.get(str(pp["id"]))
+            chemin = e if isinstance(e, str) else (e or {}).get("IconPath") or (e or {}).get("iconPath")
+            if chemin:
+                return self._url(chemin)
+        if pp.get("avatarId"):   # ancien format : le perso affiché en photo
+            side = (self.persos.get(str(pp["avatarId"])) or {}).get("SideIconName")
+            if side:
+                return self._url(side.replace("_Side", ""))
+        return None
+
+    def image_carte_nom(self, id_carte):
+        """La carte de visite affichée sur le profil (playerInfo.nameCardId) -> adresse de l'image."""
+        if not id_carte:
+            return None
+        if getattr(self, "_cartes", None) is None:
+            self._cartes = (self._store(self._dossier, "gi/namecards.json", "genshin_cartes_v2.json")
+                            or self._store(self._dossier, "namecards.json", "genshin_cartes.json") or {})
+        e = self._cartes.get(str(id_carte))
+        chemin = e if isinstance(e, str) else (e or {}).get("Icon") or (e or {}).get("icon")
+        return self._url(chemin) if chemin else None
 
     def image_par_nom(self, nom):
         """Retrouve l'icône d'un perso OU d'une arme à partir de son nom (pour l'historique des vœux)."""

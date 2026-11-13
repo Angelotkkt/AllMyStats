@@ -38,6 +38,10 @@ CLE_CONFIG = "_amis"
 REPUBLIER_APRES = 6 * 3600      # ntfy oublie les messages au bout de 12 h
 CACHE_AMIS = 120                # secondes avant de relire le profil d'un ami
 MAX_AMIS = 50
+# Photo de profil : une petite image (envoyée dans son propre message) ou l'adresse d'une photo de compte de jeu
+PHOTO_MAX = 2800
+HOTES_PHOTO = ("enka.network", "avatars.steamstatic.com", "avatars.akamai.steamstatic.com", "steamcdn-a.akamaihd.net",
+               "media.valorant-api.com")
 # Stats qui n'ont pas de sens à comparer (elles parlent des autres, pas de toi)
 STATS_EXCLUES = {"amis_en_jeu", "joueurs_en_ligne"}
 # Stats où moins, c'est mieux
@@ -114,12 +118,30 @@ def envoyer(id_profil, compact):
         raise ErreurAmis(f"Le serveur des amis a refusé la publication (erreur {code}).")
 
 
+def photo_valide(v):
+    """Une photo acceptable : petite image JPEG/PNG/WebP en base64, ou adresse https d'une photo de compte de jeu."""
+    if not isinstance(v, str) or not v:
+        return ""
+    if re.fullmatch(r"data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}", v) and len(v) <= PHOTO_MAX:
+        return v
+    if len(v) < 400 and re.fullmatch(r"https://[\w.\-/%?=&~+]+", v):
+        hote = urllib.parse.urlparse(v).hostname or ""
+        if any(hote == h or hote.endswith("." + h) for h in HOTES_PHOTO):
+            return v
+    return ""
+
+
+def _empreinte_photo(photo):
+    return hashlib.sha256(photo.encode("utf-8")).hexdigest()[:12] if photo else ""
+
+
 def recevoir(id_profil):
-    """Le dernier profil publié dans le sujet de cet ami (dans les 12 dernières heures), ou None."""
+    """Le dernier profil publié dans le sujet de cet ami (dans les 12 dernières heures), ou None.
+    Si sa photo est une image envoyée à part, elle est ajoutée au profil (champ « a »)."""
     code, texte = _requete("GET", f"{RELAIS}/{SUJET.format(id=id_profil)}/json?poll=1&since=all")
     if code != 200:
         raise ErreurAmis(f"Le serveur des amis a répondu une erreur {code}.")
-    meilleur = None
+    meilleur, photos = None, {}
     for ligne in texte.splitlines():
         try:
             m = json.loads(ligne)
@@ -128,9 +150,19 @@ def recevoir(id_profil):
         if not isinstance(m, dict) or m.get("event") != "message":
             continue
         data = deballer(m.get("message"))
-        if data and (meilleur is None or (m.get("time") or 0) >= meilleur[0]):
+        if not data:
+            continue
+        if data.get("type") == "photo":
+            if isinstance(data.get("h"), str) and photo_valide(data.get("a")):
+                photos[data["h"]] = data["a"]
+        elif meilleur is None or (m.get("time") or 0) >= meilleur[0]:
             meilleur = (m.get("time") or 0, data)
-    return meilleur[1] if meilleur else None
+    if not meilleur:
+        return None
+    profil = meilleur[1]
+    if profil.get("ah") and not profil.get("a"):
+        profil["a"] = photos.get(profil["ah"], "")
+    return profil
 
 
 # ------------------------------------------------------------------ le contenu d'un profil
@@ -167,8 +199,14 @@ def construire_compact(reglages, jeux, derniere_valeur, est_cache):
                 valeurs[st.cle] = int(v) if v == int(v) else v
         if valeurs:
             j[jeu.id] = valeurs
-    return {"v": 1, "p": (reglages.get("pseudo") or "Joueur")[:24], "c": _couleur(reglages.get("couleur")),
-            "t": datetime.now(timezone.utc).isoformat(timespec="seconds"), "j": j}
+    compact = {"v": 1, "p": (reglages.get("pseudo") or "Joueur")[:24], "c": _couleur(reglages.get("couleur")),
+               "t": datetime.now(timezone.utc).isoformat(timespec="seconds"), "j": j}
+    photo = photo_valide(reglages.get("photo"))
+    if photo.startswith("https://"):
+        compact["a"] = photo                       # une adresse : elle tient dans le profil
+    elif photo:
+        compact["ah"] = _empreinte_photo(photo)    # une image : elle part dans son propre message
+    return compact
 
 
 def developper(compact, jeux):
@@ -193,6 +231,7 @@ def developper(compact, jeux):
             liste.append({"id": jeu.id, "nom": jeu.nom, "icone": jeu.icone or "", "couleur": jeu.couleur,
                           "famille": jeu.famille or "", "stats": stats})
     return {"pseudo": _texte(compact.get("p"), 24).strip() or "Joueur", "couleur": _couleur(compact.get("c")),
+            "photo": photo_valide(compact.get("a")),
             "maj": _texte(compact.get("t"), 40), "jeux": liste, "ferme": compact.get("f") == 1}
 
 
@@ -256,12 +295,29 @@ class Amis:
         return construire_compact(self.reglages(), self.jeux, self.bdd.derniere_valeur, self.est_cache)
 
     def mon_profil(self):
-        return developper(self._compact(), self.jeux)
+        return {**developper(self._compact(), self.jeux), "photo": photo_valide(self.reglages().get("photo"))}
+
+    def photos_de_jeux(self):
+        """Les photos de compte connues (Genshin, Steam, Valorant…), pour s'en servir comme photo de profil."""
+        res = []
+        for j in self.jeux.values():
+            try:
+                details, _ = self.bdd.lire_details(j.id)
+            except Exception:
+                continue
+            photo = photo_valide((details or {}).get("avatar") if isinstance(details, dict) else "")
+            if photo.startswith("https://") and photo not in [r["photo"] for r in res]:
+                res.append({"jeu": j.nom, "photo": photo})
+        return res
 
     # ----- réglages
 
-    def regler(self, actif=None, pseudo=None, couleur=None, jeux_partages=None, tous_les_jeux=False):
+    def regler(self, actif=None, pseudo=None, couleur=None, jeux_partages=None, tous_les_jeux=False, photo=None):
         changes = {}
+        if photo is not None:
+            if photo and not photo_valide(photo):
+                raise ErreurAmis("Cette photo ne convient pas (trop grande, ou d'un site inconnu). Choisis-en une autre.")
+            changes["photo"] = photo_valide(photo)
         if pseudo is not None:
             pseudo = re.sub(r"\s+", " ", str(pseudo)).strip()[:24]
             if not pseudo:
@@ -299,6 +355,9 @@ class Amis:
                 return None
             id_profil = r.get("id") or nouvel_id()
             try:
+                photo = photo_valide(r.get("photo"))
+                if compact.get("ah"):   # d'abord la photo, pour qu'elle soit là quand le profil arrive
+                    envoyer(id_profil, {"v": 1, "type": "photo", "h": compact["ah"], "a": photo})
                 envoyer(id_profil, compact)
             except ErreurAmis as e:
                 self._enregistrer(erreur=str(e))
@@ -401,7 +460,8 @@ class Amis:
         return {
             "moi": {"actif": r["actif"], "pseudo": r["pseudo"], "couleur": r["couleur"], "code": code_depuis_id(r.get("id")),
                     "publie_le": r.get("publie_le") or 0, "erreur": r.get("erreur") or "",
-                    "jeux_partages": r["jeux_partages"], "jeux_disponibles": disponibles, "mobile": self.mobile},
+                    "jeux_partages": r["jeux_partages"], "jeux_disponibles": disponibles, "mobile": self.mobile,
+                    "photo": photo_valide(r.get("photo")), "photos_jeux": self.photos_de_jeux()},
             "mon_profil": self.mon_profil(),
             "amis": liste,
             "moins_c_est_mieux": sorted(MOINS_C_EST_MIEUX),

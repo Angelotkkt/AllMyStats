@@ -1,6 +1,7 @@
 {
-  "version": "2.24.2",
+  "version": "2.25.0",
   "nouveautes": [
+    "Photo de profil dans Amis, photo du compte sur Genshin, CS2 (Steam) et Valorant (carte de joueur), et statut Discord avec logo et description",
     "Correction : erreur de certificat (« certificate has expired ») sur certains PC, pour les amis et les autres connexions",
     "Amis : nouveau serveur (ntfy.sh) pour corriger l'erreur 403 à la création du profil",
     "Amis : partage tes stats avec un code ami et compare-toi à tes amis dans un classement par jeu",
@@ -72,5 +73,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "6802f40ac2bc0e1cb6a6a582e059f068a7660dcb37314c58d1283ef9d77561fe"
+  "sha256": "48cc56648d75d4ca10107370d41bfdaaca841c109c7126e47d3923622988d3ec"
 }
