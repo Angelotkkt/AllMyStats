@@ -1,0 +1,7 @@
+name: essai
+on: workflow_dispatch
+jobs:
+  rien:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ok
