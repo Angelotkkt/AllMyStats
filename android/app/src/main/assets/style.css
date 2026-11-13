@@ -30,3 +30,13 @@ input:focus { outline: none; border-color: var(--or); }
 .message.visible { display: block; }
 .attente { opacity: .6; pointer-events: none; }
 .petit { font-size: 13px; color: var(--brume); }
+.avancement { display: none; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; margin: 14px 0;
+  background: var(--encre-2); border: 1.5px solid var(--trait); }
+.avancement.visible { display: flex; }
+.rond { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; border: 3px solid var(--trait); border-top-color: var(--or);
+  animation: tourne .9s linear infinite; }
+@keyframes tourne { to { transform: rotate(360deg); } }
+.centre { min-height: 90vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; }
+.centre img { width: 84px; height: 84px; }
+.centre .rond { width: 38px; height: 38px; border-width: 4px; }
+.lien-retour { background: none; border: 0; color: var(--turquoise); min-height: 44px; font-weight: 600; }

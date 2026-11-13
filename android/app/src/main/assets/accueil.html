@@ -9,17 +9,20 @@
 <body>
 <main>
   <div class="marque"><img src="icone.png" alt=""><div><b>AllMyStats</b><small>tes jeux, tes stats</small></div></div>
-  <h1>Relie ton téléphone à ton PC</h1>
-  <p>Tes stats sont calculées par AllMyStats sur ton PC. Le téléphone les affiche par ton Wi-Fi.</p>
+  <button class="lien-retour" id="retour" hidden>‹ Revenir à mes stats</button>
+  <h1 id="titre">Relie ton téléphone une fois</h1>
+  <p id="intro">Le téléphone copie tes comptes, tes clés et tes stats depuis AllMyStats sur ton PC.
+    Ensuite il marche <b>tout seul, sans le PC</b> : il récupère ses stats sur Internet.</p>
 
   <div class="carte">
     <div class="etape"><i>1</i><span>Sur ton PC : AllMyStats &gt; <b>Paramètres</b> &gt; <b>Téléphone</b>, coche
-      « Voir AllMyStats sur mon téléphone ».</span></div>
-    <div class="etape"><i>2</i><span>Le téléphone doit être sur le <b>même Wi-Fi</b> que le PC.</span></div>
+      « Relier mon téléphone ».</span></div>
+    <div class="etape"><i>2</i><span>Mets le téléphone sur le <b>même Wi-Fi</b> que le PC (juste le temps de la liaison).</span></div>
     <div class="etape"><i>3</i><span>Scanne le QR code affiché sur le PC.</span></div>
     <button class="principal" id="scanner">Scanner le QR code</button>
   </div>
 
+  <div id="avancement" class="avancement" role="status"><span class="rond"></span><span id="texte-avancement"></span></div>
   <div id="message" class="message" role="alert"></div>
 
   <div class="carte">
@@ -30,27 +33,39 @@
     <input id="code" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder="ABCD-2345">
     <button class="secondaire" id="relier" style="margin-top:14px">Relier</button>
   </div>
+  <p class="petit">Les connexions HoYoLAB, Riot, Roblox et Activision restent sur ton PC : le téléphone utilise tes
+    clés d'API et les infos publiques de tes comptes.</p>
   <p class="petit" id="version"></p>
 </main>
 <script>
   const A = window.Android;
-  const msg = document.getElementById("message");
+  const msg = document.getElementById("message"), av = document.getElementById("avancement");
   window.afficherMessage = (texte) => {
+    av.classList.remove("visible");
     msg.textContent = texte; msg.classList.add("visible");
-    document.body.classList.remove("attente");
     msg.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+  window.afficherAvancement = (texte) => {
+    msg.classList.remove("visible");
+    document.getElementById("texte-avancement").textContent = texte; av.classList.add("visible");
   };
   document.getElementById("scanner").onclick = () => { msg.classList.remove("visible"); A && A.scannerQr(); };
   document.getElementById("relier").onclick = () => {
     const h = document.getElementById("hote").value.trim(), c = document.getElementById("code").value.trim();
     if (!h || !c) return afficherMessage("Remplis l'adresse et le code affichés sur ton PC.");
-    msg.classList.remove("visible");
-    document.body.classList.add("attente");
     A && A.relierPc(h, c);
   };
-  const avant = A ? A.pcRelie() : "";
-  if (avant) document.getElementById("hote").value = avant;
-  if (A) document.getElementById("version").textContent = "Version " + A.version();
+  if (A) {
+    if (A.dernierPc()) document.getElementById("hote").value = A.dernierPc();
+    if (A.dejaLie()) {
+      document.getElementById("retour").hidden = false;
+      document.getElementById("titre").textContent = "Synchroniser avec ton PC";
+      document.getElementById("intro").innerHTML = "Scanne de nouveau le QR code du PC pour reprendre ses nouveautés " +
+        "(nouvelle clé, import Call of Duty…). Les stats du PC remplacent celles du téléphone.";
+    }
+    document.getElementById("retour").onclick = () => A.retour();
+    document.getElementById("version").textContent = "Version " + A.version();
+  }
 </script>
 </body>
 </html>

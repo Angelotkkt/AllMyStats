@@ -1,0 +1,78 @@
+"""Version de AllMyStats. À augmenter à chaque nouvelle version."""
+
+VERSION = "2.19.0"
+
+# Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
+# on peut aussi le donner dans Paramètres > Mises à jour.
+DEPOT_MAJ = "Angelotkkt/AllMyStats"
+
+NOUVEAUTES = [
+    "Appli Android autonome : relie-la une fois avec le QR code, elle marche ensuite sans le PC",
+    "AllMyStats sur ton téléphone : appli Android reliée à ton PC par le Wi-Fi (Paramètres > Téléphone)",
+    "L'interface s'adapte aux petits écrans (menu des jeux en tiroir)",
+    "Call of Duty est de retour (la 2.16.0 l'empêchait de se charger)",
+    "Nouveau : Counter-Strike 2 (Steam + Leetify : Premier, K/D, headshots, dernières parties)",
+    "Nouveau : Fortnite (victoires, K/D, tops, passe de combat, saison en cours)",
+    "Nouveau : Apex Legends (rang et RP, niveau, légendes, statut en ligne)",
+    "Call of Duty sans lecture d'écran : importe ton fichier « Mes données » d'Activision, toutes tes parties d'un coup",
+    "Pokémon GO retiré",
+    "Ambiance sonore douce quand AllMyStats est au premier plan (bouton en bas à gauche pour la couper)",
+    "Spotify retiré : AllMyStats reste centré sur tes stats",
+    "Builds & Teams en grand : la grille de tous les persos, puis la fiche du perso sur toute la page (nouveau visuel)",
+    "Genshin Impact : nouvelle catégorie « Builds & Teams » (armes, artefacts, stats et équipes pour chaque perso)",
+    "Petits sons dans l'appli (réglables ou coupés dans Paramètres > Sons)",
+    "Les mises à jour sont cherchées toutes les 10 minutes",
+    "Blox Fruits : le test met lui-même Roblox au premier plan, et montre ce que disent les journaux de Roblox",
+    "Lecture d'écran réparée (erreur « OpenAsync ») et Blox Fruits mieux détecté dans les journaux de Roblox",
+    "Blox Fruits : la lecture d'écran prend la fenêtre de Roblox, quel que soit son titre ou le lanceur (Bloxstrap…)",
+    "Interactive Map : la carte se place correctement sur les écrans zoomés (125 %, 150 %…)",
+    "Blox Fruits : ton Build (points du menu Stats) et ton Inventaire comme en jeu, avec les images du wiki",
+    "Cases plus propres : plus de « Première valeur », le rang Valorant sans les RR en double",
+    "Valorant : nom et logo de ton rang, images des agents et des cartes dans tes parties et tes listes",
+    "Valorant : HenrikDev interrogé avec ton identifiant de compte (marche avec les pseudos à caractères spéciaux)",
+    "Valorant : connexion Riot réparée (ton Riot ID est lu directement, une erreur de stats n'annule plus la connexion)",
+    "Interactive Map : la carte reste dans son cadre et ne cache plus les boutons au-dessus",
+    "Interactive Map : la découpe de la carte est remise aussitôt quand Edge l'efface (fini la barre en haut)",
+    "Interactive Map : placement de la carte mesuré par Windows (zone de la page), sans barre en haut",
+    "Interactive Map : la carte laissée par l'ancienne version est fermée et remplacée par la bonne",
+    "Interactive Map : la carte connectée est placée au pixel près (plus de barre noire en haut)",
+    "Interactive Map : la carte officielle s'affiche dans AllMyStats avec ton compte HoYoLAB, comme sur le site (essai)",
+    "Interactive Map : bouton « Carte avec mon compte » pour cocher tes trouvailles (connexion HoYoLAB)",
+    "Interactive Map : bouton « Se connecter à HoYoLAB » sans passer en plein écran, et « Dans mon navigateur »",
+    "Interactive Map : la carte s'affiche directement dans AllMyStats, avec des onglets pour changer de carte",
+    "Genshin : ton pseudo s'affiche à la place de l'UID",
+    "Genshin : les nouveaux persos ont leur nom et leur portrait, les armes de tes vœux ont leur image",
+    "Genshin : nouvelle sous-catégorie Interactive Map (la carte officielle de Teyvat, toujours à jour)",
+    "Valorant passe par HenrikDev (comme les trackers) : rang, RR et parties même jeu fermé",
+    "Valorant : nouvelle fenêtre « Se connecter avec Riot », puis tout est automatique même jeu fermé",
+    "Valorant : la bonne région et la bonne version du jeu sont trouvées toutes seules",
+    "Connexion à Internet plus solide : un proxy Windows qui ne marche plus est contourné",
+    "Les erreurs de connexion affichent leur vraie raison",
+    "Valorant : connexion au client Riot plus solide (proxy, sécurité) et message d'erreur précis",
+    "Réparé : l'erreur « Failed to import encodings module » au redémarrage après une mise à jour",
+    "Nouveau jeu : Valorant, tout automatique comme un tracker (rang, RR, K/D, ACS, headshots, parties, agents, cartes)",
+    "Paramètres > Jeux affichés : masque les jeux auxquels tu ne joues pas",
+    "Nouveau jeu : Pokémon GO (niveau, PX, distance, Pokémon attrapés, PokéStops)",
+    "Pokémon GO : tes captures du profil sont lues toutes seules dès qu'elles arrivent sur ton PC (OneDrive)",
+    "Glisse des captures d'écran dans AllMyStats pour les faire lire",
+    "Les nouvelles versions sont trouvées tout de suite après leur publication",
+    "La barre de gauche affiche le pseudo de chaque compte connecté, même quand tu es sur un autre jeu",
+    "Mises à jour automatiques par Internet : plus besoin de télécharger de fichier",
+    "Nouveau bouton « Tester la lecture d'écran » : AllMyStats te dit exactement ce qui bloque",
+    "Lecture d'écran plus solide : images trop grandes, langue de Windows, capture noire repérée",
+    "Blox Fruits est lu même quand les journaux de Roblox sont introuvables",
+    "Call of Duty reconnu même si son programme a un nom inconnu",
+    "Connexion Activision plus solide (plus d'erreur inattendue)",
+    "Connexion Activision réparée : la fenêtre ouvre callofduty.com, clique sur CONNEXION",
+    "Nouvelle catégorie Call of Duty : BO6, BO7, Cold War, MW4, Warzone, Warzone MW4, MW3 et MW2",
+    "Ton Combat Record est lu tout seul à l'écran et rangé dans le bon jeu",
+    "Connexion Activision pour les stats officielles de Cold War et MW2",
+    "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche",
+]
+
+
+def en_tuple(texte):
+    try:
+        return tuple(int(x) for x in str(texte).strip().split("."))
+    except ValueError:
+        return (0,)

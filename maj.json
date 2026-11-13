@@ -1,6 +1,7 @@
 {
-  "version": "2.18.0",
+  "version": "2.19.0",
   "nouveautes": [
+    "Appli Android autonome : relie-la une fois avec le QR code, elle marche ensuite sans le PC",
     "AllMyStats sur ton téléphone : appli Android reliée à ton PC par le Wi-Fi (Paramètres > Téléphone)",
     "L'interface s'adapte aux petits écrans (menu des jeux en tiroir)",
     "Call of Duty est de retour (la 2.16.0 l'empêchait de se charger)",
@@ -63,5 +64,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "7faebfa4a04ff16d91270ed8e8c7d36a22cf421feb10200dd94bfa5ea7fc84b8"
+  "sha256": "6cda4d0aeb18dbbe786866b5019f5564ca94e0bc29631bea5e8c88bac1a79c3c"
 }

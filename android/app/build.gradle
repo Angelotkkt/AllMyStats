@@ -1,5 +1,6 @@
 plugins {
     id "com.android.application"
+    id "com.chaquo.python"
 }
 
 def versionAms = System.getenv("APP_VERSION") ?: "2.0.0"
@@ -15,6 +16,10 @@ android {
         targetSdk 34
         versionCode numero
         versionName versionAms
+        ndk {
+            // Téléphones Android (64 et 32 bits)
+            abiFilters "arm64-v8a", "armeabi-v7a"
+        }
     }
 
     signingConfigs {
@@ -40,6 +45,17 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Le moteur d'AllMyStats (le même code Python que sur le PC) tourne dans l'appli
+chaquopy {
+    defaultConfig {
+        version "3.12"
+        extractPackages "core", "jeux"
+        pyc {
+            src false
+        }
     }
 }
 
