@@ -1,6 +1,8 @@
 {
-  "version": "2.15.0",
+  "version": "2.16.0",
   "nouveautes": [
+    "Call of Duty sans lecture d'écran : importe ton fichier « Mes données » d'Activision, toutes tes parties d'un coup",
+    "Pokémon GO retiré",
     "Ambiance sonore douce quand AllMyStats est au premier plan (bouton en bas à gauche pour la couper)",
     "Spotify retiré : AllMyStats reste centré sur tes stats",
     "Builds & Teams en grand : la grille de tous les persos, puis la fiche du perso sur toute la page (nouveau visuel)",
@@ -55,5 +57,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "25e087ec72013b4c474251a2b6a74735ae89c62644315075d991e5a888b341f5"
+  "sha256": "5da8f231e62bc8708419a7dd1d1124b0494c6890c27daa1e9eb08dbad4118bdc"
 }
