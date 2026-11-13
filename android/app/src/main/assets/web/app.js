@@ -796,8 +796,8 @@ async function afficherPageBuilds(jeu) {
       <header class="bt-entete">
         <div class="bc-titre">${emblemeJeu(jeu)}<div><b>${esc(jeu.nom)}</b><small>${esc(jeu.famille || "")}</small></div></div>
         <span class="bt-compte" id="bt-compte"></span>
-        <button class="bt-bouton-equipe" id="bt-mode-equipe">${ICONES.equipe}<span><b>Compléter une équipe</b>
-          <small>Choisis jusqu'à 3 persos, AMS trouve les autres</small></span></button>
+        <button class="bt-bouton-equipe" id="bt-mode-equipe">${ICONES.equipe}<span><b>Composer une équipe</b>
+          <small>AMS complète ton équipe et build chaque perso</small></span></button>
       </header>
       <label class="bt-recherche">${ICONES.loupe}<input type="search" id="builds-cherche"
         placeholder="Chercher un perso (Furina, Kazuha…)" autocomplete="off" value="${esc(builds.filtre)}"></label>
@@ -871,9 +871,10 @@ async function afficherCompleterEquipe(jeu) {
         <button class="discret" id="bt-eq-vider" ${builds.equipe.length ? "" : "hidden"}>Tout retirer</button>
       </div>
       <header class="bt-eq-entete">
-        <h2>Compléter une équipe</h2>
-        <p>Choisis jusqu'à 3 persos que tu veux jouer ensemble. AllMyStats regarde les équipes conseillées par
-          Genshin-Builds pour chacun et te propose ceux qui vont le mieux avec eux.</p>
+        <h2>Composer une équipe</h2>
+        <p>Choisis de 1 à 3 persos : AllMyStats te propose ceux qui vont le mieux avec eux, d'après les équipes
+          conseillées par Genshin-Builds. Choisis-en 4 : tu obtiens le build de chacun, avec des alternatives et
+          les ajustements pour que l'équipe marche ensemble.</p>
       </header>
       <div class="bt-eq-slots" id="bt-eq-slots"></div>
       <div id="bt-eq-resultats"></div>
@@ -917,7 +918,7 @@ async function afficherCompleterEquipe(jeu) {
 function basculerEquipe(id) {
   const i = builds.equipe.indexOf(id);
   if (i >= 0) builds.equipe.splice(i, 1);
-  else if (builds.equipe.length >= 3) return toast("3 persos maximum : retire-en un, AllMyStats propose le 4e.", "info");
+  else if (builds.equipe.length >= 4) return toast("Ton équipe a déjà 4 persos : retire-en un pour en changer.", "info");
   else builds.equipe.push(id);
   son(i >= 0 ? "fermer" : "clic");
   majEquipe();
@@ -929,8 +930,8 @@ function majEquipe(garder) {
   const encoreValable = r && r.cle === builds.equipe.join(",");
   if (!garder || !encoreValable) builds.resultatEquipe = encoreValable ? r : null;
   $("#bt-eq-vider").hidden = !builds.equipe.length;
-  const reste = 3 - builds.equipe.length;
-  $("#bt-eq-reste").textContent = reste ? `encore ${reste} possible${reste > 1 ? "s" : ""}` : "3 choisis : c'est le maximum";
+  const reste = 4 - builds.equipe.length;
+  $("#bt-eq-reste").textContent = reste ? `encore ${reste} place${reste > 1 ? "s" : ""}` : "équipe complète";
   dessinerSlotsEquipe();
   dessinerChoixEquipe();
   dessinerResultatsEquipe();
@@ -942,9 +943,10 @@ async function chercherEquipe() {
   const cle = builds.equipe.join(",");
   const numero = ++builds.demandeEquipe;
   try {
-    const d = await api(`/api/jeux/genshin_builds/page/equipe/${encodeURIComponent(cle)}`);
+    const quoi = builds.equipe.length === 4 ? "builds_equipe" : "equipe";
+    const d = await api(`/api/jeux/genshin_builds/page/${quoi}/${encodeURIComponent(cle)}`);
     if (numero !== builds.demandeEquipe) return;
-    builds.resultatEquipe = { ...d, cle };
+    builds.resultatEquipe = { ...d, cle, complete: builds.equipe.length === 4 };
   } catch (e) {
     if (numero !== builds.demandeEquipe) return;
     builds.resultatEquipe = { cle, erreur: e.message };
@@ -960,8 +962,8 @@ function majBoutonVoir() {
   const n = builds.equipe.length, r = builds.resultatEquipe;
   voir.hidden = !n || !voir.dataset.horsVue;
   const noms = builds.equipe.map((id) => persoBuild(id)?.nom || id).join(" + ");
-  voir.innerHTML = `${ICONES.equipe}<span><b>${esc(noms)}</b><small>${!r ? "Recherche des coéquipiers…"
-    : r.erreur ? "Voir le problème" : "Voir les coéquipiers proposés"}</small></span><i>↑</i>`;
+  voir.innerHTML = `${ICONES.equipe}<span><b>${esc(noms)}</b><small>${!r ? "Recherche en cours…"
+    : r.erreur ? "Voir le problème" : n === 4 ? "Voir les builds de l'équipe" : "Voir les coéquipiers proposés"}</small></span><i>↑</i>`;
 }
 
 function dessinerSlotsEquipe() {
@@ -983,7 +985,7 @@ function dessinerSlotsEquipe() {
     const prop = proposes[i - builds.equipe.length];
     if (prop) {
       cases.push(`<button class="bt-slot propose r${prop.rarete || 4}" data-ajouter="${esc(prop.id)}" style="--el:${prop.couleur || "var(--or)"}"
-          title="${builds.equipe.length < 3 ? "Ajouter " + esc(prop.nom) + " à ta sélection" : esc(prop.nom)}">
+          title="Ajouter ${esc(prop.nom)} à ton équipe">
         <span class="bt-visuel">${prop.image ? `<img src="${esc(prop.image)}" alt="">` : ""}<span class="bt-elem">${icone((prop.element || "").toLowerCase())}</span>
           <em class="bt-slot-tag">${ICONES.etincelle || ""}Proposé</em></span>
         <span class="bt-nom">${esc(prop.nom)}</span></button>`);
@@ -991,13 +993,20 @@ function dessinerSlotsEquipe() {
     }
     const attente = builds.equipe.length && !r;
     cases.push(`<div class="bt-slot vide">${attente ? `<div class="rond"></div>` : `<b>+</b>`}
-      <span>${attente ? "Recherche…" : i < 3 ? (i === builds.equipe.length ? "Choisis un perso plus bas" : "Libre") : "AMS te propose le dernier"}</span></div>`);
+      <span>${attente ? "Recherche…" : i === builds.equipe.length ? "Choisis un perso plus bas" : "Libre"}</span></div>`);
   }
-  zone.innerHTML = cases.join("");
+  const propositionComplete = proposes.length && builds.equipe.length + proposes.length === 4;
+  zone.innerHTML = cases.join("") + (propositionComplete ? `
+    <button class="bt-eq-prendre" id="bt-eq-prendre">${ICONES.ok}<span><b>Prendre cette équipe</b>
+      <small>et voir le build de chaque perso</small></span></button>` : "");
+  $("#bt-eq-prendre")?.addEventListener("click", () => {
+    builds.equipe = r.proposition.map((p) => p.id);
+    son("succes");
+    majEquipe();
+  });
   zone.querySelectorAll("[data-retirer]").forEach((b) => b.addEventListener("click", () => basculerEquipe(b.dataset.retirer)));
   zone.querySelectorAll("[data-ajouter]").forEach((b) => b.addEventListener("click", () => {
-    if (builds.equipe.length < 3) basculerEquipe(b.dataset.ajouter);
-    else ouvrirBuildDepuisEquipe(b.dataset.ajouter);
+    basculerEquipe(b.dataset.ajouter);
   }));
 }
 
@@ -1014,7 +1023,8 @@ function dessinerResultatsEquipe() {
   if (!builds.equipe.length) { zone.innerHTML = ""; return; }
   if (!r) { zone.innerHTML = `<div class="bt-attente"><div class="rond"></div><p>Recherche des meilleurs coéquipiers…</p></div>`; return; }
   if (r.erreur) { zone.innerHTML = `<div class="vide">${ICONES.erreur}${esc(r.erreur)}</div>`; return; }
-  const plein = builds.equipe.length >= 3;
+  if (r.complete) return dessinerBuildsEquipe(zone, r);
+  const plein = builds.equipe.length >= 4;
   const manque = r.manquants?.length
     ? `<p class="bt-eq-note">${ICONES.astuce}Genshin-Builds n'a pas encore d'équipes conseillées pour ${esc(r.manquants.join(", "))} : AllMyStats se base sur les autres persos choisis.</p>` : "";
   const sugg = (r.suggestions || []).map((p) => `
@@ -1026,7 +1036,7 @@ function dessinerResultatsEquipe() {
         <small>${esc(p.avis)} · dans ${p.nb_equipes} équipe${p.nb_equipes > 1 ? "s" : ""} conseillée${p.nb_equipes > 1 ? "s" : ""}${p.equipes_vues?.length ? ` (${esc(p.equipes_vues.join(", "))})` : ""}</small>
       </div>
       <div class="bt-eq-actions">
-        <button class="secondaire" data-ajouter="${esc(p.id)}" ${plein ? "disabled title='3 persos déjà choisis'" : ""}>+ Ajouter</button>
+        <button class="secondaire" data-ajouter="${esc(p.id)}" ${plein ? "disabled title='Ton équipe est complète'" : ""}>+ Ajouter</button>
         <button class="discret" data-build="${esc(p.id)}">Build</button>
       </div>
     </li>`).join("");
@@ -1042,6 +1052,56 @@ function dessinerResultatsEquipe() {
     ${equipes ? `<section class="bt-equipes bt-eq-connues"><h3>${ICONES.equipe}Équipes conseillées avec ta sélection</h3><ul>${equipes}</ul></section>` : ""}
     <p class="bt-source">Équipes conseillées par <a href="https://genshin-builds.com/fr" target="_blank" rel="noopener">Genshin-Builds</a>, classées par AllMyStats.</p>`;
   zone.querySelectorAll("[data-ajouter]").forEach((b) => b.addEventListener("click", () => basculerEquipe(b.dataset.ajouter)));
+  zone.querySelectorAll("[data-build]").forEach((b) => b.addEventListener("click", () => ouvrirBuildDepuisEquipe(b.dataset.build)));
+}
+
+function dessinerBuildsEquipe(zone, r) {
+  const rang = (liste) => `<ol class="bt-rang">${liste.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>`;
+  const optionArtefacts = (o) => `<span class="bt-pieces">${esc(o.pieces)}</span>
+    <span class="bt-sets">${o.ensembles.map((e) => `<b>${esc(e)}</b>`).join("")}</span>`;
+  const resonances = (r.resonances || []).map((x) => `
+    <li style="--el:${(ELEMENTS_BUILDS.find(([e]) => e === x.element) || [])[1] || "var(--or)"}">
+      ${x.element ? icone(x.element.toLowerCase()) : ICONES.etoile || ""}<b>${esc(x.nom)}</b><span>${esc(x.effet)}</span></li>`).join("");
+  const cartes = (r.membres || []).map((m) => {
+    if (m.erreur) return `<article class="bt-eq-carte" style="--el:${m.couleur || "var(--accent)"}">
+      <header>${vignetteBuild(m)}<div><h4>${esc(m.nom)}</h4></div></header>
+      <p class="bt-eq-adapte">${ICONES.erreur}<span>${esc(m.erreur)}</span></p></article>`;
+    const arme = m.armes?.[m.arme_choisie], autresArmes = (m.armes || []).filter((_, i) => i !== m.arme_choisie).slice(0, 4);
+    const art = m.artefacts?.[m.artefact_choisi], autresArt = (m.artefacts || []).filter((_, i) => i !== m.artefact_choisi).slice(0, 3);
+    const adapte = `<em class="bt-eq-tag">Adapté à l'équipe</em>`;
+    return `<article class="bt-eq-carte" style="--el:${m.couleur || "var(--accent)"}">
+      <header>
+        ${vignetteBuild(m)}
+        <div><h4>${m.element ? icone(m.element.toLowerCase()) : ""}${esc(m.nom)}</h4>${m.role ? `<small>${esc(m.role)}</small>` : ""}</div>
+        <button class="discret" data-build="${esc(m.id)}">Fiche complète</button>
+      </header>
+      ${(m.adaptations || []).map((t) => `<p class="bt-eq-adapte">${ICONES.astuce}<span>${esc(t)}</span></p>`).join("")}
+      ${arme ? `<section><h5>${ICONES.arme}Arme</h5>
+        <div class="bt-eq-top">${vignetteBuild(arme)}<b>${esc(arme.nom)}</b>${m.arme_choisie ? adapte : ""}</div>
+        ${autresArmes.length ? `<p class="bt-eq-alt"><span>Alternatives</span>${autresArmes.map((a) => esc(a.nom)).join(" · ")}</p>` : ""}
+      </section>` : ""}
+      ${art ? `<section><h5>${ICONES.artefact}Artefacts</h5>
+        <div class="bt-eq-top bt-eq-art">${optionArtefacts(art)}${m.artefact_choisi ? adapte : ""}</div>
+        ${autresArt.length ? `<p class="bt-eq-alt"><span>Alternatives</span>${autresArt.map((o) => `${esc(o.ensembles.join(" + "))} (${esc(o.pieces)})`).join(" · ")}</p>` : ""}
+      </section>` : ""}
+      ${m.stats?.length ? `<section><h5>${ICONES.graphique}Stats principales</h5>
+        <dl class="bt-eq-stats">${m.stats.map((x) => `<dt>${esc(x.piece)}</dt><dd><b>${esc(x.valeurs[0] || "")}</b>${x.valeurs.length > 1
+          ? `<small>ou ${esc(x.valeurs.slice(1).join(", "))}</small>` : ""}</dd>`).join("")}</dl>
+      </section>` : ""}
+      ${m.sous_stats?.length ? `<section><h5>Sous-stats à viser</h5>${rang(m.sous_stats)}</section>` : ""}
+      ${m.aptitudes?.length ? `<section><h5>Aptitudes à monter</h5>${rang(m.aptitudes)}</section>` : ""}
+      ${m.autres_roles?.length ? `<p class="bt-eq-roles">Autre${m.autres_roles.length > 1 ? "s" : ""} façon${m.autres_roles.length > 1 ? "s" : ""} de le jouer : ${esc(m.autres_roles.join(", "))} (dans la fiche complète)</p>` : ""}
+    </article>`;
+  }).join("");
+  zone.innerHTML = `
+    <section class="bt-bloc bt-eq-resume">
+      <h3>${ICONES.equipe}Ce qui fait marcher ton équipe</h3>
+      ${resonances ? `<ul class="bt-eq-reso">${resonances}</ul>` : `<p class="gris">Pas de résonance élémentaire avec ces 4 persos.</p>`}
+      ${r.notes?.length ? `<ul class="bt-eq-notes">${r.notes.map((t) => `<li>${ICONES.astuce}<span>${esc(t)} Les builds plus bas en tiennent compte.</span></li>`).join("")}</ul>`
+        : `<p class="bt-eq-ok">${ICONES.ok}<span>Aucun conflit : chaque perso peut garder son meilleur build.</span></p>`}
+    </section>
+    <div class="bt-eq-cartes">${cartes}</div>
+    <p class="bt-source">Builds conseillés par <a href="https://genshin-builds.com/fr" target="_blank" rel="noopener">Genshin-Builds</a>, adaptés à ton équipe par AllMyStats.</p>`;
   zone.querySelectorAll("[data-build]").forEach((b) => b.addEventListener("click", () => ouvrirBuildDepuisEquipe(b.dataset.build)));
 }
 

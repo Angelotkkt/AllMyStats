@@ -33,6 +33,55 @@ APTITUDES = {"normal attack": "Attaque normale", "normal": "Attaque normale", "s
              "elemental skill": "Compétence", "burst": "Déchaînement", "elemental burst": "Déchaînement"}
 
 
+# Sets d'artefacts dont le bonus 4 pièces profite à toute l'équipe mais ne se cumule pas s'il est porté deux fois
+# (noms français puis anglais, comparés sans accents ni majuscules)
+SETS_SOUTIEN = {
+    "noblesse": ("noblesse oblige",),
+    "millelith": ("millelith",),
+    "instructeur": ("instructeur", "instructor"),
+    "foret": ("souvenirs de la foret", "deepwood"),
+    "verdure": ("verdure", "viridescent"),
+    "petra": ("roche ancienne", "archaic petra"),
+    "cendres": ("cite des cendres", "cinder city"),
+}
+
+# Résonances élémentaires (2 persos du même élément, ou 4 éléments différents)
+RESONANCES = {
+    "Pyro": "+25 % d'ATQ",
+    "Hydro": "+25 % de PV max",
+    "Cryo": "+15 % de taux CRIT contre les ennemis gelés ou affectés par Cryo",
+    "Electro": "Les réactions Électro génèrent des particules d'énergie",
+    "Geo": "+15 % de force des boucliers ; sous bouclier, +15 % de DGT et RÉS Géo des ennemis touchés réduite",
+    "Anemo": "Moins d'endurance consommée, déplacement plus rapide et temps de recharge réduits de 5 %",
+    "Dendro": "+50 de maîtrise élémentaire (davantage après certaines réactions)",
+}
+
+
+def _sans_accents(texte):
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFD", str(texte or "").lower()) if unicodedata.category(c) != "Mn")
+
+
+def _set_soutien(option):
+    """Une option d'artefacts (4 pièces d'un seul set) -> clé du set de soutien, ou None."""
+    ensembles = (option or {}).get("ensembles") or []
+    if len(ensembles) != 1:
+        return None
+    nom = _sans_accents(ensembles[0])
+    return next((cle for cle, mots in SETS_SOUTIEN.items() if any(m in nom for m in mots)), None)
+
+
+def _resonances(elements):
+    elements = [e for e in elements if e]
+    res = []
+    for e, effet in RESONANCES.items():
+        if elements.count(e) >= 2:
+            res.append({"element": e, "nom": f"2 {e}", "effet": effet})
+    if len(elements) == 4 and len(set(elements)) == 4:
+        res.append({"element": None, "nom": "4 éléments différents", "effet": "+15 % de RÉS à tous les éléments et aux DGT physiques"})
+    return res
+
+
 def slug(nom_anglais):
     """« Kamisato Ayaka » -> « kamisato_ayaka » (forme des adresses de Genshin-Builds)."""
     texte = re.sub(r"['’.]", "", (nom_anglais or "").lower())
@@ -342,12 +391,97 @@ class BuildsGenshin(Jeu):
             "source": "Genshin-Builds",
         }
 
+    # ------------------------------------------------------------------ builder une équipe de 4
+
+    def builds_equipe(self, ids, dossier):
+        """4 persos -> le build de chacun (arme, artefacts, stats, aptitudes) avec des alternatives, en tenant
+        compte de l'équipe : deux persos qui veulent la même arme ou le même set de soutien (dont le bonus ne se
+        cumule pas) se voient proposer une alternative, et les résonances élémentaires sont affichées."""
+        choisis = []
+        for i in ids:
+            i = slug(i)
+            if i and i not in choisis:
+                choisis.append(i)
+        if len(choisis) != 4:
+            raise ErreurJeu("Choisis exactement 4 persos différents.")
+        tous = {p["id"]: p for p in self.persos(dossier)}
+        membres, notes = [], []
+        for c in choisis:
+            p = tous.get(c) or {"id": c, "nom": c}
+            m = {k: p.get(k) for k in ("id", "nom", "element", "couleur", "rarete", "arme", "image")}
+            try:
+                d = self.build(c, dossier)
+            except ErreurJeu as e:
+                m["erreur"] = str(e)
+                membres.append(m)
+                continue
+            b = (d.get("builds") or [{}])[0]
+            m.update({
+                "role": b.get("nom") or "",
+                "autres_roles": [x.get("nom") for x in (d.get("builds") or [])[1:] if x.get("nom")],
+                "armes": list(b.get("armes") or []),
+                "artefacts": list(b.get("artefacts") or []),
+                "stats": [x for x in b.get("stats") or [] if x.get("piece") not in ("Fleur", "Plume")],
+                "sous_stats": b.get("sous_stats") or [],
+                "aptitudes": b.get("aptitudes") or [],
+                "note": b.get("note") or "",
+                "element": m.get("element") or d.get("element"),
+                "couleur": m.get("couleur") or d.get("couleur"),
+                "image": m.get("image") or d.get("image"),
+                "nom": m.get("nom") if m.get("nom") != c else d.get("nom") or c,
+                "arme_choisie": 0, "artefact_choisi": 0, "adaptations": [],
+            })
+            membres.append(m)
+
+        # 1) Même arme conseillée en premier pour deux persos : le second prend sa meilleure alternative libre
+        prises = {}
+        for m in membres:
+            armes = m.get("armes") or []
+            if not armes:
+                continue
+            premiere = armes[0]["nom"]
+            if premiere in prises:
+                libre = next((i for i, a in enumerate(armes) if a["nom"] not in prises), None)
+                if libre is not None:
+                    m["arme_choisie"] = libre
+                    m["adaptations"].append(f"{premiere} est déjà conseillée à {prises[premiere]} : si tu n'en as qu'un "
+                                            f"exemplaire, {armes[libre]['nom']} est la meilleure alternative ici.")
+                    notes.append(f"{prises[premiere]} et {m['nom']} veulent tous les deux {premiere}.")
+            prises.setdefault(armes[m["arme_choisie"]]["nom"], m["nom"])
+
+        # 2) Sets de soutien dont le bonus d'équipe ne se cumule pas : un seul porteur suffit
+        portes = {}
+        for m in membres:
+            options = m.get("artefacts") or []
+            if not options:
+                continue
+            soutien = _set_soutien(options[0])
+            if soutien and soutien in portes:
+                libre = next((i for i, o in enumerate(options) if _set_soutien(o) not in portes), None)
+                if libre is not None:
+                    m["artefact_choisi"] = libre
+                    m["adaptations"].append(f"{options[0]['ensembles'][0]} est déjà porté par {portes[soutien]} et son bonus "
+                                            f"d'équipe ne se cumule pas : {' + '.join(options[libre]['ensembles'])} est plus utile ici.")
+                    notes.append(f"Un seul {options[0]['ensembles'][0]} dans l'équipe : il est donné à {portes[soutien]}.")
+            s = _set_soutien(options[m["artefact_choisi"]])
+            if s:
+                portes.setdefault(s, m["nom"])
+
+        return {
+            "membres": membres,
+            "resonances": _resonances([m.get("element") for m in membres]),
+            "notes": notes,
+            "source": "Genshin-Builds",
+        }
+
     # ------------------------------------------------------------------ pour le serveur
 
     def page_donnees(self, chemin, dossier):
         """GET /api/jeux/genshin_builds/page/persos, /page/build/<id> et /page/equipe/<id>,<id>,<id>"""
         if chemin == ["persos"]:
             return {"persos": self.persos(dossier)}
+        if len(chemin) == 2 and chemin[0] == "builds_equipe":
+            return self.builds_equipe([x for x in urllib.parse.unquote(chemin[1]).split(",") if x], dossier)
         if len(chemin) == 2 and chemin[0] == "equipe":
             return self.completer([x for x in urllib.parse.unquote(chemin[1]).split(",") if x], dossier)
         if len(chemin) == 2 and chemin[0] == "build":
