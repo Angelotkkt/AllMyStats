@@ -112,6 +112,7 @@
   .tel { display: grid; grid-template-columns: auto 1fr; gap: 48px; align-items: start; margin-bottom: 22px; }
   .tel .telecharger { background: var(--turquoise); box-shadow: 0 5px 0 #1F8579; }
   .tel .telecharger:hover { box-shadow: 0 3px 0 #1F8579; }
+  .sous-titre { font: 700 26px/1.2 var(--f-chiffres); margin: 40px 0 18px; }
   @media (max-width: 860px) { .tel { grid-template-columns: 1fr; gap: 28px; } }
   .final { text-align: center; padding: 84px 0; border-top: 1px dashed var(--trait); }
   .final h2 { margin-bottom: 26px; }
@@ -260,8 +261,27 @@
               4G et PC éteint.</p></li>
         </ol>
       </div>
-      <p class="meta">Sur iPhone, pas d'appli (Apple ne permet pas d'en installer hors App Store) : ouvre dans Safari le
-        lien affiché sous le QR code, sur ton PC, puis Partager, « Sur l'écran d'accueil ».</p>
+      <h3 class="sous-titre" id="iphone">Sur iPhone</h3>
+      <div class="tel">
+        <div>
+          <a class="telecharger" id="telecharger-ios" href="#iphone">
+            <span class="ico" data-ico="telephone"></span><span id="texte-ios">Télécharger pour iPhone</span></a>
+          <div class="meta" id="meta-ios">Gratuit · iOS 15 et plus · hors App Store</div>
+        </div>
+        <ol class="etapes">
+          <li><h3>Installe Sideloadly sur ton PC</h3>
+            <p>Gratuit (sideloadly.io). Il faut aussi iTunes et iCloud téléchargés sur le site d'Apple, pas ceux du
+              Microsoft Store.</p></li>
+          <li><h3>Installe l'appli</h3>
+            <p>Branche l'iPhone en USB, glisse AllMyStats.ipa dans Sideloadly, mets ton identifiant Apple et clique
+              Start. Sur l'iPhone : Réglages, Confidentialité et sécurité, active le Mode développeur ; puis Réglages,
+              Général, VPN et gestion de l'appareil, fais confiance à ton identifiant.</p></li>
+          <li><h3>Relie-la au PC, une fois</h3>
+            <p>Ouvre AllMyStats sur l'iPhone et tape l'adresse et le code affichés dans Paramètres, Téléphone, sur ton PC.</p></li>
+        </ol>
+      </div>
+      <p class="meta">Avec un identifiant Apple gratuit, Apple limite les applis installées ainsi à 7 jours : refais
+        « Start » dans Sideloadly une fois par semaine (tes stats sont gardées). L'App Store demande un compte payant.</p>
     </section>
 
     <section>
@@ -355,6 +375,21 @@
       const b = document.getElementById("telecharger-android");
       b.setAttribute("aria-disabled", "true"); b.removeAttribute("href");
       document.getElementById("texte-android").textContent = "Android : bientôt disponible";
+    });
+  // L'appli iPhone : le fichier AllMyStats.ipa de la publication « ios »
+  fetch(`https://api.github.com/repos/${DEPOT}/releases/tags/ios`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((rel) => {
+      const ipa = rel?.assets?.find((a) => /\.ipa$/i.test(a.name));
+      if (!ipa) throw new Error("pas encore d'IPA");
+      document.getElementById("telecharger-ios").href = ipa.browser_download_url;
+      const mo = (ipa.size / 1048576).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+      document.getElementById("meta-ios").textContent = `${mo} Mo · Gratuit · iOS 15 et plus · hors App Store`;
+    })
+    .catch(() => {
+      const b = document.getElementById("telecharger-ios");
+      b.setAttribute("aria-disabled", "true"); b.removeAttribute("href");
+      document.getElementById("texte-ios").textContent = "iPhone : bientôt disponible";
     });
   fetch("maj.json").then((r) => r.json()).then((m) => {
     const meta = document.getElementById("meta");

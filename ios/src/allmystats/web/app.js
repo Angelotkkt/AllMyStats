@@ -1509,8 +1509,7 @@ async function chargerTelephone(action) {
       <p class="gris petit">Le téléphone copie une fois tes comptes, tes clés et tes stats, puis <b>marche sans le PC</b>
         (il récupère ses stats tout seul sur Internet). Les connexions HoYoLAB, Riot, Roblox et Activision restent sur le PC.
         Rescanne quand tu veux reprendre les nouveautés du PC.</p>
-      <p class="gris petit">Sur iPhone (pas d'appli) : ouvre <b>http://${esc(t.adresses[0])}:${t.port}/relier?c=${esc(t.code)}</b>
-        dans le navigateur du téléphone.</p>
+      <p class="gris petit">Sur iPhone : dans l'appli AllMyStats pour iPhone (sur le site), tape l'adresse et le code ci-dessus.</p>
       <p class="gris petit">Si Windows demande d'autoriser AllMyStats sur le réseau, coche <b>Réseaux privés</b> et accepte.
         Le téléphone ne voit AllMyStats que quand ce PC est allumé (« Toujours actif » conseillé).</p>` : ""}
     ${t.erreur ? `<p class="erreur-maj">${ICONES.alerte}<span>${esc(t.erreur)}</span></p>` : ""}

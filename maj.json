@@ -1,5 +1,5 @@
 {
-  "version": "2.20.0",
+  "version": "2.20.1",
   "nouveautes": [
     "Version iPhone (gratuite, à installer avec Sideloadly) : reliée une fois au PC, puis autonome",
     "Appli Android autonome : relie-la une fois avec le QR code, elle marche ensuite sans le PC",
@@ -65,5 +65,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "a1761929259a897aeddf3c4c52584df96e1535f81acb5d1106434ae311e940fa"
+  "sha256": "bc380451ecabee5847d6de85eef314060a7a2088f6a4ed6378c6ad74144996fc"
 }

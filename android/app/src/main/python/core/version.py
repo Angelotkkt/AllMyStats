@@ -1,6 +1,6 @@
 """Version de AllMyStats. À augmenter à chaque nouvelle version."""
 
-VERSION = "2.20.0"
+VERSION = "2.20.1"
 
 # Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
 # on peut aussi le donner dans Paramètres > Mises à jour.
