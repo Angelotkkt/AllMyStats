@@ -1,12 +1,13 @@
 """Version de AllMyStats. À augmenter à chaque nouvelle version."""
 
-VERSION = "2.27.0"
+VERSION = "2.27.1"
 
 # Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
 # on peut aussi le donner dans Paramètres > Mises à jour.
 DEPOT_MAJ = "Angelotkkt/AllMyStats"
 
 NOUVEAUTES = [
+    "Correction : le redémarrage après l'installation de la nouvelle application (erreur « Failed to load Python DLL »)",
     "Nouvelle application AllMyStats : une vraie fenêtre Windows (plus de navigateur), et un fond animé aux couleurs du jeu",
     "Amis : demandes d'amis à accepter, amitié des deux côtés, stats chiffrées visibles seulement par tes amis (nouveau code ami)",
     "Discord : le statut montre seulement le logo et la description (plus de bouton ni de page regardée)",

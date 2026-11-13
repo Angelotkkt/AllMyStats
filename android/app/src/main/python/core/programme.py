@@ -73,11 +73,19 @@ if %essais% gtr 60 goto fin
 timeout /t 1 /nobreak >nul
 goto remplacer
 :relancer
+rem Le nouveau programme doit démarrer « neuf », sans les réglages internes de l'ancien
+set _MEIPASS2=
+for /f "delims==" %%v in ('set _PYI_ 2^>nul') do set "%%v="
+set PYINSTALLER_RESET_ENVIRONMENT=1
 start "" "{exe}"
 :fin
 del "%~f0"
 """)
-    subprocess.Popen(["cmd", "/c", script], close_fds=True,
+    # Sans ça, le nouveau AllMyStats.exe croirait être un « sous-processus » de l'ancien et chercherait ses
+    # fichiers dans le dossier temporaire de l'ancien, effacé entre-temps : « Failed to load Python DLL ».
+    env = {k: v for k, v in os.environ.items() if not k.startswith("_PYI_") and k != "_MEIPASS2"}
+    env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
+    subprocess.Popen(["cmd", "/c", script], close_fds=True, env=env,
                      creationflags=subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP)
     return "Nouvelle version du programme téléchargée : AllMyStats redémarre…"
 
