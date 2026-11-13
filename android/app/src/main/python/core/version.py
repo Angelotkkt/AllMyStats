@@ -1,12 +1,13 @@
 """Version de AllMyStats. À augmenter à chaque nouvelle version."""
 
-VERSION = "2.29.0"
+VERSION = "2.30.0"
 
 # Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
 # on peut aussi le donner dans Paramètres > Mises à jour.
 DEPOT_MAJ = "Angelotkkt/AllMyStats"
 
 NOUVEAUTES = [
+    "Honkai: Star Rail : connexion HoYoLAB (puissance de Pionnier, tous tes persos, Jade stellaire du mois) et historique des sauts avec pity",
     "Nouveau jeu : Honkai: Star Rail (niveau de Pionnier, succès, Univers simulé, Mémoire du Chaos, vitrine, temps de jeu)",
     "Interactive Map : la carte HoYoLAB s'affiche directement dans la page d'AllMyStats (plus de fenêtre à part)",
     "Nouvelles icônes des jeux en pixel art, et la carte HoYoLAB dans sa propre fenêtre AllMyStats (connexion gardée)",

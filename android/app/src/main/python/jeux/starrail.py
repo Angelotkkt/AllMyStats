@@ -10,8 +10,11 @@ import time
 import urllib.error
 import urllib.request
 
+from core import connexion_navigateur as navigateur
 from core.temps_de_jeu import SuiviJeu
 
+from . import _starrail_hoyolab as hoyolab
+from . import _starrail_sauts as sauts
 from .base import ErreurJeu, Jeu, Stat
 
 URL_API = "https://enka.network/api/hsr/uid/{uid}/"
@@ -114,6 +117,32 @@ class _Noms:
         return {"nom": self.texte((c.get("EquipmentName") or {}).get("Hash")) or "Cône de lumière",
                 "rarete": c.get("Rarity"), "image": self._url(c.get("ImagePath"))}
 
+    def image_par_nom(self, nom):
+        """Portrait d'un perso, ou image d'un cône de lumière, d'après son nom (pour les derniers 5★ des sauts)."""
+        import unicodedata
+
+        def cle(t):
+            return "".join(c for c in unicodedata.normalize("NFD", str(t or "").lower()) if unicodedata.category(c) != "Mn")
+
+        if not hasattr(self, "_par_nom"):
+            self._par_nom = {}
+            textes = self._textes()
+            persos = self._store("avatars.json", "starrail_persos.json") or {}
+            cones = self._store("weapons.json", "starrail_cones.json") or {}
+            for ident, p in persos.items():
+                image = self._url(p.get("AvatarSideIconPath"))
+                h = str((p.get("AvatarName") or {}).get("Hash"))
+                for langue in ("fr", "en"):
+                    if image and (textes.get(langue) or {}).get(h):
+                        self._par_nom.setdefault(cle(textes[langue][h]), image)
+            for ident, c in cones.items():
+                image = self._url(c.get("ImagePath"))
+                h = str((c.get("EquipmentName") or {}).get("Hash"))
+                for langue in ("fr", "en"):
+                    if image and (textes.get(langue) or {}).get(h):
+                        self._par_nom.setdefault(cle(textes[langue][h]), image)
+        return self._par_nom.get(cle(nom))
+
     def photo(self, id_icone):
         pfps = self._store("pfps.json", "starrail_photos.json")
         e = pfps.get(str(id_icone)) or {}
@@ -126,15 +155,28 @@ class HonkaiStarRail(Jeu):
     icone = "jeu_starrail"
     couleur = "#8C7CF0"
     stat_vedette = "niveau_pionnier"
-    connexion_aide = ("Mets ton UID (en bas à gauche de l'écran en jeu) dans les Réglages : AllMyStats lit ton "
-                      "profil public, sans connexion.")
+    connexion_nom = "HoYoLAB"
+    cles_connexion = ("ltoken_v2", "ltuid_v2", "ltmid_v2")
+    dossier_connexion = "connexion_hoyolab"   # le même que Genshin : déjà connecté si tu l'es pour Genshin
+    connexion_aide = ("Connecte-toi avec ton compte HoYoverse (le même que pour Genshin) : AllMyStats récupère ton "
+                      "UID, tes stats, ta puissance de Pionnier et ton Jade stellaire tout seul.")
 
     reglages = [
         {"cle": "uid", "nom": "UID",
-         "aide": "Ton UID Honkai: Star Rail (9 ou 10 chiffres), en bas à gauche de l'écran en jeu, ou dans Menu > Profil."},
+         "aide": "Rempli tout seul quand tu te connectes. Sinon : ton UID Honkai: Star Rail (9 ou 10 chiffres), "
+                 "en bas à gauche de l'écran en jeu."},
+        {"section": "Cookies HoYoLAB (remplis tout seuls par « Se connecter »)", "avance": True,
+         "cle": "ltoken_v2", "nom": "ltoken_v2", "secret": True, "optionnel": True,
+         "aide": "Remplis tout seuls par « Se connecter avec HoYoLAB ». Garde-les secrets : c'est comme un mot de passe."},
+        {"cle": "ltuid_v2", "nom": "ltuid_v2", "secret": True, "optionnel": True, "avance": True},
+        {"cle": "ltmid_v2", "nom": "ltmid_v2", "secret": True, "optionnel": True, "avance": True},
+        {"section": "Historique des sauts", "avance": True, "cle": "lien_sauts",
+         "nom": "Lien des sauts (seulement si tu ne joues pas sur ce PC)", "optionnel": True,
+         "aide": "Sur PC, rien à faire : ouvre l'historique des sauts en jeu, AllMyStats le trouve tout seul. "
+                 "Sur téléphone ou console, colle ici le lien de l'historique (il expire au bout de 24 h)."},
     ]
 
-    P, C, T = "Profil", "Collection", "Temps de jeu"
+    P, C, H, J, S, T = "Profil", "Collection", "HoYoLAB", "Jade stellaire", "Sauts", "Temps de jeu"
     stats = [
         Stat("niveau_pionnier", "Niveau de Pionnier", "auto", groupe=P, icone="aventure"),
         Stat("equilibre", "Niveau d'équilibre", "auto", groupe=P, icone="monde"),
@@ -145,6 +187,21 @@ class HonkaiStarRail(Jeu):
         Stat("persos_total", "Personnages", "auto", groupe=C, icone="persos"),
         Stat("cones", "Cônes de lumière", "auto", groupe=C, icone="arme"),
         Stat("reliques", "Reliques", "auto", groupe=C, icone="artefact"),
+        Stat("persos_5", "Persos 5★", "auto", groupe=C, icone="cinq_etoiles"),
+        Stat("jours_actifs", "Jours actifs", "auto", groupe=H, icone="jours"),
+        Stat("coffres", "Coffres ouverts", "auto", groupe=H, icone="coffre"),
+        Stat("jade_jour", "Jade gagné aujourd'hui", "auto", groupe=J, icone="jade_stellaire"),
+        Stat("jade_mois", "Jade gagné ce mois", "auto", groupe=J, icone="jade_stellaire"),
+        Stat("passes_mois", "Passes gagnés ce mois", "auto", groupe=J, icone="passe_stellaire"),
+        Stat("sauts_total", "Sauts effectués", "auto", groupe=S, icone="voeu"),
+        Stat("jade_depensee", "Jade dépensé en sauts", "auto", groupe=S, icone="jade_stellaire", aide="Sauts × 160"),
+        Stat("cinq_etoiles", "5★ obtenus", "auto", groupe=S, icone="cinq_etoiles"),
+        Stat("quatre_etoiles", "4★ obtenus", "auto", groupe=S, icone="quatre_etoiles"),
+        Stat("pity_perso", "Pity bannière perso", "auto", groupe=S, icone="pity",
+             aide="Sauts depuis ton dernier 5★ (garanti à 90)"),
+        Stat("pity_cone", "Pity bannière cône", "auto", groupe=S, icone="arme",
+             aide="Sauts depuis ton dernier 5★ (garanti à 80)"),
+        Stat("pity_moyen", "Pity moyen d'un 5★", "auto", decimales=1, groupe=S, icone="sablier"),
         Stat("temps_total", "Temps de jeu suivi", "auto", unite="h", decimales=1, groupe=T, icone="horloge",
              aide="Mesuré sur ce PC depuis que AllMyStats tourne (mode arrière-plan conseillé)"),
         Stat("temps_7j", "Ces 7 derniers jours", "auto", unite="h", decimales=1, groupe=T, icone="calendrier_semaine"),
@@ -161,7 +218,30 @@ class HonkaiStarRail(Jeu):
 
     def nom_du_compte(self, reglages):
         pseudo = (_lire_json(os.path.join(self._dossier_compte(), "starrail_compte.json")) or {}).get("pseudo")
-        return pseudo or (f"UID {reglages['uid']}" if reglages.get("uid") else "")
+        return pseudo or reglages.get("pseudo_compte") or (f"UID {reglages['uid']}" if reglages.get("uid") else "")
+
+    def connexion(self, reglages, dossier_donnees):
+        try:
+            cookies = navigateur.recuperer_cookies(
+                "https://www.hoyolab.com/home", os.path.join(dossier_donnees, self.dossier_connexion),
+                domaine="hoyolab.com", est_connecte=lambda c: bool(c.get("ltoken_v2") and c.get("ltuid_v2")))
+        except navigateur.ErreurConnexion as e:
+            raise ErreurJeu(str(e))
+        trouves = {k: cookies[k] for k in hoyolab.NOMS_COOKIES if cookies.get(k)}
+        try:
+            comptes = hoyolab.comptes_starrail(trouves)
+        except hoyolab.ErreurHoyolab as e:
+            raise ErreurJeu(f"Connecté, mais impossible de trouver ton compte Star Rail : {e}")
+        if not comptes:
+            raise ErreurJeu("Connecté, mais aucun compte Honkai: Star Rail n'est lié à ce compte HoYoLAB.")
+        actuel = (reglages.get("uid") or "").strip()
+        compte = next((c for c in comptes if str(c.get("game_role_id")) == actuel), None) \
+            or max(comptes, key=lambda c: c.get("level") or 0)
+        trouves["uid"] = str(compte.get("game_role_id"))
+        hoyolab.tout_rendre_visible(trouves, compte)
+        nom = compte.get("nickname") or trouves["uid"]
+        trouves["pseudo_compte"] = nom
+        return trouves, f"Connecté en tant que {nom} (UID {trouves['uid']})"
 
     @staticmethod
     def _dossier_compte():
@@ -210,7 +290,45 @@ class HonkaiStarRail(Jeu):
         except ErreurJeu as e:
             etat.append({"nom": "Profil", "icone": "aventure", "ok": False, "texte": str(e)})
 
-        # 2) Temps de jeu
+        # 2) HoYoLAB (si connecté)
+        cookies = hoyolab.lire_cookies(reglages)
+        if cookies.get("ltoken_v2") and cookies.get("ltuid_v2"):
+            try:
+                v, s, avertissements = hoyolab.recuperer(uid, cookies)
+                for cle, val in v.items():   # Enka a la priorité pour les stats qu'ils ont tous les deux
+                    valeurs.setdefault(cle, val)
+                sections = s[:1] + sections + s[1:] if s and s[0]["titre"] == "En ce moment" else sections + s
+                etat.append({"nom": "HoYoLAB", "icone": "jours", "ok": not avertissements,
+                             "texte": "connecté" if not avertissements else " · ".join(avertissements)})
+            except hoyolab.ErreurHoyolab as e:
+                etat.append({"nom": "HoYoLAB", "icone": "jours", "ok": False, "texte": str(e)})
+        else:
+            etat.append({"nom": "HoYoLAB", "icone": "jours", "ok": None,
+                         "texte": "pas connecté : clique sur « Se connecter avec HoYoLAB » pour la puissance de "
+                                  "Pionnier, tous tes persos et ton Jade stellaire"})
+
+        # 3) Historique des sauts
+        chemin_sauts = os.path.join(dossier_donnees, "starrail_sauts.json")
+        lien = (reglages.get("lien_sauts") or "").strip() or sauts.chercher_lien_dans_le_jeu()
+        texte_sauts, ok_sauts = None, True
+        if lien:
+            try:
+                _, nouveaux = sauts.mettre_a_jour(lien, chemin_sauts)
+                texte_sauts = f"{nouveaux} nouveau(x) saut(s)" if nouveaux else "à jour"
+            except sauts.ErreurSauts as e:
+                texte_sauts, ok_sauts = str(e), False
+        stock = sauts.charger_stock(chemin_sauts)
+        if stock:
+            v, s = sauts.analyser(stock, uid, noms.image_par_nom)
+            valeurs.update(v)
+            sections += s or []
+            texte_sauts = texte_sauts or "ouvre l'historique des sauts en jeu pour avoir les nouveaux"
+        elif not lien:
+            ok_sauts = None
+            texte_sauts = "ouvre l'historique des sauts en jeu (sur ce PC), puis actualise"
+        etat.append({"nom": "Sauts", "icone": "voeu", "ok": ok_sauts, "texte": texte_sauts})
+
+        # 4) Temps de jeu
         v, s = self._suivi(dossier_donnees).resume()
         if v:
             valeurs.update(v)

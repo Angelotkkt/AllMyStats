@@ -1071,3 +1071,12 @@ iconePixel("jeu_starrail", "px_hsr", "#6E63D8", "#1A1640", [[
   "..kk........kk..",
   "ssssssssssssssss",
 ], { k: "#141230", y: "#FFE07A", b: "#3D4FB8", w: "#BFE8FF", g: "#E8B04B", W: "#FFFFFF", r: "#C9CED8", s: "#8A90A8" }]);
+// Jade stellaire (un cristal bleu à facettes) et passe (un ticket doré) — dessins maison
+emoji("jade_stellaire", `${deg("gjs", "#BFF0FF", "#3E8EF0")}
+  <path d="M16 2.5 26 11 16 29.5 6 11z" fill="url(#gjs)" stroke="#1E4E9E" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M6 11h20M16 2.5 12 11l4 18.5L20 11z" fill="none" stroke="#1E4E9E" stroke-width=".9" stroke-linejoin="round" opacity=".7"/>
+  <path d="M12 11 16 2.5 20 11z" fill="#fff" opacity=".45"/>`);
+emoji("passe_stellaire", `${deg("gps", "#FFE59A", "#E0A23A")}
+  <path d="M3 9.5h26v4a2.5 2.5 0 0 0 0 5v4H3v-4a2.5 2.5 0 0 0 0-5z" fill="url(#gps)" stroke="#8A5A12" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M21 10v12" stroke="#8A5A12" stroke-width="1" stroke-dasharray="1.6 1.4"/>
+  <path d="M12 12.2l1.3 2.6 2.9.4-2.1 2 .5 2.9-2.6-1.4-2.6 1.4.5-2.9-2.1-2 2.9-.4z" fill="#fff" opacity=".85"/>`);
