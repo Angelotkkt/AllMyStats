@@ -221,6 +221,7 @@ function afficherJeu(animer = false) {
   cacherCarteCollee();
   if (jeu.page === "carte") return afficherPageCarte(jeu);
   if (jeu.page === "builds") return afficherPageBuilds(jeu);
+  if (jeu.page === "quotidien") return afficherPageQuotidien(jeu);
 
   // Range les stats par groupe ; on cache les stats auto jamais récupérées
   const visible = (s) => s.source === "manuel" || s.modifiable || stats[s.cle].actuelle !== null;
@@ -754,6 +755,102 @@ function carteChoisie(jeu) {
   let id = null;
   try { id = localStorage.getItem("carte_" + jeu.id); } catch (e) {}
   return (jeu.cartes_en_ligne || []).find((c) => c.id === id) || jeu.cartes_en_ligne?.[0];
+}
+
+// ================= Connexion quotidienne HoYoLAB (onglet de Genshin) =================
+const quotidien = { vue: "recompenses" };
+
+function afficherPageQuotidien(jeu) {
+  $("#contenu").innerHTML = `
+    <div class="cq-page">
+      <header class="cq-entete">
+        <span class="cq-ico">${icone(jeu.icone)}</span>
+        <div><h2>Connexion quotidienne</h2>
+          <p>Ta récompense de connexion HoYoLAB pour Genshin Impact, à récupérer chaque jour.</p></div>
+        <div class="bt-groupe cq-vues" role="tablist">
+          <button class="puce ${quotidien.vue === "recompenses" ? "actif" : ""}" data-vue="recompenses" role="tab">Récompenses</button>
+          <button class="puce ${quotidien.vue === "officielle" ? "actif" : ""}" data-vue="officielle" role="tab">Page officielle</button>
+        </div>
+      </header>
+      <div id="cq-corps"></div>
+    </div>`;
+  document.querySelectorAll(".cq-vues [data-vue]").forEach((b) => b.addEventListener("click", () => {
+    if (quotidien.vue === b.dataset.vue) return;
+    quotidien.vue = b.dataset.vue;
+    son("onglet");
+    cacherCarteCollee();
+    afficherPageQuotidien(jeu);
+  }));
+  if (quotidien.vue === "officielle") {
+    $("#cq-corps").innerHTML = `<div id="cadre-carte" class="cadre-carte cq-cadre"><div class="carte-attente"><div class="rond"></div></div></div>
+      <p class="cq-note">${ICONES.astuce}C'est la vraie page de HoYoLAB : connecte-toi en haut si elle te le demande. Missions,
+        compensation de connexion et récompenses s'y récupèrent directement.</p>`;
+    return montrerCarteCollee(jeu, jeu.cartes_en_ligne[0]);
+  }
+  chargerQuotidien(jeu);
+}
+
+async function chargerQuotidien(jeu) {
+  const corps = $("#cq-corps");
+  corps.innerHTML = `<div class="bt-attente"><div class="rond"></div><p>Chargement de ton calendrier…</p></div>`;
+  let d;
+  try {
+    d = await api(`/api/jeux/${jeu.id}/page/etat`);
+  } catch (e) {
+    corps.innerHTML = `<div class="vide">${ICONES.erreur}<span>${esc(e.message)}</span></div>`;
+    return;
+  }
+  if (etat.jeuActif !== jeu.id || quotidien.vue !== "recompenses") return;
+  if (!d.connecte) {
+    corps.innerHTML = `<div class="cq-carte cq-pas-connecte">${ICONES.connexion}
+      <h3>Connecte-toi d'abord à HoYoLAB</h3>
+      <p>AllMyStats se sert de la connexion HoYoLAB de la page Genshin Impact (bouton « Se connecter avec HoYoLAB »).
+        Tu peux aussi récupérer ta récompense sur la page officielle.</p>
+      <div class="am-boutons"><button class="principal" id="cq-aller-genshin">Aller à Genshin Impact</button>
+        <button class="secondaire" id="cq-aller-officielle">Page officielle</button></div></div>`;
+    $("#cq-aller-genshin").onclick = () => choisirJeu("genshin");
+    $("#cq-aller-officielle").onclick = () => document.querySelector('.cq-vues [data-vue="officielle"]').click();
+    return;
+  }
+  const faits = d.jours_faits, deja = d.deja_fait;
+  const jourActuel = deja ? faits - 1 : faits;   // la case d'aujourd'hui
+  corps.innerHTML = `
+    <div class="cq-carte">
+      <div class="cq-resume">
+        <div class="cq-compte"><b>${faits}</b><span>jour${faits > 1 ? "s" : ""} ce mois-ci</span></div>
+        ${d.jours_manques ? `<div class="cq-manques"><b>${d.jours_manques}</b> jour${d.jours_manques > 1 ? "s" : ""} de connexion manqué${d.jours_manques > 1 ? "s" : ""}</div>` : ""}
+        <button class="principal cq-recuperer" id="cq-recuperer" ${deja ? "disabled" : ""}>
+          ${deja ? `${ICONES.ok}Récupérée aujourd'hui` : `${ICONES.cadeau || ICONES.cinq_etoiles}Récupérer la récompense du jour`}</button>
+      </div>
+      <ol class="cq-grille">${d.recompenses.map((r, i) => {
+        const classe = i < faits ? (i === jourActuel ? "fait aujourdhui" : "fait") : i === jourActuel ? "aujourdhui" : "";
+        return `<li class="cq-jour ${classe}">
+          <div class="cq-rond">${urlImage(r.image) ? `<img src="${urlImage(r.image)}" alt="" loading="lazy">` : ICONES.cadeau || ""}</div>
+          <span class="cq-nb">×${esc(String(r.nombre))}</span>
+          <span class="cq-label" title="${esc(r.nom)}">Jour ${i + 1}</span>
+          ${i < faits ? `<span class="cq-coche">${ICONES.ok}</span>` : ""}</li>`;
+      }).join("")}</ol>
+      <p class="cq-note">${ICONES.astuce}Rien n'est récupéré tout seul : c'est toi qui cliques. Pour les missions et la
+        compensation de connexion, va dans « Page officielle ».</p>
+    </div>`;
+  $("#cq-recuperer").onclick = async (e) => {
+    const b = e.currentTarget;
+    b.disabled = true;
+    try {
+      const r = await api(`/api/jeux/${jeu.id}/page/recuperer`, { method: "POST", body: {} });
+      if (r.verification) {
+        toast(r.message, "info");
+        quotidien.vue = "officielle";
+        return afficherPageQuotidien(jeu);
+      }
+      son(r.deja ? "info" : "succes");
+      toast(r.message, r.deja ? "info" : "succes");
+      chargerQuotidien(jeu);
+    } catch (err) {
+      toast(err.message, "erreur");
+      b.disabled = false;
+    }
+  };
 }
 
 function afficherPageCarte(jeu) {

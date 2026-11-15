@@ -1152,3 +1152,50 @@ button.bt-membre:hover .bt-vig { outline: 2px solid var(--el); }
 .carte-native li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 14px; background: var(--encre-2);
   font-size: 14px; line-height: 1.4; }
 .carte-native li svg.emoji { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* ---------------------------------------------------------------- connexion quotidienne (Genshin) */
+.cq-page { max-width: 1240px; }
+.cq-entete { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.cq-ico svg.emoji { width: 58px; height: 58px; }
+.cq-entete > div:first-of-type { flex: 1; min-width: 240px; }
+.cq-entete h2 { margin: 0; font: 700 34px/1.05 var(--f-chiffres); }
+.cq-entete p { margin: 4px 0 0; color: #c8cdea; }
+.cq-carte { padding: 22px; border-radius: 24px; background: linear-gradient(170deg, #FFF8E8, #F4E9CF); color: #5A4630;
+  border: 3px solid #E9D8AE; box-shadow: 0 14px 40px rgba(0, 0, 0, .35); }
+.cq-resume { display: flex; align-items: center; gap: 14px 26px; flex-wrap: wrap; margin-bottom: 18px; }
+.cq-compte { display: flex; align-items: baseline; gap: 8px; font-weight: 600; }
+.cq-compte b { font: 700 40px/1 var(--f-chiffres); color: #D58A3E; }
+.cq-manques { color: #9A7A52; font-weight: 600; }
+.cq-manques b { color: #D58A3E; font-size: 18px; }
+.cq-carte .cq-recuperer { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; font-size: 16px;
+  background: #D9793A; border-color: #D9793A; color: #fff; border-radius: 999px; }
+.cq-carte .cq-recuperer:disabled { background: #B9C9A8; border-color: #B9C9A8; color: #2E4A22; opacity: 1; cursor: default; }
+.cq-recuperer svg.emoji { width: 20px; height: 20px; }
+.cq-grille { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+.cq-jour { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 6px 0;
+  border-radius: 14px; background: #C9BBA0; overflow: hidden; }
+.cq-rond { width: 74px; height: 74px; border-radius: 50%; background: #FFFDF6; display: grid; place-items: center; overflow: hidden; }
+.cq-rond img { width: 62px; height: 62px; object-fit: contain; }
+.cq-rond svg.emoji { width: 40px; height: 40px; }
+.cq-nb { color: #fff; font-weight: 700; font-size: 15px; text-shadow: 0 1px 2px rgba(0, 0, 0, .35); margin-top: 4px; }
+.cq-label { align-self: stretch; text-align: center; background: #FFFDF6; color: #A89878; font-size: 17px; padding: 6px 0 8px; margin-top: 8px; }
+.cq-jour.fait { filter: saturate(.55); opacity: .8; }
+.cq-jour.aujourdhui { background: #E57B4A; box-shadow: 0 0 0 3px #FFB37A; filter: none; opacity: 1; }
+.cq-jour.aujourdhui .cq-label { color: #D9793A; font-weight: 700; }
+.cq-coche { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%; background: #fff;
+  display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0, 0, 0, .25); }
+.cq-coche svg.emoji { width: 18px; height: 18px; }
+.cq-note { display: flex; gap: 8px; align-items: flex-start; margin: 16px 0 0; font-size: 13.5px; color: inherit; opacity: .85; }
+.cq-note svg.emoji { width: 18px; height: 18px; flex-shrink: 0; }
+#cq-corps > .cq-note { color: #c8cdea; }
+.cq-cadre { height: calc(100vh - 230px); min-height: 420px; }
+.cq-pas-connecte { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.cq-pas-connecte > svg.emoji { width: 48px; height: 48px; }
+.cq-pas-connecte h3 { margin: 0; font: 700 22px/1.2 var(--f-chiffres); color: #5A4630; }
+.cq-pas-connecte p { margin: 0; max-width: 60ch; }
+@media (max-width: 760px) {
+  .cq-recuperer { margin-left: 0; width: 100%; justify-content: center; }
+  .cq-grille { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .cq-rond { width: 54px; height: 54px; } .cq-rond img { width: 46px; height: 46px; }
+  .cq-label { font-size: 13px; }
+}

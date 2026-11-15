@@ -539,6 +539,9 @@ class Gestionnaire(BaseHTTPRequestHandler):
                 if not hasattr(jeu, "page_donnees"):
                     return self._erreur("Cette catégorie n'a pas de données de page.")
                 try:
+                    if getattr(jeu, "reglages_source", None):   # page qui se sert de la connexion d'un autre jeu
+                        return self._json(jeu.page_donnees(m[4:], DOSSIER_DONNEES,
+                                                           reglages=CONFIG.reglages(jeu.reglages_source)))
                     return self._json(jeu.page_donnees(m[4:], DOSSIER_DONNEES))
                 except ErreurJeu as e:
                     return self._erreur(str(e))
@@ -579,6 +582,21 @@ class Gestionnaire(BaseHTTPRequestHandler):
             return self._protege(installer_fichier)
         if len(m) == 4 and m[:2] == ["api", "jeux"] and m[3] == "image":  # capture d'écran glissée dans l'appli
             return self._protege(lambda: self._recevoir_image(m[2]))
+        if len(m) >= 5 and m[:2] == ["api", "jeux"] and m[3] == "page":   # action d'une page spéciale
+            jeu = self._jeu(m[2])
+            if not jeu:
+                return
+            if not hasattr(jeu, "page_action"):
+                return self._erreur("Cette catégorie n'a pas d'action.")
+
+            def action():
+                try:
+                    corps = self._corps()
+                    reglages = CONFIG.reglages(jeu.reglages_source) if getattr(jeu, "reglages_source", None) else None
+                    return self._json(jeu.page_action(m[4:], corps, DOSSIER_DONNEES, reglages=reglages))
+                except ErreurJeu as e:
+                    return self._erreur(str(e))
+            return self._protege(action)
         if len(m) == 4 and m[:2] == ["api", "jeux"] and m[3] == "donnees":  # fichier de données (Activision…)
             return self._protege(lambda: self._recevoir_donnees(m[2]))
         corps = self._corps()

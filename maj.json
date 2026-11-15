@@ -1,6 +1,7 @@
 {
-  "version": "2.30.0",
+  "version": "2.31.0",
   "nouveautes": [
+    "Genshin : nouvel onglet « Connexion quotidienne » pour voir et récupérer ta récompense HoYoLAB du jour",
     "Honkai: Star Rail : connexion HoYoLAB (puissance de Pionnier, tous tes persos, Jade stellaire du mois) et historique des sauts avec pity",
     "Nouveau jeu : Honkai: Star Rail (niveau de Pionnier, succès, Univers simulé, Mémoire du Chaos, vitrine, temps de jeu)",
     "Interactive Map : la carte HoYoLAB s'affiche directement dans la page d'AllMyStats (plus de fenêtre à part)",
@@ -81,5 +82,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "316cc4c078daa4f3e4f4923f9bc8de9981c569902cde6cca8752869f72c5fa65"
+  "sha256": "74b57c680e639523b3aa00ff49525153ec625e8de23d9b71c2e33158827a7a0e"
 }

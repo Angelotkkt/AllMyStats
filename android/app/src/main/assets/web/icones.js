@@ -1080,3 +1080,30 @@ emoji("passe_stellaire", `${deg("gps", "#FFE59A", "#E0A23A")}
   <path d="M3 9.5h26v4a2.5 2.5 0 0 0 0 5v4H3v-4a2.5 2.5 0 0 0 0-5z" fill="url(#gps)" stroke="#8A5A12" stroke-width="1.2" stroke-linejoin="round"/>
   <path d="M21 10v12" stroke="#8A5A12" stroke-width="1" stroke-dasharray="1.6 1.4"/>
   <path d="M12 12.2l1.3 2.6 2.9.4-2.1 2 .5 2.9-2.6-1.4-2.6 1.4.5-2.9-2.1-2 2.9-.4z" fill="#fff" opacity=".85"/>`);
+
+// Cadeau (récompense) — dessin maison
+emoji("cadeau", `${deg("gcd", "#FF8A6B", "#D9483A")}
+  <rect x="5" y="13" width="22" height="15" rx="2.5" fill="url(#gcd)"/>
+  <rect x="3.5" y="9" width="25" height="6" rx="2" fill="#FF9E7E"/>
+  <rect x="14" y="9" width="4" height="19" fill="#FFD36B"/>
+  <path d="M16 9c-2-4.5-7.5-6-8.2-2.6C7.2 9.3 12 9.4 16 9zm0 0c2-4.5 7.5-6 8.2-2.6.6 2.9-4.2 3-8.2 2.6z" fill="#FFD36B" stroke="#C98A1E" stroke-width=".8"/>`);
+
+// Connexion quotidienne : un calendrier coché, en pixel art, aux couleurs de Genshin
+iconePixel("connexion_quotidienne", "px_cq", "#6E9BE8", "#24407E", [[
+  "...k........k...",
+  "..kRk......kRk..",
+  ".kkRkkkkkkkkRkk.",
+  ".kRRRRRRRRRRRRk.",
+  ".kRRRRRRRRRRRRk.",
+  ".kkkkkkkkkkkkkk.",
+  ".kppppppppppppk.",
+  ".kpqqpqqpqqpggk.",
+  ".kpqqpqqpqqgggk.",
+  ".kppppppppgggpk.",
+  ".kpqqpqqpggqqpk.",
+  ".kpggpqqgggqqpk.",
+  ".kpgggggggppppk.",
+  ".kppgggpppppppk.",
+  ".kkkkkkkkkkkkkk.",
+  "................",
+], { k: "#2B1A08", R: "#E2533F", p: "#FFF6E0", q: "#E2CFA4", g: "#4CB36A" }]);
