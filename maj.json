@@ -1,6 +1,7 @@
 {
-  "version": "2.31.0",
+  "version": "2.31.1",
   "nouveautes": [
+    "Connexion quotidienne de Genshin : nouveau style médiéval de Mondstadt (parchemin, cadre doré, sceaux de cire)",
     "Genshin : nouvel onglet « Connexion quotidienne » pour voir et récupérer ta récompense HoYoLAB du jour",
     "Honkai: Star Rail : connexion HoYoLAB (puissance de Pionnier, tous tes persos, Jade stellaire du mois) et historique des sauts avec pity",
     "Nouveau jeu : Honkai: Star Rail (niveau de Pionnier, succès, Univers simulé, Mémoire du Chaos, vitrine, temps de jeu)",
@@ -82,5 +83,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "74b57c680e639523b3aa00ff49525153ec625e8de23d9b71c2e33158827a7a0e"
+  "sha256": "a55a156d50e9119f45466afb14d39fc0552df652de9496046fbdde2f6e3f3431"
 }

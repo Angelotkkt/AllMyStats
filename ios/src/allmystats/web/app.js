@@ -758,7 +758,21 @@ function carteChoisie(jeu) {
 }
 
 // ================= Connexion quotidienne HoYoLAB (onglet de Genshin) =================
+// Style « Mondstadt » : parchemin, cadre doré à volutes de vent, sceaux de cire. Dessins maison.
 const quotidien = { vue: "recompenses" };
+const MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre",
+  "novembre", "décembre"];
+// Volute dorée d'angle (un tourbillon de vent et une feuille)
+const ORNEMENT_ANGLE = `<svg viewBox="0 0 80 80" aria-hidden="true"><g fill="none" stroke="#B8893A" stroke-width="2.4" stroke-linecap="round">
+  <path d="M6 74V20Q6 6 20 6h54"/><path d="M14 74V26q0-12 12-12h48" stroke-width="1.2" opacity=".8"/>
+  <path d="M22 34c0-8 6-12 12-12 7 0 10 5 10 9 0 5-4 7-7 7-4 0-5-3-5-5" stroke-width="2"/>
+  <path d="M40 22c6-4 14-3 18 1" stroke-width="1.6"/><path d="M22 38c-4 6-3 14 1 18" stroke-width="1.6"/></g>
+  <path d="M7 7l7 3-3 4z" fill="#D9B45A"/><circle cx="34" cy="31" r="2.6" fill="#3FB8A0"/></svg>`;
+// Sceau de cire rouge avec une coche, pour les jours récupérés
+const SCEAU = `<svg viewBox="0 0 40 40" aria-hidden="true">
+  <path d="M20 2l3.2 3 4.3-1 1.6 4.1 4.3 1.1-.5 4.4 3.4 2.8-2.3 3.8 2.3 3.8-3.4 2.8.5 4.4-4.3 1.1-1.6 4.1-4.3-1L20 38l-3.2-3-4.3 1-1.6-4.1-4.3-1.1.5-4.4L3.7 23.6 6 19.8 3.7 16l3.4-2.8-.5-4.4 4.3-1.1 1.6-4.1 4.3 1z" fill="#A32A24"/>
+  <circle cx="20" cy="20" r="11" fill="#C23A30"/><circle cx="20" cy="20" r="11" fill="none" stroke="#7E1C17" stroke-width="1.2"/>
+  <path d="M14.5 20.5l3.8 3.8 7.4-8" fill="none" stroke="#F6D5C2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 function afficherPageQuotidien(jeu) {
   $("#contenu").innerHTML = `
@@ -814,21 +828,26 @@ async function chargerQuotidien(jeu) {
   }
   const faits = d.jours_faits, deja = d.deja_fait;
   const jourActuel = deja ? faits - 1 : faits;   // la case d'aujourd'hui
+  const mois = MOIS_FR[(Number(d.mois) || new Date().getMonth() + 1) - 1] || "";
   corps.innerHTML = `
     <div class="cq-carte">
+      ${["hg", "hd", "bg", "bd"].map((c) => `<span class="cq-angle ${c}">${ORNEMENT_ANGLE}</span>`).join("")}
+      <div class="cq-banniere"><span>Registre de ${esc(mois)}</span></div>
       <div class="cq-resume">
-        <div class="cq-compte"><b>${faits}</b><span>jour${faits > 1 ? "s" : ""} ce mois-ci</span></div>
-        ${d.jours_manques ? `<div class="cq-manques"><b>${d.jours_manques}</b> jour${d.jours_manques > 1 ? "s" : ""} de connexion manqué${d.jours_manques > 1 ? "s" : ""}</div>` : ""}
-        <button class="principal cq-recuperer" id="cq-recuperer" ${deja ? "disabled" : ""}>
-          ${deja ? `${ICONES.ok}Récupérée aujourd'hui` : `${ICONES.cadeau || ICONES.cinq_etoiles}Récupérer la récompense du jour`}</button>
+        <div class="cq-compte"><b class="cq-lettrine">${faits}</b><span>jour${faits > 1 ? "s" : ""} inscrit${faits > 1 ? "s" : ""}<br>
+          <i>ce mois-ci</i></span></div>
+        ${d.jours_manques ? `<div class="cq-manques"><b>${d.jours_manques}</b> jour${d.jours_manques > 1 ? "s" : ""} manqué${d.jours_manques > 1 ? "s" : ""}</div>` : ""}
+        <button class="cq-recuperer" id="cq-recuperer" ${deja ? "disabled" : ""}>
+          ${deja ? `<span class="cq-sceau-petit">${SCEAU}</span>Récompense du jour reçue` : `${ICONES.cadeau}Recevoir la récompense du jour`}</button>
       </div>
       <ol class="cq-grille">${d.recompenses.map((r, i) => {
         const classe = i < faits ? (i === jourActuel ? "fait aujourdhui" : "fait") : i === jourActuel ? "aujourdhui" : "";
-        return `<li class="cq-jour ${classe}">
-          <div class="cq-rond">${urlImage(r.image) ? `<img src="${urlImage(r.image)}" alt="" loading="lazy">` : ICONES.cadeau || ""}</div>
+        return `<li class="cq-jour ${classe}" title="${esc(r.nom)}">
+          ${i === jourActuel ? `<span class="cq-ruban">Aujourd'hui</span>` : ""}
+          <div class="cq-rond">${urlImage(r.image) ? `<img src="${urlImage(r.image)}" alt="" loading="lazy">` : ICONES.cadeau}</div>
           <span class="cq-nb">×${esc(String(r.nombre))}</span>
-          <span class="cq-label" title="${esc(r.nom)}">Jour ${i + 1}</span>
-          ${i < faits ? `<span class="cq-coche">${ICONES.ok}</span>` : ""}</li>`;
+          <span class="cq-label">Jour <b>${i + 1}</b></span>
+          ${i < faits ? `<span class="cq-sceau">${SCEAU}</span>` : ""}</li>`;
       }).join("")}</ol>
       <p class="cq-note">${ICONES.astuce}Rien n'est récupéré tout seul : c'est toi qui cliques. Pour les missions et la
         compensation de connexion, va dans « Page officielle ».</p>

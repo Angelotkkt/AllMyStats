@@ -22,7 +22,7 @@ MESSAGES = {
     -100: "Ta connexion HoYoLAB a expiré : reconnecte-toi dans la page Genshin Impact.",
     10001: "Ta connexion HoYoLAB a expiré : reconnecte-toi dans la page Genshin Impact.",
     -10002: "HoYoLAB ne trouve pas de compte Genshin lié à ce compte.",
-    -5003: "Tu as déjà récupéré la récompense d'aujourd'hui.",
+    -5003: "Tu as déjà reçu la récompense d'aujourd'hui.",
 }
 
 
@@ -120,4 +120,4 @@ class ConnexionQuotidienne(PageEnLigne):
             return {"ok": True, "deja": True, "message": MESSAGES[-5003]}
         if code != 0:
             raise ErreurJeu(MESSAGES.get(code, f"HoYoLAB : {rep.get('message', '?')} (code {code})"))
-        return {"ok": True, "message": "Récompense du jour récupérée !"}
+        return {"ok": True, "message": "Récompense du jour reçue !"}
