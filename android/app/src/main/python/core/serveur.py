@@ -475,6 +475,7 @@ class Gestionnaire(BaseHTTPRequestHandler):
             corps = f.read()
         self.send_response(200)
         self.send_header("Content-Type", type_mime + ("; charset=utf-8" if type_mime.startswith("text") else ""))
+        self.send_header("Cache-Control", "no-cache")   # après une mise à jour, jamais d'ancien fichier gardé
         self.send_header("Content-Length", str(len(corps)))
         self.end_headers()
         self.wfile.write(corps)
@@ -908,7 +909,8 @@ def _montrer_fenetre_existante(port):
 def _lancer_avec_fenetre_native(serveur, adresse, cachee):
     """Le serveur tourne à côté ; la fenêtre native occupe le fil principal jusqu'à la fermeture."""
     threading.Thread(target=serveur.serve_forever, daemon=True, name="serveur").start()
-    fenetre = FenetreNative(adresse, DOSSIER_DONNEES, cachee=cachee, rester_actif=arriere_plan_actif)
+    fenetre = FenetreNative(adresse, DOSSIER_DONNEES, cachee=cachee, rester_actif=arriere_plan_actif,
+                             icone=os.path.join(DOSSIER_WEB, "icone.ico"))
     MODE["fenetre"] = fenetre
     try:
         fenetre.lancer()

@@ -1,6 +1,7 @@
 {
-  "version": "2.32.0",
+  "version": "2.32.1",
   "nouveautes": [
+    "La fenêtre et la barre des tâches prennent le nouveau logo dès la mise à jour, sans attendre un nouveau .exe",
     "Nouveau logo « Comète A » : dans l'appli, sur le site, l'icône du .exe, Android, iOS et Discord",
     "Connexion quotidienne de Genshin : nouveau style médiéval de Mondstadt (parchemin, cadre doré, sceaux de cire)",
     "Genshin : nouvel onglet « Connexion quotidienne » pour voir et récupérer ta récompense HoYoLAB du jour",
@@ -84,5 +85,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "d0f7c597ea61dd8a8fdabf87fefd44a21411d6b0b79e1dcf8912aaea6796aa20"
+  "sha256": "825bb0ac18ba360410e3601c6c97790f3ebbac3d232fd95a963e50e721f35b77"
 }

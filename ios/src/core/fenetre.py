@@ -33,8 +33,9 @@ class FenetreNative:
     """La fenêtre native. lancer() doit tourner sur le fil principal et ne rend la main qu'à la fermeture
     définitive. Si AllMyStats doit rester actif (mode « Toujours actif »), fermer la fenêtre la cache."""
 
-    def __init__(self, adresse, dossier_donnees, cachee=False, rester_actif=lambda: False):
+    def __init__(self, adresse, dossier_donnees, cachee=False, rester_actif=lambda: False, icone=None):
         self.adresse, self.dossier = adresse, dossier_donnees
+        self.icone = icone   # icone.ico de la version installée (le logo suit les mises à jour, pas le .exe)
         self.cachee, self.rester_actif = cachee, rester_actif
         self.fenetre = None
         self.visible = not cachee
@@ -51,12 +52,35 @@ class FenetreNative:
             background_color="#141832", hidden=self.cachee, text_select=False, zoomable=False)
         self.fenetre.events.closing += self._fermeture
         self.fenetre.events.shown += lambda: self._visible(True)
+        self.fenetre.events.shown += lambda: self._mettre_icone(self.fenetre)
+        self.fenetre.events.loaded += lambda: self._mettre_icone(self.fenetre)
         self.fenetre.events.loaded += lambda: self.prete.set()
         webview.start(gui="edgechromium", private_mode=False, debug=False,
                       storage_path=os.path.join(self.dossier, "fenetre_appli"))
 
     def _visible(self, v):
         self.visible = v
+
+    def _mettre_icone(self, fenetre):
+        """Met le logo de la version installée sur la fenêtre (et donc dans la barre des tâches). Sans ça,
+        Windows montrerait l'icône gravée dans le .exe, qui ne change qu'avec un nouveau .exe."""
+        if not self.icone or not os.path.isfile(self.icone):
+            return
+        try:
+            from System import Action
+            from System.Drawing import Icon
+            forme = fenetre.native
+            if forme is None:
+                return
+
+            def faire():
+                forme.Icon = Icon(self.icone)
+            if forme.InvokeRequired:
+                forme.BeginInvoke(Action(faire))
+            else:
+                faire()
+        except Exception:   # noqa: BLE001 — l'icône n'est qu'un détail, jamais une raison de planter
+            pass
 
     def _fermeture(self):
         if not self._quitter and self.rester_actif():
@@ -99,6 +123,7 @@ class FenetreNative:
         fenetre = webview.create_window(titre, url, width=1400, height=900, min_size=(800, 560),
                                         background_color="#141832", maximized=plein_ecran, text_select=True)
         fenetre.events.closed += lambda: self._pages.pop(url, None)
+        fenetre.events.shown += lambda: self._mettre_icone(fenetre)
         self._pages[url] = fenetre
         return True
 
