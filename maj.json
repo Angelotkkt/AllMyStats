@@ -1,6 +1,7 @@
 {
-  "version": "2.31.1",
+  "version": "2.32.0",
   "nouveautes": [
+    "Nouveau logo « Comète A » : dans l'appli, sur le site, l'icône du .exe, Android, iOS et Discord",
     "Connexion quotidienne de Genshin : nouveau style médiéval de Mondstadt (parchemin, cadre doré, sceaux de cire)",
     "Genshin : nouvel onglet « Connexion quotidienne » pour voir et récupérer ta récompense HoYoLAB du jour",
     "Honkai: Star Rail : connexion HoYoLAB (puissance de Pionnier, tous tes persos, Jade stellaire du mois) et historique des sauts avec pity",
@@ -83,5 +84,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "a55a156d50e9119f45466afb14d39fc0552df652de9496046fbdde2f6e3f3431"
+  "sha256": "d0f7c597ea61dd8a8fdabf87fefd44a21411d6b0b79e1dcf8912aaea6796aa20"
 }

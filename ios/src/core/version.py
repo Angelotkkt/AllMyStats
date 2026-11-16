@@ -1,12 +1,13 @@
 """Version de AllMyStats. À augmenter à chaque nouvelle version."""
 
-VERSION = "2.31.1"
+VERSION = "2.32.0"
 
 # Dépôt GitHub public où sont publiées les mises à jour (« pseudo/AllMyStats »). Vide = pas encore créé :
 # on peut aussi le donner dans Paramètres > Mises à jour.
 DEPOT_MAJ = "Angelotkkt/AllMyStats"
 
 NOUVEAUTES = [
+    "Nouveau logo « Comète A » : dans l'appli, sur le site, l'icône du .exe, Android, iOS et Discord",
     "Connexion quotidienne de Genshin : nouveau style médiéval de Mondstadt (parchemin, cadre doré, sceaux de cire)",
     "Genshin : nouvel onglet « Connexion quotidienne » pour voir et récupérer ta récompense HoYoLAB du jour",
     "Honkai: Star Rail : connexion HoYoLAB (puissance de Pionnier, tous tes persos, Jade stellaire du mois) et historique des sauts avec pity",
