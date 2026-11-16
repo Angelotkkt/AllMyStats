@@ -1,6 +1,7 @@
 {
-  "version": "2.32.1",
+  "version": "2.33.0",
   "nouveautes": [
+    "Chaque jeu a son style : Mondstadt pour Genshin, boutique pour Fortnite, compétences pour Valorant, Apex, CS2, Call of Duty, Star Rail et Blox Fruits",
     "La fenêtre et la barre des tâches prennent le nouveau logo dès la mise à jour, sans attendre un nouveau .exe",
     "Nouveau logo « Comète A » : dans l'appli, sur le site, l'icône du .exe, Android, iOS et Discord",
     "Connexion quotidienne de Genshin : nouveau style médiéval de Mondstadt (parchemin, cadre doré, sceaux de cire)",
@@ -85,5 +86,5 @@
     "Les jeux d'une même série sont rangés dans un dossier dans la barre de gauche"
   ],
   "fichier": "AllMyStats.zip",
-  "sha256": "825bb0ac18ba360410e3601c6c97790f3ebbac3d232fd95a963e50e721f35b77"
+  "sha256": "a4fa9a9383cd5e2ac537e8b240e6cb421694ac419e25268d566bead4aeed16ca"
 }

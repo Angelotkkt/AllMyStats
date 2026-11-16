@@ -212,12 +212,27 @@ function synchroniserConnexion() {
   if (change) afficherListeJeux();
 }
 
+// Chaque jeu a son habillage (web/themes.css) : polices, couleurs, formes et décor dans l'esprit du jeu.
+// Tout est dessiné maison, sans logo ni image des jeux.
+function themeDe(jeu) {
+  const id = jeu?.id || "", famille = (jeu?.famille || "").toLowerCase();
+  if (id.startsWith("genshin") || famille.includes("genshin")) return "genshin";
+  if (famille.includes("call of duty") || id.startsWith("cod")) return "cod";
+  return { starrail: "starrail", fortnite: "fortnite", valorant: "valorant", apex: "apex", cs2: "cs2",
+           bloxfruits: "bloxfruits" }[id] || "";
+}
+function appliquerTheme(jeu) {
+  const t = themeDe(jeu), m = document.querySelector("main");
+  if (t) m.dataset.theme = t; else delete m.dataset.theme;
+}
+
 function afficherJeu(animer = false) {
   synchroniserConnexion();
   const { jeu, stats, details, derniere_maj } = etat.donnees;
   $("#titre-mobile").textContent = jeu.famille && jeu.famille !== jeu.nom ? `${jeu.nom}` : jeu.nom;
   fermerMenu();
   document.documentElement.style.setProperty("--accent", jeu.couleur);
+  appliquerTheme(jeu);
   cacherCarteCollee();
   if (jeu.page === "carte") return afficherPageCarte(jeu);
   if (jeu.page === "builds") return afficherPageBuilds(jeu);
@@ -1049,6 +1064,7 @@ async function afficherPageAmis(frais = false) {
   cacherCarteCollee();
   $("#titre-mobile").textContent = "Amis";
   document.documentElement.style.setProperty("--accent", "#FFC44D");
+  appliquerTheme(null);
   afficherListeJeux();
   if (!amis.data) $("#contenu").innerHTML = `<div class="bt-attente"><div class="rond"></div><p>Chargement de tes amis…</p></div>`;
   try {

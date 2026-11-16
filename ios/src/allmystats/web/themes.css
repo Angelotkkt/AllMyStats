@@ -1,0 +1,530 @@
+/* =====================================================================================================
+   Thèmes par jeu : chaque jeu habille ses pages dans son esprit (polices, couleurs, formes, décor).
+   La page du jeu porte <main data-theme="…"> (voir themeDe() dans app.js). Tout est dessiné ici, en CSS
+   et en petits dessins SVG : aucun logo ni image des jeux. Polices libres dans web/polices (licences à côté).
+   ===================================================================================================== */
+@font-face { font-family: "AMS Luckiest"; src: url("polices/LuckiestGuy.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "AMS Teko"; src: url("polices/Teko.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: "AMS Saira"; src: url("polices/SairaCondensed-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "AMS Rajdhani"; src: url("polices/Rajdhani-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "AMS Rajdhani"; src: url("polices/Rajdhani-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "AMS Stencil"; src: url("polices/SairaStencilOne.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "AMS Exo"; src: url("polices/Exo2.ttf") format("truetype"); font-weight: 300 800; font-display: swap; }
+@font-face { font-family: "AMS Pirata"; src: url("polices/PirataOne.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "AMS Lilita"; src: url("polices/LilitaOne.ttf") format("truetype"); font-display: swap; }
+
+/* Petits réglages communs à tous les thèmes */
+main[data-theme] .fond-anime .grille { animation: none; }
+main[data-theme] h2.titre { position: relative; }
+main[data-theme] .stat { overflow: visible; }
+
+/* =====================================================================================================
+   GENSHIN — Mondstadt : nuit bleue étoilée, bois sombre, parchemin, or, sceaux, vert Anémo
+   ===================================================================================================== */
+main[data-theme="genshin"] {
+  --nuit: #0F1830; --encre: #172443; --encre-2: #1F2F55; --trait: #7A6232; --brume: #CDBF9C; --craie: #F7EDD3;
+  --g-or: #D9B45A; --g-or-clair: #F1D48A; --g-anemo: #3FB8A0; --g-encre: #4A3420; --g-bleu: #2F4E86;
+  --f-chiffres: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --g-titre: "Cinzel AMS", "Palatino Linotype", Georgia, serif;
+  --r-carte: 8px; --r-tuile: 6px; --r-petit: 6px;
+}
+main[data-theme="genshin"] .fond-anime .f1 { background: radial-gradient(circle, #3FB8A0 0%, transparent 62%); opacity: .2; }
+main[data-theme="genshin"] .fond-anime .f2 { background: radial-gradient(circle, #D9B45A 0%, transparent 60%); opacity: .12; }
+main[data-theme="genshin"] .fond-anime .f3 { background: radial-gradient(circle, #4F74C8 0%, transparent 62%); opacity: .2; }
+main[data-theme="genshin"] .fond-anime .grille {   /* ciel étoilé de Mondstadt */
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 18%, rgba(255, 244, 210, .7), transparent 60%),
+    radial-gradient(1.2px 1.2px at 64% 9%, rgba(255, 244, 210, .55), transparent 60%),
+    radial-gradient(2px 2px at 82% 34%, rgba(170, 240, 225, .55), transparent 60%),
+    radial-gradient(1.2px 1.2px at 32% 72%, rgba(255, 244, 210, .45), transparent 60%),
+    radial-gradient(1.6px 1.6px at 91% 81%, rgba(255, 244, 210, .5), transparent 60%),
+    radial-gradient(1px 1px at 48% 46%, rgba(255, 255, 255, .5), transparent 60%);
+  background-size: 340px 300px; }
+main[data-theme="genshin"] .carte-joueur {
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgba(63, 184, 160, .22), transparent 60%),
+    linear-gradient(160deg, #22355F, #152240 60%, #101A33);
+  border: 2px solid #8A6A2E;
+  box-shadow: inset 0 0 0 4px #172443, inset 0 0 0 5.5px var(--g-or), 0 14px 34px rgba(0, 0, 0, .4); }
+main[data-theme="genshin"] .carte-joueur::after {   /* volutes de vent dorées aux 4 coins */
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><g fill='none' stroke='%23D9B45A' stroke-width='2' stroke-linecap='round'><path d='M4 56V16Q4 4 16 4h40'/><path d='M16 26c0-6 4-9 9-9 5 0 7 4 7 7 0 4-3 5-5 5-3 0-4-2-4-4'/></g><circle cx='25' cy='24' r='2' fill='%233FB8A0'/></svg>") top 8px left 8px / 54px no-repeat,
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><g fill='none' stroke='%23D9B45A' stroke-width='2' stroke-linecap='round'><path d='M56 56V16Q56 4 44 4H4'/><path d='M44 26c0-6-4-9-9-9-5 0-7 4-7 7 0 4 3 5 5 5 3 0 4-2 4-4'/></g><circle cx='35' cy='24' r='2' fill='%233FB8A0'/></svg>") top 8px right 8px / 54px no-repeat; }
+main[data-theme="genshin"] .cj-pseudo { font-family: var(--g-titre); letter-spacing: .5px; color: var(--g-or-clair);
+  text-shadow: 0 2px 0 #3A2A0E; }
+main[data-theme="genshin"] .cj-jeu { font-family: var(--g-titre); color: var(--g-anemo); letter-spacing: 1px; }
+main[data-theme="genshin"] .cj-vedette .chiffre { color: #FFF3D2; text-shadow: 0 3px 0 #6A4A16, 0 0 22px rgba(217, 180, 90, .35); }
+main[data-theme="genshin"] .cj-emblem.a-photo .cj-photo { border-radius: 50%; border-color: var(--g-or); box-shadow: 0 0 0 3px #3A2A0E, 0 8px 22px rgba(0, 0, 0, .45); }
+main[data-theme="genshin"] h2.titre { font-family: var(--g-titre); font-size: 22px; letter-spacing: 1px; color: var(--g-or-clair);
+  text-shadow: 0 2px 0 #2A1D08; }
+main[data-theme="genshin"] h2.titre::after { content: ""; flex: 1; height: 10px; margin-left: 8px;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><path d='M5 0L10 5L5 10L0 5Z' fill='%23D9B45A'/></svg>") left center / 10px no-repeat,
+    linear-gradient(90deg, var(--g-or), rgba(217, 180, 90, 0)) left 14px center / calc(100% - 14px) 2px no-repeat; }
+/* Les stats : des fiches de parchemin encadrées d'or, avec un médaillon */
+main[data-theme="genshin"] .stat {
+  color: var(--g-encre); border: 2px solid #8A6A36;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .24  0 0 0 0 .1  0 0 0 .08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    radial-gradient(120% 100% at 50% 30%, #F8EED2, #EAD7A8 70%, #D8BC84);
+  box-shadow: inset 0 0 0 3px #F6E8C2, inset 0 0 0 4.5px rgba(184, 137, 58, .8), 0 3px 0 #5E4520; }
+main[data-theme="genshin"] .stat:hover { border-color: var(--g-or); }
+main[data-theme="genshin"] .stat.choisie { border-color: var(--g-anemo);
+  box-shadow: inset 0 0 0 3px #F6E8C2, inset 0 0 0 4.5px var(--g-anemo), 0 3px 0 #145246, 0 0 18px rgba(63, 184, 160, .55); }
+main[data-theme="genshin"] .sticker { border-radius: 50%; border: 3px solid var(--g-or); background: radial-gradient(circle at 40% 35%, #2C4478, #172443);
+  box-shadow: 0 0 0 2px #5E4520, 0 3px 0 rgba(0, 0, 0, .35); transform: none !important; }
+main[data-theme="genshin"] .stat .nom { color: #7A5A36; font-family: var(--g-titre); font-size: 12px; font-weight: 700; letter-spacing: .4px; }
+main[data-theme="genshin"] .stat .val { color: #3A2612; }
+main[data-theme="genshin"] .stat .val.rien { color: #B9A174; }
+main[data-theme="genshin"] .stat .delta { color: #8A6A44; font-style: italic; }
+main[data-theme="genshin"] .stat .delta .plus { color: #1F7A52; }
+main[data-theme="genshin"] .stat .delta .moins { color: #A3352A; }
+main[data-theme="genshin"] .stat .etiquette { color: #8A6A44; border-color: #C9AE7A; background: rgba(255, 250, 235, .6); }
+main[data-theme="genshin"] .panneau { border: 2px solid #6E5426; background: linear-gradient(180deg, #1B2A4C, #142039);
+  box-shadow: inset 0 0 0 3px #142039, inset 0 0 0 4px rgba(217, 180, 90, .55); }
+main[data-theme="genshin"] .panneau h3 { font-family: var(--g-titre); color: var(--g-or-clair); letter-spacing: .5px; }
+main[data-theme="genshin"] button.principal { background: linear-gradient(180deg, #3FB8A0, #23806E); color: #FFF6DA;
+  border: 2px solid var(--g-or-clair); font-family: var(--g-titre); letter-spacing: .5px; text-shadow: 0 1px 1px rgba(0, 0, 0, .35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 2px 0 #145246; }
+main[data-theme="genshin"] button.secondaire { border-color: #8A6A36; background: rgba(23, 36, 67, .8); font-family: var(--g-titre); letter-spacing: .3px; }
+main[data-theme="genshin"] button.secondaire:hover { border-color: var(--g-or); }
+main[data-theme="genshin"] .bandeau { border: 2px solid #8A6A36; border-style: solid; background: rgba(23, 36, 67, .85); }
+main[data-theme="genshin"] .puce.actif { background: linear-gradient(180deg, #F1D48A, #B8893A); color: #2A1A08; border-color: #F1D48A; }
+main[data-theme="genshin"] .bc-titre b, main[data-theme="genshin"] .bt-eq-entete h2, main[data-theme="genshin"] .bt-hero h2 {
+  font-family: var(--g-titre); color: var(--g-or-clair); letter-spacing: .6px; }
+main[data-theme="genshin"] .bt-perso { border-color: #6E5426; }
+main[data-theme="genshin"] .bt-nom { font-family: var(--g-titre); font-size: 12.5px; background: linear-gradient(180deg, #2A1E10, #1B130A); color: #F1DFB0; }
+main[data-theme="genshin"] .bt-recherche { border-color: #8A6A36; background: rgba(23, 36, 67, .85); }
+
+/* =====================================================================================================
+   FORTNITE — ciel et tempête violette, cartes de la boutique par rareté, gros titres penchés en jaune
+   ===================================================================================================== */
+main[data-theme="fortnite"] {
+  --nuit: #160F3A; --encre: #1E1652; --encre-2: #2A1F6E; --trait: #4A39A8; --brume: #C3BBF5; --craie: #FFFFFF;
+  --f-chiffres: "AMS Luckiest", "Arial Black", Impact, sans-serif;
+  --r-carte: 14px; --r-tuile: 10px; --r-petit: 8px; --fn-jaune: #FFE45C;
+}
+main[data-theme="fortnite"] .fond-anime .f1 { background: radial-gradient(circle, #33B5FF 0%, transparent 62%); opacity: .35; }
+main[data-theme="fortnite"] .fond-anime .f2 { background: radial-gradient(circle, #B44CFF 0%, transparent 60%); opacity: .35; }
+main[data-theme="fortnite"] .fond-anime .f3 { background: radial-gradient(circle, #FF4FD8 0%, transparent 62%); opacity: .15; }
+main[data-theme="fortnite"] .fond-anime .grille {   /* trame BD */
+  background-image: radial-gradient(rgba(255, 255, 255, .07) 1.6px, transparent 1.8px); background-size: 16px 16px; }
+main[data-theme="fortnite"] .carte-joueur { border: 3px solid #0B0726; border-radius: 14px;
+  background:
+    repeating-conic-gradient(from 0deg at 85% 50%, rgba(255, 255, 255, .09) 0 8deg, transparent 8deg 22deg),
+    radial-gradient(120% 140% at 85% 50%, #5ED0FF, #2463E8 45%, #3A1B9E 85%);
+  box-shadow: 0 6px 0 #0B0726, 0 16px 30px rgba(0, 0, 0, .35); }
+main[data-theme="fortnite"] .carte-joueur::after { background: linear-gradient(transparent 78%, rgba(11, 7, 38, .55)); }
+main[data-theme="fortnite"] .cj-pseudo { font-size: 44px; text-transform: uppercase; transform: skew(-6deg); letter-spacing: .5px;
+  text-shadow: 3px 3px 0 #0B0726, -1px -1px 0 #0B0726, 1px -1px 0 #0B0726, -1px 1px 0 #0B0726; }
+main[data-theme="fortnite"] .cj-jeu { color: var(--fn-jaune); font-family: var(--f-chiffres); font-size: 16px; letter-spacing: .5px; text-transform: uppercase; }
+main[data-theme="fortnite"] .cj-maj { color: #E6E2FF; }
+main[data-theme="fortnite"] .cj-vedette .chiffre { color: var(--fn-jaune); transform: skew(-6deg);
+  text-shadow: 4px 4px 0 #0B0726, -2px -2px 0 #0B0726, 2px -2px 0 #0B0726, -2px 2px 0 #0B0726; }
+main[data-theme="fortnite"] .cj-vedette .libelle { color: #fff; }
+main[data-theme="fortnite"] h2.titre { font-size: 28px; text-transform: uppercase; color: var(--fn-jaune); transform: skew(-6deg);
+  text-shadow: 3px 3px 0 #0B0726, -1px -1px 0 #0B0726, 1px -1px 0 #0B0726, -1px 1px 0 #0B0726; transform-origin: left; }
+/* Les stats : des cartes de boutique, couleur de rareté qui tourne (rare, épique, légendaire, peu commune) */
+main[data-theme="fortnite"] .stat { --r1: #5ED0FF; --r2: #1F5FD8; border: 3px solid #0B0726; overflow: hidden; color: #fff;
+  background: repeating-conic-gradient(from 0deg at 50% 0%, rgba(255, 255, 255, .1) 0 6deg, transparent 6deg 18deg),
+              radial-gradient(130% 110% at 50% 0%, var(--r1), var(--r2) 75%);
+  box-shadow: 0 5px 0 #0B0726; transition: transform .12s; padding-top: 34px; }
+main[data-theme="fortnite"] .stat:nth-child(4n+2) { --r1: #D88BFF; --r2: #7A2BC8; }
+main[data-theme="fortnite"] .stat:nth-child(4n+3) { --r1: #FFC46B; --r2: #D9611A; }
+main[data-theme="fortnite"] .stat:nth-child(4n) { --r1: #9BEA5C; --r2: #2F8F2A; }
+main[data-theme="fortnite"] .stat:hover { transform: translateY(-3px) rotate(-1deg); border-color: #0B0726; }
+main[data-theme="fortnite"] .stat.choisie { border-color: var(--fn-jaune); box-shadow: 0 5px 0 #0B0726, 0 0 0 3px #0B0726, 0 0 22px rgba(255, 228, 92, .6); }
+main[data-theme="fortnite"] .stat::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40%;
+  background: linear-gradient(transparent, rgba(11, 7, 38, .55)); pointer-events: none; }
+main[data-theme="fortnite"] .stat > * { position: relative; z-index: 1; }
+main[data-theme="fortnite"] .sticker { position: absolute; top: 8px; left: 10px; width: 36px; height: 36px; border-radius: 8px;
+  border: 2.5px solid #0B0726; background: rgba(255, 255, 255, .9); transform: rotate(-6deg) !important; box-shadow: 0 3px 0 #0B0726; }
+main[data-theme="fortnite"] .sticker svg.emoji { width: 24px; height: 24px; }
+main[data-theme="fortnite"] .stat .nom { color: #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: .3px;
+  text-shadow: 0 1px 0 rgba(11, 7, 38, .6); }
+main[data-theme="fortnite"] .stat .val { color: #fff; font-size: 34px; text-shadow: 2px 2px 0 #0B0726, -1px -1px 0 #0B0726, 1px -1px 0 #0B0726, -1px 1px 0 #0B0726; }
+main[data-theme="fortnite"] .stat .val.rien { color: rgba(255, 255, 255, .45); text-shadow: none; }
+main[data-theme="fortnite"] .stat .delta { color: #F3F0FF; font-weight: 600; }
+main[data-theme="fortnite"] .stat .delta .plus { color: var(--fn-jaune); }
+main[data-theme="fortnite"] .stat .delta .moins { color: #FFB3C1; }
+main[data-theme="fortnite"] .stat .etiquette { color: #0B0726; background: var(--fn-jaune); border-color: #0B0726; font-weight: 800; }
+main[data-theme="fortnite"] .panneau { border: 3px solid #0B0726; background: linear-gradient(180deg, #2A1F6E, #1A1350); box-shadow: 0 5px 0 #0B0726; }
+main[data-theme="fortnite"] .panneau h3 { font-family: var(--f-chiffres); font-weight: 400; text-transform: uppercase; color: var(--fn-jaune); letter-spacing: .5px; }
+main[data-theme="fortnite"] button.principal { background: var(--fn-jaune); color: #0B0726; border: 3px solid #0B0726; transform: skew(-6deg);
+  font-family: var(--f-chiffres); font-weight: 400; font-size: 15px; text-transform: uppercase; box-shadow: 0 4px 0 #0B0726; }
+main[data-theme="fortnite"] button.secondaire { border: 3px solid #0B0726; background: #3A2C9A; transform: skew(-6deg); box-shadow: 0 4px 0 #0B0726;
+  font-weight: 800; text-transform: uppercase; font-size: 13px; }
+main[data-theme="fortnite"] .bandeau { border: 3px solid #0B0726; background: #2A1F6E; box-shadow: 0 4px 0 #0B0726; }
+
+/* =====================================================================================================
+   VALORANT — interface de compétences : angles coupés, rouge vif, blanc cassé, touches C Q E X
+   ===================================================================================================== */
+main[data-theme="valorant"] {
+  --nuit: #0F1923; --encre: #142230; --encre-2: #1C2D3D; --trait: #2E4153; --brume: #9AA8B4; --craie: #ECE8E1;
+  --f-chiffres: "AMS Teko", "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+  --v-rouge: #FF4655; --r-carte: 0; --r-tuile: 0; --r-petit: 0;
+}
+main[data-theme="valorant"] .fond-anime .f1 { background: radial-gradient(circle, #FF4655 0%, transparent 60%); opacity: .14; }
+main[data-theme="valorant"] .fond-anime .f2 { background: radial-gradient(circle, #1FD1B8 0%, transparent 60%); opacity: .08; }
+main[data-theme="valorant"] .fond-anime .f3 { background: radial-gradient(circle, #ECE8E1 0%, transparent 60%); opacity: .05; }
+main[data-theme="valorant"] .fond-anime .grille {   /* lignes de construction géométriques */
+  background-image:
+    linear-gradient(rgba(236, 232, 225, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(236, 232, 225, .04) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 49.6%, rgba(255, 70, 85, .07) 49.6% 50.4%, transparent 50.4%);
+  background-size: 64px 64px, 64px 64px, 256px 256px; }
+main[data-theme="valorant"] .carte-joueur { border: 0;
+  clip-path: polygon(0 0, calc(100% - 34px) 0, 100% 34px, 100% 100%, 34px 100%, 0 calc(100% - 34px));
+  background:
+    linear-gradient(115deg, transparent 62%, rgba(255, 70, 85, .9) 62% 63%, transparent 63% 66%, rgba(255, 70, 85, .35) 66% 71%, transparent 71%),
+    linear-gradient(120deg, #1C2D3D, #0F1923 70%); }
+main[data-theme="valorant"] .carte-joueur::after { background:
+  linear-gradient(var(--v-rouge), var(--v-rouge)) left 0 top 0 / 6px 100% no-repeat,
+  repeating-linear-gradient(90deg, rgba(236, 232, 225, .03) 0 1px, transparent 1px 8px); }
+main[data-theme="valorant"] .cj-pseudo { font-size: 52px; line-height: .9; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+main[data-theme="valorant"] .cj-jeu { color: var(--v-rouge); font-family: var(--f-chiffres); font-size: 20px; letter-spacing: 3px; text-transform: uppercase; }
+main[data-theme="valorant"] .cj-vedette .chiffre { font-size: 110px; font-weight: 700; color: var(--craie); text-shadow: 4px 4px 0 rgba(255, 70, 85, .55); }
+main[data-theme="valorant"] .cj-vedette .libelle { text-transform: uppercase; letter-spacing: 1.5px; }
+main[data-theme="valorant"] .cj-emblem.a-photo .cj-photo { border-radius: 0; border: 3px solid var(--craie);
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%); }
+main[data-theme="valorant"] h2.titre { font-size: 30px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; padding-left: 22px; }
+main[data-theme="valorant"] h2.titre::before { content: ""; position: absolute; left: 0; top: 50%; width: 10px; height: 26px; transform: translateY(-55%) skew(-18deg);
+  background: var(--v-rouge); }
+main[data-theme="valorant"] h2.titre::after { content: ""; flex: 1; height: 1px; margin-left: 10px; background: linear-gradient(90deg, rgba(236, 232, 225, .4), transparent); }
+/* Les stats : des cartes de compétence, avec leur touche (C, Q, E, X) et leurs charges */
+main[data-theme="valorant"] .stat { border: 0; padding: 30px 16px 26px; color: var(--craie);
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  background:
+    linear-gradient(rgba(236, 232, 225, .16), rgba(236, 232, 225, .16)) left 18px bottom 0 / calc(100% - 18px) 1px no-repeat,
+    linear-gradient(160deg, #1E3042, #121F2C); }
+main[data-theme="valorant"] .stat::before { content: ""; position: absolute; left: 16px; bottom: 10px; width: 54px; height: 5px;
+  background: repeating-linear-gradient(90deg, var(--craie) 0 14px, transparent 14px 20px); opacity: .55; }
+main[data-theme="valorant"] .stat::after { content: "C"; position: absolute; top: 8px; right: 22px; min-width: 22px; height: 22px; padding: 0 5px;
+  display: grid; place-items: center; font: 600 18px/1 var(--f-chiffres); color: #0F1923; background: var(--craie); }
+main[data-theme="valorant"] .stat:nth-child(4n+2)::after { content: "Q"; }
+main[data-theme="valorant"] .stat:nth-child(4n+3)::after { content: "E"; }
+main[data-theme="valorant"] .stat:nth-child(4n)::after { content: "X"; background: var(--v-rouge); color: #fff; }
+main[data-theme="valorant"] .stat:hover { background:
+  linear-gradient(rgba(255, 70, 85, .6), rgba(255, 70, 85, .6)) left 18px bottom 0 / calc(100% - 18px) 2px no-repeat,
+  linear-gradient(160deg, #24394D, #142231); }
+main[data-theme="valorant"] .stat.choisie { background:
+  linear-gradient(var(--v-rouge), var(--v-rouge)) left 0 top 0 / 4px 100% no-repeat,
+  linear-gradient(160deg, rgba(255, 70, 85, .28), #142231 70%); }
+main[data-theme="valorant"] .stat.choisie::before { background: repeating-linear-gradient(90deg, var(--v-rouge) 0 14px, transparent 14px 20px); opacity: 1; }
+main[data-theme="valorant"] .sticker { position: absolute; top: 10px; left: 14px; width: 40px; height: 40px; border-radius: 0;
+  border: 1.5px solid rgba(236, 232, 225, .5); background: rgba(15, 25, 35, .8); transform: rotate(45deg) scale(.82) !important; box-shadow: none; }
+main[data-theme="valorant"] .sticker > * { transform: rotate(-45deg); }
+main[data-theme="valorant"] .stat .nom { margin-top: 24px; color: var(--brume); text-transform: uppercase; font-size: 12px; letter-spacing: 1.2px; font-weight: 600; }
+main[data-theme="valorant"] .stat .val { font-size: 40px; font-weight: 600; line-height: .95; }
+main[data-theme="valorant"] .stat .etiquette { top: 10px; right: 50px; border-radius: 0; border-color: rgba(236, 232, 225, .3); text-transform: uppercase; letter-spacing: .6px; }
+main[data-theme="valorant"] .stat .delta .plus { color: #1FD1B8; }
+main[data-theme="valorant"] .stat .delta .moins { color: var(--v-rouge); }
+main[data-theme="valorant"] .panneau { border: 1px solid rgba(236, 232, 225, .14); background: linear-gradient(160deg, #182839, #101C28);
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%); }
+main[data-theme="valorant"] .panneau h3 { text-transform: uppercase; letter-spacing: 1.5px; font-size: 22px; font-weight: 600; }
+main[data-theme="valorant"] button.principal { background: var(--v-rouge); color: #fff; font-family: var(--f-chiffres); font-size: 19px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 7px 18px 5px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
+main[data-theme="valorant"] button.secondaire { background: transparent; border: 1px solid rgba(236, 232, 225, .45); font-family: var(--f-chiffres);
+  font-size: 18px; letter-spacing: 1.2px; text-transform: uppercase; padding: 7px 16px 5px; }
+main[data-theme="valorant"] button.secondaire:hover { border-color: var(--craie); background: rgba(236, 232, 225, .06); }
+main[data-theme="valorant"] .bandeau { border: 1px solid rgba(255, 70, 85, .5); background: rgba(255, 70, 85, .08); }
+
+/* =====================================================================================================
+   APEX — acier, rouille et rouge, bandes de danger, objets par niveau (commun, rare, épique, légendaire)
+   ===================================================================================================== */
+main[data-theme="apex"] {
+  --nuit: #141416; --encre: #1E1E22; --encre-2: #29292F; --trait: #45454E; --brume: #A9A9B2; --craie: #F2F2F2;
+  --f-chiffres: "AMS Saira", "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+  --a-rouge: #DA292A; --r-carte: 0; --r-tuile: 0; --r-petit: 0;
+}
+main[data-theme="apex"] .fond-anime .f1 { background: radial-gradient(circle, #DA292A 0%, transparent 60%); opacity: .16; }
+main[data-theme="apex"] .fond-anime .f2 { background: radial-gradient(circle, #C8742A 0%, transparent 60%); opacity: .12; }
+main[data-theme="apex"] .fond-anime .f3 { background: radial-gradient(circle, #8F9AA8 0%, transparent 60%); opacity: .06; }
+main[data-theme="apex"] .fond-anime .grille { background-image: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .022) 0 2px, transparent 2px 26px); }
+main[data-theme="apex"] .carte-joueur { border: 0; clip-path: polygon(28px 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%, 0 28px);
+  background:
+    linear-gradient(var(--a-rouge), var(--a-rouge)) left bottom / 100% 5px no-repeat,
+    linear-gradient(105deg, transparent 70%, rgba(218, 41, 42, .85) 70% 100%),
+    linear-gradient(160deg, #2E2E35, #19191C 70%); }
+main[data-theme="apex"] .carte-joueur::after { background:
+  repeating-linear-gradient(-45deg, #F2B300 0 10px, #141416 10px 20px) right 0 top 0 / 30% 7px no-repeat; }
+main[data-theme="apex"] .cj-pseudo { font-size: 46px; text-transform: uppercase; letter-spacing: .5px; }
+main[data-theme="apex"] .cj-jeu { color: #FF6B5B; font-family: var(--f-chiffres); text-transform: uppercase; letter-spacing: 2px; font-size: 15px; }
+main[data-theme="apex"] .cj-vedette .chiffre { font-size: 100px; text-shadow: 4px 4px 0 #0A0A0B; }
+main[data-theme="apex"] .cj-vedette .libelle { color: #fff; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+main[data-theme="apex"] .cj-emblem.a-photo .cj-photo { border-radius: 0; border-color: #fff;
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px); }
+main[data-theme="apex"] h2.titre { font-size: 26px; text-transform: uppercase; letter-spacing: 1px; padding: 2px 18px 2px 14px; align-self: flex-start;
+  width: fit-content; background: linear-gradient(90deg, var(--a-rouge), #9C1A1B); clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%); }
+/* Les stats : des objets de butin, bande de niveau en bas et coin coupé */
+main[data-theme="apex"] .stat { --tier: #B8B8B8; border: 0; padding: 30px 16px 20px; color: var(--craie);
+  clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+  background:
+    linear-gradient(var(--tier), var(--tier)) left bottom / 100% 5px no-repeat,
+    linear-gradient(0deg, color-mix(in srgb, var(--tier) 26%, transparent), transparent 55%),
+    linear-gradient(170deg, #2C2C33, #1B1B1F); }
+main[data-theme="apex"] .stat:nth-child(4n+2) { --tier: #3D9BFF; }
+main[data-theme="apex"] .stat:nth-child(4n+3) { --tier: #B94DF5; }
+main[data-theme="apex"] .stat:nth-child(4n) { --tier: #FFC21A; }
+main[data-theme="apex"] .stat::after { content: ""; position: absolute; top: 0; right: 0; width: 46%; height: 6px;
+  background: repeating-linear-gradient(-45deg, var(--tier) 0 6px, transparent 6px 12px); opacity: .7; }
+main[data-theme="apex"] .stat:hover { filter: brightness(1.12); }
+main[data-theme="apex"] .stat.choisie { background:
+  linear-gradient(var(--tier), var(--tier)) left bottom / 100% 5px no-repeat,
+  linear-gradient(var(--a-rouge), var(--a-rouge)) left top / 4px 100% no-repeat,
+  linear-gradient(0deg, color-mix(in srgb, var(--tier) 40%, transparent), transparent 70%),
+  linear-gradient(170deg, #34343C, #1F1F24); }
+main[data-theme="apex"] .sticker { top: 8px; left: 16px; width: 34px; height: 34px; border-radius: 0; border: 0; background: transparent; box-shadow: none; transform: none !important; }
+main[data-theme="apex"] .sticker svg.emoji { width: 30px; height: 30px; }
+main[data-theme="apex"] .stat .nom { margin-top: 14px; color: var(--brume); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; font-weight: 700; }
+main[data-theme="apex"] .stat .val { font-size: 36px; }
+main[data-theme="apex"] .stat .etiquette { border-radius: 0; text-transform: uppercase; top: 12px; }
+main[data-theme="apex"] .panneau { border: 1px solid #3A3A42; background: linear-gradient(170deg, #26262C, #19191C);
+  clip-path: polygon(18px 0, 100% 0, 100% 100%, 0 100%, 0 18px); }
+main[data-theme="apex"] .panneau h3 { text-transform: uppercase; letter-spacing: 1px; }
+main[data-theme="apex"] button.principal { background: var(--a-rouge); color: #fff; text-transform: uppercase; font-family: var(--f-chiffres); letter-spacing: 1px;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); padding: 9px 22px; }
+main[data-theme="apex"] button.secondaire { background: #2A2A30; border-color: #4A4A54; text-transform: uppercase; font-family: var(--f-chiffres); letter-spacing: .8px;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); padding: 9px 22px; }
+main[data-theme="apex"] .bandeau { border: 0; background: linear-gradient(90deg, rgba(218, 41, 42, .2), rgba(30, 30, 34, .9)); border-left: 4px solid var(--a-rouge); }
+
+/* =====================================================================================================
+   COUNTER-STRIKE 2 — tactique : radar, crochets de visée, orange, couleurs de rareté des skins
+   ===================================================================================================== */
+main[data-theme="cs2"] {
+  --nuit: #12161A; --encre: #1A1F24; --encre-2: #232A31; --trait: #38424C; --brume: #A3AEB9; --craie: #E9EEF2;
+  --f-chiffres: "AMS Rajdhani", "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+  --c-orange: #DE9B35; --r-carte: 4px; --r-tuile: 3px; --r-petit: 3px;
+}
+main[data-theme="cs2"] .fond-anime .f1 { background: radial-gradient(circle, #DE9B35 0%, transparent 60%); opacity: .12; }
+main[data-theme="cs2"] .fond-anime .f2 { background: radial-gradient(circle, #4B69FF 0%, transparent 60%); opacity: .1; }
+main[data-theme="cs2"] .fond-anime .f3 { opacity: 0; }
+main[data-theme="cs2"] .fond-anime .grille {   /* radar : cercles concentriques et quadrillage */
+  background-image:
+    repeating-radial-gradient(circle at 78% 30%, transparent 0 58px, rgba(222, 155, 53, .06) 58px 59px),
+    linear-gradient(rgba(233, 238, 242, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(233, 238, 242, .03) 1px, transparent 1px);
+  background-size: auto, 40px 40px, 40px 40px; }
+main[data-theme="cs2"] .carte-joueur { border: 1px solid #3A444E;
+  background:
+    repeating-radial-gradient(circle at 92% 50%, transparent 0 26px, rgba(222, 155, 53, .1) 26px 27px),
+    linear-gradient(120deg, #232A31, #161A1E 70%); }
+main[data-theme="cs2"] .carte-joueur::after {   /* crochets de visée aux coins */
+  background:
+    linear-gradient(var(--c-orange), var(--c-orange)) left 10px top 10px / 22px 2px no-repeat,
+    linear-gradient(var(--c-orange), var(--c-orange)) left 10px top 10px / 2px 22px no-repeat,
+    linear-gradient(var(--c-orange), var(--c-orange)) right 10px bottom 10px / 22px 2px no-repeat,
+    linear-gradient(var(--c-orange), var(--c-orange)) right 10px bottom 10px / 2px 22px no-repeat; }
+main[data-theme="cs2"] .cj-pseudo { font-size: 44px; text-transform: uppercase; letter-spacing: 1px; }
+main[data-theme="cs2"] .cj-jeu { color: var(--c-orange); font-family: var(--f-chiffres); text-transform: uppercase; letter-spacing: 2.5px; font-weight: 700; }
+main[data-theme="cs2"] .cj-vedette .chiffre { color: #fff; text-shadow: 0 0 18px rgba(222, 155, 53, .35); }
+main[data-theme="cs2"] .cj-emblem.a-photo .cj-photo { border-radius: 4px; border-color: var(--c-orange); }
+main[data-theme="cs2"] h2.titre { font-size: 25px; text-transform: uppercase; letter-spacing: 2px; }
+main[data-theme="cs2"] h2.titre::before { content: "»"; color: var(--c-orange); font-size: 30px; line-height: 1; margin-right: -2px; }
+main[data-theme="cs2"] h2.titre::after { content: ""; flex: 1; height: 1px; margin-left: 10px;
+  background: repeating-linear-gradient(90deg, rgba(233, 238, 242, .3) 0 6px, transparent 6px 12px); }
+/* Les stats : fiches tactiques, crochets de visée et liseré de rareté à gauche */
+main[data-theme="cs2"] .stat { --rar: #5E98D9; border: 1px solid #333D47; padding-left: 20px; color: var(--craie);
+  background:
+    linear-gradient(var(--rar), var(--rar)) left 0 top 0 / 4px 100% no-repeat,
+    linear-gradient(90deg, color-mix(in srgb, var(--rar) 18%, transparent), transparent 60%),
+    linear-gradient(170deg, #222930, #181D22); }
+main[data-theme="cs2"] .stat:nth-child(6n+2) { --rar: #4B69FF; }
+main[data-theme="cs2"] .stat:nth-child(6n+3) { --rar: #8847FF; }
+main[data-theme="cs2"] .stat:nth-child(6n+4) { --rar: #D32CE6; }
+main[data-theme="cs2"] .stat:nth-child(6n+5) { --rar: #EB4B4B; }
+main[data-theme="cs2"] .stat:nth-child(6n) { --rar: #E4AE39; }
+main[data-theme="cs2"] .stat::after { content: ""; position: absolute; inset: 6px; pointer-events: none;
+  background:
+    linear-gradient(var(--brume), var(--brume)) right 0 top 0 / 10px 1.5px no-repeat, linear-gradient(var(--brume), var(--brume)) right 0 top 0 / 1.5px 10px no-repeat,
+    linear-gradient(var(--brume), var(--brume)) right 0 bottom 0 / 10px 1.5px no-repeat, linear-gradient(var(--brume), var(--brume)) right 0 bottom 0 / 1.5px 10px no-repeat;
+  opacity: .45; }
+main[data-theme="cs2"] .stat:hover { border-color: #4A5662; }
+main[data-theme="cs2"] .stat.choisie { border-color: var(--c-orange); box-shadow: 0 0 0 1px var(--c-orange), 0 0 16px rgba(222, 155, 53, .3); }
+main[data-theme="cs2"] .sticker { border-radius: 3px; border: 1.5px solid #4A5662; background: #12161A; transform: none !important; box-shadow: none; left: 20px; }
+main[data-theme="cs2"] .stat .nom { text-transform: uppercase; letter-spacing: 1px; font-size: 12px; font-weight: 600; }
+main[data-theme="cs2"] .stat .val { font-size: 36px; }
+main[data-theme="cs2"] .stat .etiquette { border-radius: 2px; text-transform: uppercase; }
+main[data-theme="cs2"] .panneau { border: 1px solid #333D47; background: linear-gradient(170deg, #1F252B, #171B20); }
+main[data-theme="cs2"] .panneau h3 { text-transform: uppercase; letter-spacing: 1.2px; }
+main[data-theme="cs2"] button.principal { background: var(--c-orange); color: #12161A; text-transform: uppercase; letter-spacing: 1px; font-family: var(--f-chiffres); font-weight: 700; font-size: 15px; }
+main[data-theme="cs2"] button.secondaire { text-transform: uppercase; letter-spacing: .8px; font-family: var(--f-chiffres); font-weight: 700; font-size: 15px; }
+main[data-theme="cs2"] .bandeau { border: 1px solid rgba(222, 155, 53, .5); border-style: solid; background: rgba(222, 155, 53, .07); }
+
+/* =====================================================================================================
+   CALL OF DUTY — affichage militaire : pochoir, kaki, lignes de balayage, crochets d'interface
+   (la couleur d'accent reste celle de chaque épisode)
+   ===================================================================================================== */
+main[data-theme="cod"] {
+  --nuit: #10120D; --encre: #181B13; --encre-2: #21251A; --trait: #3A4130; --brume: #A8AF98; --craie: #ECEEE2;
+  --f-chiffres: "AMS Rajdhani", "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+  --cod-titre: "AMS Stencil", "Stencil", "Arial Black", sans-serif; --r-carte: 2px; --r-tuile: 2px; --r-petit: 2px;
+}
+main[data-theme="cod"] .fond-anime .f1 { opacity: .14; }
+main[data-theme="cod"] .fond-anime .f2 { background: radial-gradient(circle, #7C8B4A 0%, transparent 60%); opacity: .14; }
+main[data-theme="cod"] .fond-anime .f3 { opacity: .05; }
+main[data-theme="cod"] .fond-anime .grille {   /* lignes de balayage et quadrillage tactique */
+  background-image: repeating-linear-gradient(0deg, rgba(236, 238, 226, .025) 0 1px, transparent 1px 4px),
+    linear-gradient(rgba(124, 139, 74, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 139, 74, .05) 1px, transparent 1px);
+  background-size: auto, 80px 80px, 80px 80px; }
+main[data-theme="cod"] .carte-joueur { border: 1px solid #3F4733;
+  background:
+    radial-gradient(14% 22% at 18% 30%, rgba(124, 139, 74, .18), transparent 70%),
+    radial-gradient(18% 26% at 70% 70%, rgba(80, 92, 50, .2), transparent 70%),
+    radial-gradient(12% 20% at 48% 18%, rgba(140, 120, 80, .14), transparent 70%),
+    linear-gradient(120deg, color-mix(in srgb, var(--accent) 14%, #1E2218), #12140E 75%); }
+main[data-theme="cod"] .carte-joueur::after { background:
+  repeating-linear-gradient(0deg, rgba(255, 255, 255, .03) 0 1px, transparent 1px 3px),
+  linear-gradient(var(--accent), var(--accent)) left 14px top 14px / 28px 3px no-repeat,
+  linear-gradient(var(--accent), var(--accent)) left 14px top 14px / 3px 28px no-repeat,
+  linear-gradient(var(--accent), var(--accent)) right 14px bottom 14px / 28px 3px no-repeat,
+  linear-gradient(var(--accent), var(--accent)) right 14px bottom 14px / 3px 28px no-repeat; }
+main[data-theme="cod"] .cj-pseudo { font-family: var(--cod-titre); font-weight: 400; font-size: 42px; text-transform: uppercase; letter-spacing: 1px; }
+main[data-theme="cod"] .cj-jeu { color: var(--accent); font-family: var(--f-chiffres); text-transform: uppercase; letter-spacing: 3px; font-weight: 700; }
+main[data-theme="cod"] .cj-vedette .chiffre { text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 40%, transparent), 3px 3px 0 #000; }
+main[data-theme="cod"] .cj-emblem.a-photo .cj-photo { border-radius: 2px; }
+main[data-theme="cod"] h2.titre { font-family: var(--cod-titre); font-weight: 400; font-size: 24px; text-transform: uppercase; letter-spacing: 1.5px; }
+main[data-theme="cod"] h2.titre::before { content: ""; width: 0; height: 0; border-left: 11px solid var(--accent); border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent; margin-right: 2px; }
+main[data-theme="cod"] h2.titre::after { content: ""; flex: 1; height: 8px; margin-left: 10px;
+  background: linear-gradient(rgba(236, 238, 226, .3), rgba(236, 238, 226, .3)) left center / 100% 1px no-repeat,
+              repeating-linear-gradient(90deg, rgba(236, 238, 226, .35) 0 2px, transparent 2px 16px); }
+/* Les stats : écrans d'interface avec crochets, numéro de série et lignes de balayage */
+main[data-theme="cod"] .stat { border: 1px solid #353C2C; color: var(--craie);
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 3px),
+              linear-gradient(170deg, #20251A, #15180F); }
+main[data-theme="cod"] .stat::after { content: ""; position: absolute; inset: -1px; pointer-events: none;
+  background:
+    linear-gradient(var(--accent), var(--accent)) left 0 top 0 / 14px 2px no-repeat, linear-gradient(var(--accent), var(--accent)) left 0 top 0 / 2px 14px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) right 0 bottom 0 / 14px 2px no-repeat, linear-gradient(var(--accent), var(--accent)) right 0 bottom 0 / 2px 14px no-repeat; }
+main[data-theme="cod"] .stat:hover { border-color: #4B5539; }
+main[data-theme="cod"] .stat.choisie { border-color: var(--accent); background: linear-gradient(170deg, color-mix(in srgb, var(--accent) 16%, #20251A), #15180F); }
+main[data-theme="cod"] .sticker { border-radius: 2px; border: 1.5px solid #4B5539; background: #10120D; transform: none !important; box-shadow: none; }
+main[data-theme="cod"] .stat .nom { text-transform: uppercase; letter-spacing: 1.2px; font-size: 12px; font-weight: 600; }
+main[data-theme="cod"] .stat .val { font-size: 36px; }
+main[data-theme="cod"] .stat .etiquette { border-radius: 1px; text-transform: uppercase; font-family: var(--f-chiffres); font-weight: 700; }
+main[data-theme="cod"] .panneau { border: 1px solid #353C2C; background: linear-gradient(170deg, #1C2016, #13160E); }
+main[data-theme="cod"] .panneau h3 { font-family: var(--cod-titre); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
+main[data-theme="cod"] button.principal { text-transform: uppercase; letter-spacing: 1.2px; font-family: var(--f-chiffres); font-weight: 700; font-size: 15px; }
+main[data-theme="cod"] button.secondaire { text-transform: uppercase; letter-spacing: 1px; font-family: var(--f-chiffres); font-weight: 700; font-size: 15px; background: rgba(24, 27, 19, .8); }
+main[data-theme="cod"] .bandeau { border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); background: rgba(24, 27, 19, .85); }
+
+/* =====================================================================================================
+   HONKAI: STAR RAIL — voyage dans les étoiles : verre fumé, filets dorés, losanges, rails en orbite
+   ===================================================================================================== */
+main[data-theme="starrail"] {
+  --nuit: #0E0C22; --encre: #17143A; --encre-2: #211C4C; --trait: #3E3674; --brume: #BAB2E2; --craie: #F4F0FF;
+  --f-chiffres: "AMS Exo", "Bahnschrift", sans-serif; --hsr-or: #E8C77A;
+  --r-carte: 18px; --r-tuile: 12px; --r-petit: 999px;
+}
+main[data-theme="starrail"] .fond-anime .f1 { background: radial-gradient(circle, #8C7CF0 0%, transparent 62%); opacity: .3; }
+main[data-theme="starrail"] .fond-anime .f2 { background: radial-gradient(circle, #E8C77A 0%, transparent 60%); opacity: .1; }
+main[data-theme="starrail"] .fond-anime .f3 { background: radial-gradient(circle, #4FC3F7 0%, transparent 62%); opacity: .12; }
+main[data-theme="starrail"] .fond-anime .grille {   /* champ d'étoiles */
+  background-image:
+    radial-gradient(1.4px 1.4px at 8% 12%, #fff, transparent 60%), radial-gradient(1px 1px at 30% 40%, rgba(255, 255, 255, .7), transparent 60%),
+    radial-gradient(1.8px 1.8px at 55% 22%, rgba(232, 199, 122, .9), transparent 60%), radial-gradient(1px 1px at 76% 64%, rgba(255, 255, 255, .6), transparent 60%),
+    radial-gradient(1.4px 1.4px at 90% 8%, rgba(180, 200, 255, .9), transparent 60%), radial-gradient(1px 1px at 18% 86%, rgba(255, 255, 255, .6), transparent 60%);
+  background-size: 300px 280px; opacity: .8; }
+main[data-theme="starrail"] .carte-joueur { border: 1px solid rgba(232, 199, 122, .55);
+  background:
+    radial-gradient(ellipse 60% 30% at 80% 50%, transparent 58%, rgba(232, 199, 122, .35) 59%, transparent 60.5%),
+    radial-gradient(ellipse 80% 45% at 80% 50%, transparent 66%, rgba(140, 124, 240, .35) 67%, transparent 68.5%),
+    radial-gradient(120% 140% at 0% 0%, rgba(140, 124, 240, .3), transparent 60%),
+    linear-gradient(140deg, #231D52, #120F2C 70%);
+  box-shadow: 0 0 0 4px rgba(23, 20, 58, .9), 0 0 0 5px rgba(232, 199, 122, .25), 0 16px 34px rgba(0, 0, 0, .4); }
+main[data-theme="starrail"] .carte-joueur::after { background: none; }
+main[data-theme="starrail"] .cj-pseudo { font-weight: 600; letter-spacing: 1px; }
+main[data-theme="starrail"] .cj-jeu { color: var(--hsr-or); letter-spacing: 3px; text-transform: uppercase; font-size: 12.5px; }
+main[data-theme="starrail"] .cj-vedette .chiffre { font-weight: 300; color: #fff; text-shadow: 0 0 24px rgba(140, 124, 240, .7); letter-spacing: 0; }
+main[data-theme="starrail"] .cj-emblem.a-photo .cj-photo { border-radius: 50%; border: 2px solid var(--hsr-or); box-shadow: 0 0 0 5px rgba(232, 199, 122, .15), 0 8px 22px rgba(0, 0, 0, .45); }
+main[data-theme="starrail"] h2.titre { font-weight: 500; font-size: 20px; text-transform: uppercase; letter-spacing: 4px; color: #fff; }
+main[data-theme="starrail"] h2.titre::before { content: ""; width: 9px; height: 9px; transform: rotate(45deg); background: var(--hsr-or); margin-right: 4px;
+  box-shadow: 0 0 10px rgba(232, 199, 122, .7); }
+main[data-theme="starrail"] h2.titre::after { content: ""; flex: 1; height: 1px; margin-left: 12px; background: linear-gradient(90deg, rgba(232, 199, 122, .7), transparent); }
+/* Les stats : panneaux de verre fumé avec un filet doré et une petite étoile */
+main[data-theme="starrail"] .stat { border: 1px solid rgba(186, 178, 226, .22); color: var(--craie);
+  background:
+    linear-gradient(90deg, transparent, rgba(232, 199, 122, .8), transparent) top 0 left 18% / 64% 1.5px no-repeat,
+    linear-gradient(165deg, rgba(60, 50, 130, .55), rgba(20, 17, 50, .75));
+  backdrop-filter: blur(6px); }
+main[data-theme="starrail"] .stat::after { content: ""; position: absolute; top: 9px; right: 10px; width: 14px; height: 14px; opacity: .8;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M10 0L12 8L20 10L12 12L10 20L8 12L0 10L8 8Z' fill='%23E8C77A'/></svg>") center / contain no-repeat; }
+main[data-theme="starrail"] .stat:hover { border-color: rgba(232, 199, 122, .55); }
+main[data-theme="starrail"] .stat.choisie { border-color: var(--hsr-or); box-shadow: 0 0 18px rgba(232, 199, 122, .35); }
+main[data-theme="starrail"] .sticker { border: 1.5px solid var(--hsr-or); background: radial-gradient(circle at 40% 35%, #2E2768, #151236); transform: none !important;
+  box-shadow: 0 0 12px rgba(140, 124, 240, .5); }
+main[data-theme="starrail"] .stat .nom { letter-spacing: .6px; }
+main[data-theme="starrail"] .stat .val { font-weight: 600; }
+main[data-theme="starrail"] .stat .etiquette { right: 30px; }
+main[data-theme="starrail"] .panneau { border: 1px solid rgba(186, 178, 226, .2); background: linear-gradient(165deg, rgba(40, 34, 92, .7), rgba(16, 14, 40, .85)); }
+main[data-theme="starrail"] .panneau h3 { font-weight: 500; text-transform: uppercase; letter-spacing: 2px; }
+main[data-theme="starrail"] button.principal { background: linear-gradient(180deg, #F3DDA0, #D1A956); color: #1B1640; border-radius: 999px;
+  font-family: var(--f-chiffres); font-weight: 700; letter-spacing: .5px; padding: 9px 20px; }
+main[data-theme="starrail"] button.secondaire { border-radius: 999px; border-color: rgba(232, 199, 122, .45); background: rgba(23, 20, 58, .7); }
+main[data-theme="starrail"] .bandeau { border-radius: 14px; border: 1px solid rgba(232, 199, 122, .45); background: rgba(23, 20, 58, .8); }
+
+/* =====================================================================================================
+   BLOX FRUITS — pirates : mer profonde, vagues, planches de bois, hublots dorés
+   ===================================================================================================== */
+main[data-theme="bloxfruits"] {
+  --nuit: #0B2638; --encre: #103248; --encre-2: #164560; --trait: #2A6F8F; --brume: #B3D9EA; --craie: #FFFFFF;
+  --f-chiffres: "AMS Lilita", "Arial Black", sans-serif; --bf-titre: "AMS Pirata", "Palatino Linotype", Georgia, serif;
+  --bf-or: #F4C04A; --r-carte: 16px; --r-tuile: 12px; --r-petit: 10px;
+}
+main[data-theme="bloxfruits"] .fond-anime .f1 { background: radial-gradient(circle, #2FB7E8 0%, transparent 62%); opacity: .28; }
+main[data-theme="bloxfruits"] .fond-anime .f2 { background: radial-gradient(circle, #F4C04A 0%, transparent 60%); opacity: .1; }
+main[data-theme="bloxfruits"] .fond-anime .f3 { background: radial-gradient(circle, #22D3A6 0%, transparent 62%); opacity: .12; }
+main[data-theme="bloxfruits"] .fond-anime .grille {   /* vagues */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='40'><path d='M0 30 Q15 20 30 30 T60 30 T90 30 T120 30' fill='none' stroke='%23B3D9EA' stroke-opacity='.07' stroke-width='2'/></svg>");
+  background-size: 120px 40px; }
+main[data-theme="bloxfruits"] .carte-joueur { border: 3px solid #5A3519;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='40' preserveAspectRatio='none'><path d='M0 22 Q25 6 50 22 T100 22 T150 22 T200 22 V40 H0Z' fill='%23103248' fill-opacity='.55'/></svg>") left bottom / 200px 40px repeat-x,
+    linear-gradient(180deg, #2C8FC2, #17607F 55%, #0F3E57);
+  box-shadow: inset 0 0 0 3px #8A5A2B, 0 6px 0 #3A210D, 0 16px 30px rgba(0, 0, 0, .35); }
+main[data-theme="bloxfruits"] .carte-joueur::after { background: none; }
+main[data-theme="bloxfruits"] .cj-pseudo { font-family: var(--f-chiffres); font-weight: 400; font-size: 42px; text-shadow: 3px 3px 0 #0B2638; }
+main[data-theme="bloxfruits"] .cj-jeu { font-family: var(--bf-titre); font-size: 22px; color: var(--bf-or); text-shadow: 2px 2px 0 #3A210D; }
+main[data-theme="bloxfruits"] .cj-maj { color: #DDF1FA; }
+main[data-theme="bloxfruits"] .cj-vedette .chiffre { font-weight: 400; color: var(--bf-or); text-shadow: 4px 4px 0 #3A210D; }
+main[data-theme="bloxfruits"] .cj-vedette .libelle { color: #fff; }
+main[data-theme="bloxfruits"] h2.titre { font-family: var(--bf-titre); font-weight: 400; font-size: 32px; color: var(--bf-or); text-shadow: 2px 2px 0 #3A210D; letter-spacing: .5px; }
+main[data-theme="bloxfruits"] h2.titre::after { content: ""; flex: 1; height: 8px; margin-left: 10px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='8'><path d='M0 4 Q6 0 12 4 T24 4' fill='none' stroke='%23C9A060' stroke-width='2'/></svg>") left center / 24px 8px repeat-x; }
+/* Les stats : des planches de bois clouées, avec un hublot doré */
+main[data-theme="bloxfruits"] .stat { border: 2px solid #3A210D; color: #FFF6E6;
+  background:
+    radial-gradient(circle at 10px 10px, #C9A060 2.5px, transparent 3px), radial-gradient(circle at calc(100% - 10px) 10px, #C9A060 2.5px, transparent 3px),
+    radial-gradient(circle at 10px calc(100% - 10px), #C9A060 2.5px, transparent 3px), radial-gradient(circle at calc(100% - 10px) calc(100% - 10px), #C9A060 2.5px, transparent 3px),
+    repeating-linear-gradient(180deg, transparent 0 31px, rgba(0, 0, 0, .25) 31px 33px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .03) 0 3px, transparent 3px 9px),
+    linear-gradient(180deg, #8A5A2B, #6B4220);
+  box-shadow: 0 4px 0 #3A210D; }
+main[data-theme="bloxfruits"] .stat:hover { border-color: var(--bf-or); }
+main[data-theme="bloxfruits"] .stat.choisie { border-color: var(--bf-or); box-shadow: 0 4px 0 #3A210D, 0 0 0 2px var(--bf-or), 0 0 18px rgba(244, 192, 74, .45); }
+main[data-theme="bloxfruits"] .sticker { border: 4px solid var(--bf-or); background: radial-gradient(circle at 40% 35%, #3FB3E0, #135574);
+  box-shadow: 0 0 0 2px #3A210D, inset 0 0 0 2px rgba(255, 255, 255, .25); }
+main[data-theme="bloxfruits"] .stat .nom { color: #F3DDB8; font-weight: 700; }
+main[data-theme="bloxfruits"] .stat .val { color: #fff; font-weight: 400; text-shadow: 2px 2px 0 #3A210D; }
+main[data-theme="bloxfruits"] .stat .val.rien { color: rgba(255, 246, 230, .4); text-shadow: none; }
+main[data-theme="bloxfruits"] .stat .delta { color: #F3DDB8; }
+main[data-theme="bloxfruits"] .stat .delta .plus { color: #9BF07A; }
+main[data-theme="bloxfruits"] .stat .delta .moins { color: #FFB0A0; }
+main[data-theme="bloxfruits"] .stat .etiquette { color: #3A210D; background: var(--bf-or); border-color: #3A210D; font-weight: 700; }
+main[data-theme="bloxfruits"] .panneau { border: 2px solid #2A6F8F; background: linear-gradient(180deg, #144159, #0E3045); }
+main[data-theme="bloxfruits"] .panneau h3 { font-family: var(--bf-titre); font-weight: 400; font-size: 22px; color: var(--bf-or); }
+main[data-theme="bloxfruits"] button.principal { background: linear-gradient(180deg, #FFD66B, #E0A42A); color: #3A210D; border: 2px solid #3A210D;
+  font-family: var(--f-chiffres); font-weight: 400; font-size: 15px; letter-spacing: .3px; box-shadow: 0 3px 0 #3A210D; }
+main[data-theme="bloxfruits"] button.secondaire { border: 2px solid #3A210D; background: #8A5A2B; color: #FFF6E6; box-shadow: 0 3px 0 #3A210D; }
+main[data-theme="bloxfruits"] .bandeau { border: 2px solid #2A6F8F; border-style: solid; background: rgba(16, 50, 72, .9); }
+
+/* Écrans étroits : on calme les gros titres */
+@media (max-width: 760px) {
+  main[data-theme="fortnite"] .cj-pseudo, main[data-theme="apex"] .cj-pseudo, main[data-theme="valorant"] .cj-pseudo,
+  main[data-theme="cs2"] .cj-pseudo, main[data-theme="cod"] .cj-pseudo { font-size: 32px; }
+  main[data-theme="valorant"] .cj-vedette .chiffre, main[data-theme="apex"] .cj-vedette .chiffre { font-size: 72px; }
+  main[data-theme="fortnite"] h2.titre, main[data-theme="valorant"] h2.titre, main[data-theme="bloxfruits"] h2.titre { font-size: 22px; }
+}
+main[data-theme="fortnite"] .stat { padding-top: 52px; }
+main[data-theme="genshin"] .onglets-carte { border-color: #8A6A36; }
+main[data-theme="genshin"] .onglets-carte .onglet.actif { background: linear-gradient(180deg, #F1D48A, #B8893A); color: #2A1A08; }
